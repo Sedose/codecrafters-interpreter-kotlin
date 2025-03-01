@@ -94,18 +94,12 @@
         <dependency>
             <groupId>io.insert-koin</groupId>
             <artifactId>koin-core</artifactId>
-            <version>4.1.0-Beta5</version>
+            <version>3.5.6</version>
         </dependency>
         <dependency>
             <groupId>io.insert-koin</groupId>
             <artifactId>koin-core-jvm</artifactId>
-            <version>4.1.0-Beta5</version>
-        </dependency>
-        <dependency>
-            <groupId>app.softwork</groupId>
-            <artifactId>kotlinx-uuid-core</artifactId>
-            <version>0.1.4</version>
-            <scope>runtime</scope>
+            <version>3.5.6</version>
         </dependency>
     </dependencies>
 </project>
