@@ -1,3 +1,5 @@
+package io.codecrafters
+
 import org.koin.core.component.KoinComponent
 
 class Tokenizer : KoinComponent {
