@@ -10,11 +10,17 @@ class Tokenizer : KoinComponent {
   fun tokenize(input: String): TokenizationResult {
     val tokens = mutableListOf<Token>()
     val errors = mutableListOf<String>()
+    var lineNumber = 1
 
     for (char in input) {
-      processToken(char)
-        ?.let(tokens::add)
-        ?: errors.add("[line 1] Error: Unexpected character: $char")
+      when (char.toString()) {
+        System.lineSeparator() -> lineNumber++
+        else -> {
+          processToken(char)
+            ?.let(tokens::add)
+            ?: errors.add("[line $lineNumber] Error: Unexpected character: $char")
+        }
+      }
     }
 
     return TokenizationResult(tokens, errors)
