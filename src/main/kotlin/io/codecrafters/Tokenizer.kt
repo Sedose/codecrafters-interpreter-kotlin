@@ -15,12 +15,19 @@ class Tokenizer : KoinComponent {
 
     while (current < input.length) {
       val char = input[current]
+
       if (char == '\n') {
         lineNumber++
         current++
       } else if (char == '=' && input.getOrNull(current + 1) == '=') {
         tokens.add(Token(TokenType.EQUAL_EQUAL, "=="))
         current += 2
+      } else if (char == '!' && input.getOrNull(current + 1) == '=') {
+        tokens.add(Token(TokenType.BANG_EQUAL, "!="))
+        current += 2
+      } else if (char == '!') {
+        tokens.add(Token(TokenType.BANG, "!"))
+        current++
       } else {
         processToken(char)
           ?.let { tokens.add(it) }
@@ -49,5 +56,6 @@ class Tokenizer : KoinComponent {
       ';' to TokenType.SEMICOLON,
       '*' to TokenType.STAR,
       '=' to TokenType.EQUAL,
+      '!' to TokenType.BANG,
     )
 }

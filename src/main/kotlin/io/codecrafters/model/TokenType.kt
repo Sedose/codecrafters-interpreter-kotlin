@@ -13,4 +13,6 @@ enum class TokenType {
   STAR,
   EQUAL,
   EQUAL_EQUAL,
+  BANG,
+  BANG_EQUAL,
 }
