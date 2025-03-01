@@ -105,6 +105,15 @@ class Tokenizer : KoinComponent {
           tokens.add(Token(TokenType.NUMBER, lexeme, literal))
         }
 
+        char.isLetter() || char == '_' -> {
+          val start = current
+          while (current < input.length && (input[current].isLetterOrDigit() || input[current] == '_')) {
+            current++
+          }
+          val lexeme = input.substring(start, current)
+          tokens.add(Token(TokenType.IDENTIFIER, lexeme, null))
+        }
+
         else -> {
           processToken(char)
             ?.let { tokens.add(it) }

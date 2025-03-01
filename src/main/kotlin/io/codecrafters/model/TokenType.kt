@@ -22,4 +22,5 @@ enum class TokenType {
   SLASH,
   STRING,
   NUMBER,
+  IDENTIFIER,
 }
