@@ -89,6 +89,22 @@ class Tokenizer : KoinComponent {
           }
         }
 
+        char.isDigit() -> {
+          val start = current
+          while (current < input.length && input[current].isDigit()) {
+            current++
+          }
+          if (current < input.length && input[current] == '.') {
+            current++
+            while (current < input.length && input[current].isDigit()) {
+              current++
+            }
+          }
+          val lexeme = input.substring(start, current)
+          val literal = lexeme.toDouble()
+          tokens.add(Token(TokenType.NUMBER, lexeme, literal))
+        }
+
         else -> {
           processToken(char)
             ?.let { tokens.add(it) }

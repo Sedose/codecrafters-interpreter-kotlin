@@ -21,4 +21,5 @@ enum class TokenType {
   GREATER_EQUAL,
   SLASH,
   STRING,
+  NUMBER,
 }
