@@ -17,9 +17,15 @@ class Tokenizer : KoinComponent {
       '*' to TokenType.STAR,
     )
 
-  fun processToken(token: Char): String {
-    val tokenType =
-      tokenToType[token] ?: throw RuntimeException("Unknown token: $token")
-    return "$tokenType $token null"
+  var hasError = false  // Track if errors exist
+
+  fun processToken(token: Char): String? {
+    return if (token in tokenToType) {
+      "${tokenToType[token]} $token null"
+    } else {
+      System.err.println("[line 1] Error: Unexpected character: $token")
+      hasError = true
+      null
+    }
   }
 }

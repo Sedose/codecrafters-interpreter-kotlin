@@ -28,12 +28,15 @@ class TokenizerApp : KoinComponent {
     val fileContents = File(filename).readText()
 
     if (fileContents.isNotEmpty()) {
-      fileContents.toCharArray()
-        .joinToString(separator = "\n") { tokenizer.processToken(it) }
-        .let(::println)
+      fileContents.mapNotNull { tokenizer.processToken(it) }
+        .forEach(::println)
     }
 
     println("EOF  null")
+
+    if (tokenizer.hasError) {
+      exitProcess(65)
+    }
   }
 }
 
