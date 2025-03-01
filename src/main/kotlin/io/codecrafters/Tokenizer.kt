@@ -1,8 +1,11 @@
 package io.codecrafters
 
+import io.codecrafters.model.Token
+import io.codecrafters.model.TokenizationResult
 import org.koin.core.component.KoinComponent
 
 class Tokenizer : KoinComponent {
+
   private val tokenToType =
     mapOf(
       '(' to TokenType.LEFT_PAREN,
@@ -17,14 +20,26 @@ class Tokenizer : KoinComponent {
       '*' to TokenType.STAR,
     )
 
-  var hasError = false  // Track if errors exist
+  fun tokenize(input: String): TokenizationResult {
+    val tokens = mutableListOf<Token>()
+    val errors = mutableListOf<String>()
 
-  fun processToken(token: Char): String? {
+    for (char in input) {
+      val token = processToken(char)
+      if (token != null) {
+        tokens.add(token)
+      } else {
+        errors.add("[line 1] Error: Unexpected character: $char")
+      }
+    }
+
+    return TokenizationResult(tokens, errors)
+  }
+
+  private fun processToken(token: Char): Token? {
     return if (token in tokenToType) {
-      "${tokenToType[token]} $token null"
+      Token(tokenToType[token]!!, token.toString(), null)
     } else {
-      System.err.println("[line 1] Error: Unexpected character: $token")
-      hasError = true
       null
     }
   }
