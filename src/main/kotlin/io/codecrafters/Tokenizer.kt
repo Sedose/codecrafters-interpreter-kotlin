@@ -16,6 +16,10 @@ class Tokenizer : KoinComponent {
       val char = input[current]
 
       when {
+        char == ' ' || char == '\t' -> {
+          current++
+        }
+
         char == '\n' -> {
           lineNumber++
           current++
