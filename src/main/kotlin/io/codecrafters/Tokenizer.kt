@@ -6,7 +6,6 @@ import io.codecrafters.model.TokenizationResult
 import org.koin.core.component.KoinComponent
 
 class Tokenizer : KoinComponent {
-
   fun tokenize(input: String): TokenizationResult {
     val tokens = mutableListOf<Token>()
     val errors = mutableListOf<String>()
@@ -16,23 +15,53 @@ class Tokenizer : KoinComponent {
     while (current < input.length) {
       val char = input[current]
 
-      if (char == '\n') {
-        lineNumber++
-        current++
-      } else if (char == '=' && input.getOrNull(current + 1) == '=') {
-        tokens.add(Token(TokenType.EQUAL_EQUAL, "=="))
-        current += 2
-      } else if (char == '!' && input.getOrNull(current + 1) == '=') {
-        tokens.add(Token(TokenType.BANG_EQUAL, "!="))
-        current += 2
-      } else if (char == '!') {
-        tokens.add(Token(TokenType.BANG, "!"))
-        current++
-      } else {
-        processToken(char)
-          ?.let { tokens.add(it) }
-          ?: errors.add("[line $lineNumber] Error: Unexpected character: $char")
-        current++
+      when {
+        char == '\n' -> {
+          lineNumber++
+          current++
+        }
+
+        char == '=' && input.getOrNull(current + 1) == '=' -> {
+          tokens.add(Token(TokenType.EQUAL_EQUAL, "=="))
+          current += 2
+        }
+
+        char == '!' && input.getOrNull(current + 1) == '=' -> {
+          tokens.add(Token(TokenType.BANG_EQUAL, "!="))
+          current += 2
+        }
+
+        char == '!' -> {
+          tokens.add(Token(TokenType.BANG, "!"))
+          current++
+        }
+
+        char == '<' && input.getOrNull(current + 1) == '=' -> {
+          tokens.add(Token(TokenType.LESS_EQUAL, "<="))
+          current += 2
+        }
+
+        char == '<' -> {
+          tokens.add(Token(TokenType.LESS, "<"))
+          current++
+        }
+
+        char == '>' && input.getOrNull(current + 1) == '=' -> {
+          tokens.add(Token(TokenType.GREATER_EQUAL, ">="))
+          current += 2
+        }
+
+        char == '>' -> {
+          tokens.add(Token(TokenType.GREATER, ">"))
+          current++
+        }
+
+        else -> {
+          processToken(char)
+            ?.let { tokens.add(it) }
+            ?: errors.add("[line $lineNumber] Error: Unexpected character: $char")
+          current++
+        }
       }
     }
 
@@ -57,5 +86,7 @@ class Tokenizer : KoinComponent {
       '*' to TokenType.STAR,
       '=' to TokenType.EQUAL,
       '!' to TokenType.BANG,
+      '<' to TokenType.LESS,
+      '>' to TokenType.GREATER
     )
 }
