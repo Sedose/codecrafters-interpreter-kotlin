@@ -23,12 +23,15 @@ fun main(args: Array<String>) {
     mapOf(
       '(' to LEFT_PAREN,
       ')' to RIGHT_PAREN,
+      '{' to LEFT_BRACE,
+      '}' to RIGHT_BRACE,
     )
 
   if (fileContents.isNotEmpty()) {
     fileContents.toCharArray()
       .joinToString(separator = "\n") { token ->
-        val tokenType = tokenToType[token] ?: throw RuntimeException("Unknown token: $token")
+        val tokenType =
+          tokenToType[token] ?: throw RuntimeException("Unknown token: $token")
         "$tokenType $token null"
       }.let(::println)
   }
