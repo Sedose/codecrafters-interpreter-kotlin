@@ -11,15 +11,21 @@ class Tokenizer : KoinComponent {
     val tokens = mutableListOf<Token>()
     val errors = mutableListOf<String>()
     var lineNumber = 1
+    var current = 0
 
-    for (char in input) {
-      when (char.toString()) {
-        System.lineSeparator() -> lineNumber++
-        else -> {
-          processToken(char)
-            ?.let(tokens::add)
-            ?: errors.add("[line $lineNumber] Error: Unexpected character: $char")
-        }
+    while (current < input.length) {
+      val char = input[current]
+      if (char == '\n') {
+        lineNumber++
+        current++
+      } else if (char == '=' && input.getOrNull(current + 1) == '=') {
+        tokens.add(Token(TokenType.EQUAL_EQUAL, "=="))
+        current += 2
+      } else {
+        processToken(char)
+          ?.let { tokens.add(it) }
+          ?: errors.add("[line $lineNumber] Error: Unexpected character: $char")
+        current++
       }
     }
 
@@ -42,5 +48,6 @@ class Tokenizer : KoinComponent {
       '+' to TokenType.PLUS,
       ';' to TokenType.SEMICOLON,
       '*' to TokenType.STAR,
+      '=' to TokenType.EQUAL,
     )
 }

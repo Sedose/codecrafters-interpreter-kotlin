@@ -11,4 +11,6 @@ enum class TokenType {
   PLUS,
   SEMICOLON,
   STAR,
+  EQUAL,
+  EQUAL_EQUAL,
 }
