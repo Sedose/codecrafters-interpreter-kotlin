@@ -101,5 +101,11 @@
             <artifactId>koin-core-jvm</artifactId>
             <version>4.1.0-Beta5</version>
         </dependency>
+        <dependency>
+            <groupId>app.softwork</groupId>
+            <artifactId>kotlinx-uuid-core</artifactId>
+            <version>0.1.4</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 </project>
