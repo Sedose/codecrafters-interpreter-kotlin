@@ -13,26 +13,28 @@ class Tokenizer : KoinComponent {
 
     for (char in input) {
       processToken(char)
-        ?.let (tokens::add)
+        ?.let(tokens::add)
         ?: errors.add("[line 1] Error: Unexpected character: $char")
     }
 
     return TokenizationResult(tokens, errors)
   }
 
-  private fun processToken(token: Char): Token? {
-    return when (token) {
-      '(' -> Token(TokenType.LEFT_PAREN, token.toString())
-      ')' -> Token(TokenType.RIGHT_PAREN, token.toString())
-      '{' -> Token(TokenType.LEFT_BRACE, token.toString())
-      '}' -> Token(TokenType.RIGHT_BRACE, token.toString())
-      ',' -> Token(TokenType.COMMA, token.toString())
-      '.' -> Token(TokenType.DOT, token.toString())
-      '-' -> Token(TokenType.MINUS, token.toString())
-      '+' -> Token(TokenType.PLUS, token.toString())
-      ';' -> Token(TokenType.SEMICOLON, token.toString())
-      '*' -> Token(TokenType.STAR, token.toString())
-      else -> null
-    }
-  }
+  private fun processToken(token: Char): Token? =
+    tokenMap[token]
+      ?.let { Token(it, token.toString()) }
+
+  private val tokenMap =
+    mapOf(
+      '(' to TokenType.LEFT_PAREN,
+      ')' to TokenType.RIGHT_PAREN,
+      '{' to TokenType.LEFT_BRACE,
+      '}' to TokenType.RIGHT_BRACE,
+      ',' to TokenType.COMMA,
+      '.' to TokenType.DOT,
+      '-' to TokenType.MINUS,
+      '+' to TokenType.PLUS,
+      ';' to TokenType.SEMICOLON,
+      '*' to TokenType.STAR,
+    )
 }
