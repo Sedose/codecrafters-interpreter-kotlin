@@ -111,7 +111,8 @@ class Tokenizer : KoinComponent {
             current++
           }
           val lexeme = input.substring(start, current)
-          tokens.add(Token(TokenType.IDENTIFIER, lexeme, null))
+          val tokenType = reservedWords[lexeme] ?: TokenType.IDENTIFIER
+          tokens.add(Token(tokenType, lexeme, null))
         }
 
         else -> {
@@ -147,4 +148,23 @@ class Tokenizer : KoinComponent {
       '<' to TokenType.LESS,
       '>' to TokenType.GREATER
     )
+
+  private val reservedWords = mapOf(
+    "and" to TokenType.AND,
+    "class" to TokenType.CLASS,
+    "else" to TokenType.ELSE,
+    "false" to TokenType.FALSE,
+    "for" to TokenType.FOR,
+    "fun" to TokenType.FUN,
+    "if" to TokenType.IF,
+    "nil" to TokenType.NIL,
+    "or" to TokenType.OR,
+    "print" to TokenType.PRINT,
+    "return" to TokenType.RETURN,
+    "super" to TokenType.SUPER,
+    "this" to TokenType.THIS,
+    "true" to TokenType.TRUE,
+    "var" to TokenType.VAR,
+    "while" to TokenType.WHILE,
+  )
 }
