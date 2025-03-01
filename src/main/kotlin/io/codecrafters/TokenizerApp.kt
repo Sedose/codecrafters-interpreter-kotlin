@@ -27,7 +27,10 @@ class TokenizerApp : KoinComponent {
     val fileContents = File(filename).readText()
     val result = tokenizer.tokenize(fileContents)
 
-    result.tokens.forEach(::println)
+    result.tokens.forEach { token ->
+      println("${token.type} ${token.lexeme} ${token.literal}")
+    }
+
     println("EOF  null")
 
     if (result.errors.isNotEmpty()) {
