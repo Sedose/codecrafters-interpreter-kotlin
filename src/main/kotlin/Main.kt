@@ -1,3 +1,4 @@
+import TokenType.*
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -20,8 +21,8 @@ fun main(args: Array<String>) {
 
   val tokenToType =
     mapOf(
-      '(' to "LEFT_PAREN",
-      ')' to "RIGHT_PAREN",
+      '(' to LEFT_PAREN,
+      ')' to RIGHT_PAREN,
     )
 
   if (fileContents.isNotEmpty()) {
