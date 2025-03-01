@@ -25,6 +25,7 @@ class TokenizerApp : KoinComponent {
     }
 
     val fileContents = File(filename).readText()
+
     val result = tokenizer.tokenize(fileContents)
 
     result.tokens.forEach { token ->
