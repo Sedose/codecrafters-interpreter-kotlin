@@ -20,4 +20,5 @@ enum class TokenType {
   GREATER,
   GREATER_EQUAL,
   SLASH,
+  STRING,
 }

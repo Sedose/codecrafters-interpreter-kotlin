@@ -71,6 +71,24 @@ class Tokenizer : KoinComponent {
           current++
         }
 
+        char == '"' -> {
+          val start = current + 1
+          var end = start
+          while (end < input.length && input[end] != '"') {
+            if (input[end] == '\n') lineNumber++
+            end++
+          }
+          if (end >= input.length) {
+            errors.add("[line $lineNumber] Error: Unterminated string.")
+            current = end
+          } else {
+            val lexeme = input.substring(start - 1, end + 1)
+            val literal = input.substring(start, end)
+            tokens.add(Token(TokenType.STRING, lexeme, literal))
+            current = end + 1
+          }
+        }
+
         else -> {
           processToken(char)
             ?.let { tokens.add(it) }
