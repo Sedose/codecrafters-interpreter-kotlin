@@ -21,6 +21,17 @@ class Tokenizer : KoinComponent {
           current++
         }
 
+        char == '/' && input.getOrNull(current + 1) == '/' -> {
+          while (current < input.length && input[current] != '\n') {
+            current++
+          }
+        }
+
+        char == '/' -> {
+          tokens.add(Token(TokenType.SLASH, "/"))
+          current++
+        }
+
         char == '=' && input.getOrNull(current + 1) == '=' -> {
           tokens.add(Token(TokenType.EQUAL_EQUAL, "=="))
           current += 2
