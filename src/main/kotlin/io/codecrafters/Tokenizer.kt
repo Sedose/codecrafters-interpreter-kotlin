@@ -16,115 +16,48 @@ class Tokenizer : KoinComponent {
             val char = input[current]
 
             when {
-                char == ' ' || char == '\t' -> {
-                    current++
-                }
-
-                char == '\n' -> {
-                    lineNumber++
+                char.isWhitespace() -> {
+                    if (char == '\n') lineNumber++
                     current++
                 }
 
                 char == '/' && input.getOrNull(current + 1) == '/' -> {
-                    while (current < input.length && input[current] != '\n') {
-                        current++
-                    }
+                    current = skipSingleLineComment(input, current)
                 }
 
-                char == '/' -> {
-                    tokens.add(Token(TokenType.SLASH, "/"))
+                char in tokenMap -> {
+                    tokens.add(Token(tokenMap[char]!!, char.toString()))
                     current++
                 }
 
-                char == '=' && input.getOrNull(current + 1) == '=' -> {
-                    tokens.add(Token(TokenType.EQUAL_EQUAL, "=="))
+                char in multiCharTokens.keys && input.getOrNull(current + 1) == multiCharTokens[char]?.second -> {
+                    val (tokenType, secondChar) = multiCharTokens[char]!!
+                    tokens.add(Token(tokenType, "$char$secondChar"))
                     current += 2
-                }
-
-                char == '!' && input.getOrNull(current + 1) == '=' -> {
-                    tokens.add(Token(TokenType.BANG_EQUAL, "!="))
-                    current += 2
-                }
-
-                char == '!' -> {
-                    tokens.add(Token(TokenType.BANG, "!"))
-                    current++
-                }
-
-                char == '<' && input.getOrNull(current + 1) == '=' -> {
-                    tokens.add(Token(TokenType.LESS_EQUAL, "<="))
-                    current += 2
-                }
-
-                char == '<' -> {
-                    tokens.add(Token(TokenType.LESS, "<"))
-                    current++
-                }
-
-                char == '>' && input.getOrNull(current + 1) == '=' -> {
-                    tokens.add(Token(TokenType.GREATER_EQUAL, ">="))
-                    current += 2
-                }
-
-                char == '>' -> {
-                    tokens.add(Token(TokenType.GREATER, ">"))
-                    current++
                 }
 
                 char == '"' -> {
-                    val start = current + 1
-                    var end = start
-                    while (end < input.length && input[end] != '"') {
-                        if (input[end] == '\n') lineNumber++
-                        end++
-                    }
-                    if (end >= input.length) {
-                        errors.add("[line $lineNumber] Error: Unterminated string.")
-                        current = end
-                    } else {
-                        val lexeme = input.substring(start - 1, end + 1)
-                        val literal = input.substring(start, end)
-                        tokens.add(Token(TokenType.STRING, lexeme, literal))
-                        current = end + 1
-                    }
+                    val (token, newIndex, error) = processString(input, current, lineNumber)
+                    token?.let { tokens.add(it) }
+                    error?.let { errors.add(it) }
+                    current = newIndex
                 }
 
                 char.isDigit() -> {
-                    val start = current
-                    var dotCount = 0
-
-                    while (current < input.length && (input[current].isDigit() || input[current] == '.')) {
-                        if (input[current] == '.') {
-                            dotCount++
-                            if (dotCount > 1) {
-                                errors.add("[line $lineNumber] Error: Unexpected character: .")
-                                break
-                            }
-                        }
-                        current++
-                    }
-
-                    if (dotCount == 1 || dotCount == 0) {
-                        val lexeme = input.substring(start, current)
-                        val literal = lexeme.toDoubleOrNull()
-                        tokens.add(Token(TokenType.NUMBER, lexeme, literal))
-                    }
+                    val (token, newIndex, error) = processNumber(input, current, lineNumber)
+                    token?.let { tokens.add(it) }
+                    error?.let { errors.add(it) }
+                    current = newIndex
                 }
 
                 char.isLetter() || char == '_' -> {
-                    val start = current
-                    while (current < input.length && (input[current].isLetterOrDigit() || input[current] == '_')) {
-                        current++
-                    }
-                    val lexeme = input.substring(start, current)
-                    val tokenType = reservedWords[lexeme] ?: TokenType.IDENTIFIER
-                    tokens.add(Token(tokenType, lexeme, null))
+                    val (token, newIndex) = processIdentifierOrKeyword(input, current)
+                    tokens.add(token)
+                    current = newIndex
                 }
 
                 else -> {
-                    processToken(char)
-                        ?.let { tokens.add(it) }
-                        ?: errors.add("[line $lineNumber] Error: Unexpected character: $char")
+                    errors.add("[line $lineNumber] Error: Unexpected character: $char")
                     current++
                 }
             }
@@ -133,9 +66,71 @@ class Tokenizer : KoinComponent {
         return TokenizationResult(tokens, errors)
     }
 
-    private fun processToken(token: Char): Token? =
-        tokenMap[token]
-            ?.let { Token(it, token.toString()) }
+    private fun skipSingleLineComment(
+        input: String,
+        current: Int,
+    ): Int {
+        var index = current
+        while (index < input.length && input[index] != '\n') {
+            index++
+        }
+        return index
+    }
+
+    private fun processString(
+        input: String,
+        startIndex: Int,
+        lineNumber: Int,
+    ): Triple<Token?, Int, String?> {
+        var index = startIndex + 1
+        while (index < input.length && input[index] != '"') {
+            if (input[index] == '\n') return Triple(null, index, "[line $lineNumber] Error: Unterminated string.")
+            index++
+        }
+
+        return if (index >= input.length) {
+            Triple(null, index, "[line $lineNumber] Error: Unterminated string.")
+        } else {
+            val lexeme = input.substring(startIndex, index + 1)
+            val literal = input.substring(startIndex + 1, index)
+            Triple(Token(TokenType.STRING, lexeme, literal), index + 1, null)
+        }
+    }
+
+    private fun processNumber(
+        input: String,
+        startIndex: Int,
+        lineNumber: Int,
+    ): Triple<Token?, Int, String?> {
+        var index = startIndex
+        var dotCount = 0
+
+        while (index < input.length && (input[index].isDigit() || input[index] == '.')) {
+            if (input[index] == '.') {
+                dotCount++
+                if (dotCount > 1) return Triple(null, index, "[line $lineNumber] Error: Unexpected character: .")
+            }
+            index++
+        }
+
+        val lexeme = input.substring(startIndex, index)
+        val literal = lexeme.toDoubleOrNull()
+        return Triple(Token(TokenType.NUMBER, lexeme, literal), index, null)
+    }
+
+    private fun processIdentifierOrKeyword(
+        input: String,
+        startIndex: Int,
+    ): Pair<Token, Int> {
+        var index = startIndex
+        while (index < input.length && (input[index].isLetterOrDigit() || input[index] == '_')) {
+            index++
+        }
+
+        val lexeme = input.substring(startIndex, index)
+        val tokenType = reservedWords[lexeme] ?: TokenType.IDENTIFIER
+        return Token(tokenType, lexeme) to index
+    }
 
     private val tokenMap =
         mapOf(
@@ -148,9 +143,17 @@ class Tokenizer : KoinComponent {
             '-' to TokenType.MINUS,
             '+' to TokenType.PLUS,
             ';' to TokenType.SEMICOLON,
-            '=' to TokenType.EQUAL,
             '*' to TokenType.STAR,
             '/' to TokenType.SLASH,
+            '=' to TokenType.EQUAL,
+        )
+
+    private val multiCharTokens =
+        mapOf(
+            '=' to Pair(TokenType.EQUAL_EQUAL, '='),
+            '!' to Pair(TokenType.BANG_EQUAL, '='),
+            '<' to Pair(TokenType.LESS_EQUAL, '='),
+            '>' to Pair(TokenType.GREATER_EQUAL, '='),
         )
 
     private val reservedWords =
