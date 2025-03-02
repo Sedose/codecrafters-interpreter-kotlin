@@ -89,23 +89,29 @@ class Tokenizer : KoinComponent {
                     }
                 }
 
-                char.isDigit() -> {
-                    val start = current
-                    while (current < input.length && input[current].isDigit()) {
-                        current++
+              char.isDigit() -> {
+                val start = current
+                var dotCount = 0
+
+                while (current < input.length && (input[current].isDigit() || input[current] == '.')) {
+                  if (input[current] == '.') {
+                    dotCount++
+                    if (dotCount > 1) {
+                      errors.add("[line $lineNumber] Error: Unexpected character: .")
+                      break
                     }
-                    if (current < input.length && input[current] == '.') {
-                        current++
-                        while (current < input.length && input[current].isDigit()) {
-                            current++
-                        }
-                    }
-                    val lexeme = input.substring(start, current)
-                    val literal = lexeme.toDouble()
-                    tokens.add(Token(TokenType.NUMBER, lexeme, literal))
+                  }
+                  current++
                 }
 
-                char.isLetter() || char == '_' -> {
+                if (dotCount == 1 || dotCount == 0) {
+                  val lexeme = input.substring(start, current)
+                  val literal = lexeme.toDoubleOrNull()
+                  tokens.add(Token(TokenType.NUMBER, lexeme, literal))
+                }
+              }
+
+              char.isLetter() || char == '_' -> {
                     val start = current
                     while (current < input.length && (input[current].isLetterOrDigit() || input[current] == '_')) {
                         current++
@@ -142,11 +148,9 @@ class Tokenizer : KoinComponent {
             '-' to TokenType.MINUS,
             '+' to TokenType.PLUS,
             ';' to TokenType.SEMICOLON,
-            '*' to TokenType.STAR,
             '=' to TokenType.EQUAL,
-            '!' to TokenType.BANG,
-            '<' to TokenType.LESS,
-            '>' to TokenType.GREATER,
+            '*' to TokenType.STAR,
+            '/' to TokenType.SLASH,
         )
 
     private val reservedWords =
