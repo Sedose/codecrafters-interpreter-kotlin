@@ -46,6 +46,10 @@ class TokenizerTest {
         @JvmStatic
         fun provideTokenTypeTestCases() =
             listOf(
+                Arguments.of("/", listOf(TokenType.SLASH)),
+                Arguments.of("/=", listOf(TokenType.SLASH, TokenType.EQUAL)),
+                Arguments.of("/x", listOf(TokenType.SLASH, TokenType.IDENTIFIER)),
+                Arguments.of("/", listOf(TokenType.SLASH)),
                 Arguments.of("==", listOf(TokenType.EQUAL_EQUAL)),
                 Arguments.of("!=", listOf(TokenType.BANG_EQUAL)),
                 Arguments.of("<=", listOf(TokenType.LESS_EQUAL)),
@@ -176,6 +180,19 @@ class TokenizerTest {
                 Arguments.of("()", listOf(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)),
                 Arguments.of("(()", listOf(TokenType.LEFT_PAREN, TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)),
                 Arguments.of("())", listOf(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN, TokenType.RIGHT_PAREN)),
+                Arguments.of("\t", listOf<TokenType>()),
+                Arguments.of(" \t ", listOf<TokenType>()),
+                Arguments.of("!", listOf(TokenType.BANG)),
+                Arguments.of("!x", listOf(TokenType.BANG, TokenType.IDENTIFIER)),
+                Arguments.of("!", listOf(TokenType.BANG)),
+                Arguments.of("<", listOf(TokenType.LESS)),
+                Arguments.of("<x", listOf(TokenType.LESS, TokenType.IDENTIFIER)),
+                Arguments.of("<", listOf(TokenType.LESS)),
+                Arguments.of(">", listOf(TokenType.GREATER)),
+                Arguments.of(">x", listOf(TokenType.GREATER, TokenType.IDENTIFIER)),
+                Arguments.of(">", listOf(TokenType.GREATER)),
+                Arguments.of("\"hello world\"", listOf(TokenType.STRING)),
+                Arguments.of("\"hello\nworld\"", listOf(TokenType.STRING)),
             )
 
         @JvmStatic
