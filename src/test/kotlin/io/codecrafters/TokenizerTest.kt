@@ -3,201 +3,337 @@ package io.codecrafters
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
 class TokenizerTest {
-    @Test
-    fun `should tokenize multi-character operators`() {
-        val tokenizer = Tokenizer()
-        val input = "== != <= >="
+    private val tokenizer = Tokenizer()
+
+    @ParameterizedTest
+    @MethodSource("provideMultiCharOperatorTestCases")
+    fun `should tokenize multi-character operators`(
+        input: String,
+        expectedTokenTypes: List<TokenType>,
+    ) {
         val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
-            listOf(
-                TokenType.EQUAL_EQUAL,
-                TokenType.BANG_EQUAL,
-                TokenType.LESS_EQUAL,
-                TokenType.GREATER_EQUAL,
-            )
-
-        assertEquals(expectedTokens, result.tokens.map { it.type })
+        assertEquals(expectedTokenTypes, result.tokens.map { it.type })
     }
 
-    @Test
-    fun `should tokenize numbers correctly`() {
-        val tokenizer = Tokenizer()
-        val input = "42 3.14"
+    @ParameterizedTest
+    @MethodSource("provideIdentifierAndKeywordTestCases")
+    fun `should tokenize identifiers and keywords`(
+        input: String,
+        expectedTokenTypes: List<TokenType>,
+    ) {
         val result = tokenizer.tokenize(input)
+        assertEquals(expectedTokenTypes, result.tokens.map { it.type })
+    }
 
-        val expectedTokens =
-            listOf(
-                Token(TokenType.NUMBER, "42", 42.0),
-                Token(TokenType.NUMBER, "3.14", 3.14),
-            )
+    @ParameterizedTest
+    @MethodSource("provideCommentTestCases")
+    fun `should ignore comments`(
+        input: String,
+        expectedTokenTypes: List<TokenType>,
+    ) {
+        val result = tokenizer.tokenize(input)
+        assertEquals(expectedTokenTypes, result.tokens.map { it.type })
+    }
 
+    @ParameterizedTest
+    @MethodSource("provideComplexExpressionTestCases")
+    fun `should handle complex expressions`(
+        input: String,
+        expectedTokenTypes: List<TokenType>,
+    ) {
+        val result = tokenizer.tokenize(input)
+        assertEquals(expectedTokenTypes, result.tokens.map { it.type })
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideMultiLineInputTestCases")
+    fun `should handle multi-line input`(
+        input: String,
+        expectedTokenTypes: List<TokenType>,
+    ) {
+        val result = tokenizer.tokenize(input)
+        assertEquals(expectedTokenTypes, result.tokens.map { it.type })
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideParenthesesTestCases")
+    fun `should tokenize parentheses correctly`(
+        input: String,
+        expectedTokenTypes: List<TokenType>,
+    ) {
+        val result = tokenizer.tokenize(input)
+        assertEquals(expectedTokenTypes, result.tokens.map { it.type })
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideNumberTokenizationTestCases")
+    fun `should tokenize numbers correctly`(
+        input: String,
+        expectedTokens: List<Token>,
+    ) {
+        val result = tokenizer.tokenize(input)
         assertEquals(expectedTokens, result.tokens)
     }
 
-    @Test
-    fun `should detect invalid numbers`() {
-        val tokenizer = Tokenizer()
-        val input = "3.14.159"
+    @ParameterizedTest
+    @MethodSource("provideInvalidNumberTestCases")
+    fun `should detect invalid numbers`(
+        input: String,
+        expectedErrors: List<String>,
+    ) {
         val result = tokenizer.tokenize(input)
-
-        assertEquals(listOf("[line 1] Error: Unexpected character: ."), result.errors)
+        assertEquals(expectedErrors, result.errors)
     }
 
-    @Test
-    fun `should tokenize string literals`() {
-        val tokenizer = Tokenizer()
-        val input = "\"hello\" \"world\""
+
+
+    @ParameterizedTest
+    @MethodSource("provideIdentifierVsKeywordTestCases")
+    fun `should differentiate identifiers and keywords`(
+        input: String,
+        expectedTokens: List<Token>,
+    ) {
         val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
-            listOf(
-                Token(TokenType.STRING, "\"hello\"", "hello"),
-                Token(TokenType.STRING, "\"world\"", "world"),
-            )
-
         assertEquals(expectedTokens, result.tokens)
     }
 
-    @Test
-    fun `should handle empty string literals`() {
-        val tokenizer = Tokenizer()
-        val input = "\"\""
+    @ParameterizedTest
+    @MethodSource("provideUnterminatedStringTestCases")
+    fun `should detect unterminated string`(
+        input: String,
+        expectedErrors: List<String>,
+    ) {
         val result = tokenizer.tokenize(input)
+        assertEquals(expectedErrors, result.errors)
+    }
 
-        val expectedTokens =
+    @ParameterizedTest
+    @MethodSource("provideUnknownCharacterTestCases")
+    fun `should report unknown characters`(
+        input: String,
+        expectedErrors: List<String>,
+    ) {
+        val result = tokenizer.tokenize(input)
+        assertEquals(expectedErrors, result.errors)
+    }
+
+
+
+    companion object {
+        @JvmStatic
+        fun provideMultiCharOperatorTestCases() =
             listOf(
-                Token(TokenType.STRING, "\"\"", ""),
+                Arguments.of("==", listOf(TokenType.EQUAL_EQUAL)),
+                Arguments.of("!=", listOf(TokenType.BANG_EQUAL)),
+                Arguments.of("<=", listOf(TokenType.LESS_EQUAL)),
+                Arguments.of(">=", listOf(TokenType.GREATER_EQUAL)),
+                Arguments.of(
+                    "== != <= >=",
+                    listOf(
+                        TokenType.EQUAL_EQUAL,
+                        TokenType.BANG_EQUAL,
+                        TokenType.LESS_EQUAL,
+                        TokenType.GREATER_EQUAL,
+                    ),
+                ),
             )
 
-        assertEquals(expectedTokens, result.tokens)
-    }
-
-    @Test
-    fun `should tokenize identifiers and keywords`() {
-        val tokenizer = Tokenizer()
-        val input = "var foo = 10 if else true false"
-        val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
+        @JvmStatic
+        fun provideNumberTokenizationTestCases() =
             listOf(
-                TokenType.VAR,
-                TokenType.IDENTIFIER,
-                TokenType.EQUAL,
-                TokenType.NUMBER,
-                TokenType.IF,
-                TokenType.ELSE,
-                TokenType.TRUE,
-                TokenType.FALSE,
+                Arguments.of("42", listOf(Token(TokenType.NUMBER, "42", 42.0))),
+                Arguments.of("3.14", listOf(Token(TokenType.NUMBER, "3.14", 3.14))),
+                Arguments.of(
+                    "42 3.14",
+                    listOf(
+                        Token(TokenType.NUMBER, "42", 42.0),
+                        Token(TokenType.NUMBER, "3.14", 3.14),
+                    ),
+                ),
+                Arguments.of("\"hello\"", listOf(Token(TokenType.STRING, "\"hello\"", "hello"))),
+                Arguments.of("\"world\"", listOf(Token(TokenType.STRING, "\"world\"", "world"))),
+                Arguments.of("\"\"", listOf(Token(TokenType.STRING, "\"\"", ""))),
+                Arguments.of(
+                    "\"hello\" \"world\"",
+                    listOf(
+                        Token(TokenType.STRING, "\"hello\"", "hello"),
+                        Token(TokenType.STRING, "\"world\"", "world"),
+                    ),
+                ),
             )
 
-        assertEquals(expectedTokens, result.tokens.map { it.type })
-    }
-
-    @Test
-    fun `should differentiate identifiers and keywords`() {
-        val tokenizer = Tokenizer()
-        val input = "varx"
-        val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
+        @JvmStatic
+        fun provideInvalidNumberTestCases() =
             listOf(
-                Token(TokenType.IDENTIFIER, "varx", null),
+                Arguments.of("3.14.159", listOf("[line 1] Error: Unexpected character: .")),
             )
 
-        assertEquals(expectedTokens, result.tokens)
-    }
-
-    @Test
-    fun `should detect unterminated string`() {
-        val tokenizer = Tokenizer()
-        val input = "\"unterminated"
-        val result = tokenizer.tokenize(input)
-
-        assertEquals(listOf("[line 1] Error: Unterminated string."), result.errors)
-    }
-
-    @Test
-    fun `should ignore comments`() {
-        val tokenizer = Tokenizer()
-        val input = "var x = 42 // this is a comment\nprint(x)"
-        val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
+        @JvmStatic
+        fun provideIdentifierAndKeywordTestCases() =
             listOf(
-                TokenType.VAR,
-                TokenType.IDENTIFIER,
-                TokenType.EQUAL,
-                TokenType.NUMBER,
-                TokenType.PRINT,
-                TokenType.LEFT_PAREN,
-                TokenType.IDENTIFIER,
-                TokenType.RIGHT_PAREN,
+                Arguments.of("var", listOf(TokenType.VAR)),
+                Arguments.of("if", listOf(TokenType.IF)),
+                Arguments.of("else", listOf(TokenType.ELSE)),
+                Arguments.of("true", listOf(TokenType.TRUE)),
+                Arguments.of("false", listOf(TokenType.FALSE)),
+                Arguments.of("foo", listOf(TokenType.IDENTIFIER)),
+                Arguments.of(
+                    "var foo = 10 if else true false",
+                    listOf(
+                        TokenType.VAR,
+                        TokenType.IDENTIFIER,
+                        TokenType.EQUAL,
+                        TokenType.NUMBER,
+                        TokenType.IF,
+                        TokenType.ELSE,
+                        TokenType.TRUE,
+                        TokenType.FALSE,
+                    ),
+                ),
             )
 
-        assertEquals(expectedTokens, result.tokens.map { it.type })
-    }
-
-    @Test
-    fun `should handle complex expressions`() {
-        val tokenizer = Tokenizer()
-        val input = "if(x > 10){print(\"yes\");}"
-        val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
+        @JvmStatic
+        fun provideIdentifierVsKeywordTestCases() =
             listOf(
-                TokenType.IF,
-                TokenType.LEFT_PAREN,
-                TokenType.IDENTIFIER,
-                TokenType.GREATER,
-                TokenType.NUMBER,
-                TokenType.RIGHT_PAREN,
-                TokenType.LEFT_BRACE,
-                TokenType.PRINT,
-                TokenType.LEFT_PAREN,
-                TokenType.STRING,
-                TokenType.RIGHT_PAREN,
-                TokenType.SEMICOLON,
-                TokenType.RIGHT_BRACE,
+                Arguments.of("varx", listOf(Token(TokenType.IDENTIFIER, "varx", null))),
+                Arguments.of("ifelse", listOf(Token(TokenType.IDENTIFIER, "ifelse", null))),
+                Arguments.of("_var", listOf(Token(TokenType.IDENTIFIER, "_var", null))),
             )
 
-        assertEquals(expectedTokens, result.tokens.map { it.type })
-    }
-
-    @Test
-    fun `should handle multi-line input`() {
-        val tokenizer = Tokenizer()
-        val input = "var x = 42;\nvar y = x + 3;"
-        val result = tokenizer.tokenize(input)
-
-        val expectedTokens =
+        @JvmStatic
+        fun provideUnterminatedStringTestCases() =
             listOf(
-                TokenType.VAR,
-                TokenType.IDENTIFIER,
-                TokenType.EQUAL,
-                TokenType.NUMBER,
-                TokenType.SEMICOLON,
-                TokenType.VAR,
-                TokenType.IDENTIFIER,
-                TokenType.EQUAL,
-                TokenType.IDENTIFIER,
-                TokenType.PLUS,
-                TokenType.NUMBER,
-                TokenType.SEMICOLON,
+                Arguments.of("\"unterminated", listOf("[line 1] Error: Unterminated string.")),
             )
 
-        assertEquals(expectedTokens, result.tokens.map { it.type })
-    }
+        @JvmStatic
+        fun provideCommentTestCases() =
+            listOf(
+                Arguments.of("// this is a comment", listOf<TokenType>()),
+                Arguments.of(
+                    "var x = 42 // this is a comment",
+                    listOf(
+                        TokenType.VAR,
+                        TokenType.IDENTIFIER,
+                        TokenType.EQUAL,
+                        TokenType.NUMBER,
+                    ),
+                ),
+                Arguments.of(
+                    "var x = 42 // this is a comment\nprint(x)",
+                    listOf(
+                        TokenType.VAR,
+                        TokenType.IDENTIFIER,
+                        TokenType.EQUAL,
+                        TokenType.NUMBER,
+                        TokenType.PRINT,
+                        TokenType.LEFT_PAREN,
+                        TokenType.IDENTIFIER,
+                        TokenType.RIGHT_PAREN,
+                    ),
+                ),
+            )
 
-    @Test
-    fun `should report unknown characters`() {
-        val tokenizer = Tokenizer()
-        val input = "#"
-        val result = tokenizer.tokenize(input)
+        @JvmStatic
+        fun provideComplexExpressionTestCases() =
+            listOf(
+                Arguments.of(
+                    "if(x > 10){print(\"yes\");}",
+                    listOf(
+                        TokenType.IF,
+                        TokenType.LEFT_PAREN,
+                        TokenType.IDENTIFIER,
+                        TokenType.GREATER,
+                        TokenType.NUMBER,
+                        TokenType.RIGHT_PAREN,
+                        TokenType.LEFT_BRACE,
+                        TokenType.PRINT,
+                        TokenType.LEFT_PAREN,
+                        TokenType.STRING,
+                        TokenType.RIGHT_PAREN,
+                        TokenType.SEMICOLON,
+                        TokenType.RIGHT_BRACE,
+                    ),
+                ),
+                Arguments.of(
+                    "while(true){var x = x + 1;}",
+                    listOf(
+                        TokenType.WHILE,
+                        TokenType.LEFT_PAREN,
+                        TokenType.TRUE,
+                        TokenType.RIGHT_PAREN,
+                        TokenType.LEFT_BRACE,
+                        TokenType.VAR,
+                        TokenType.IDENTIFIER,
+                        TokenType.EQUAL,
+                        TokenType.IDENTIFIER,
+                        TokenType.PLUS,
+                        TokenType.NUMBER,
+                        TokenType.SEMICOLON,
+                        TokenType.RIGHT_BRACE,
+                    ),
+                ),
+            )
 
-        assertEquals(listOf("[line 1] Error: Unexpected character: #"), result.errors)
+        @JvmStatic
+        fun provideMultiLineInputTestCases() =
+            listOf(
+                Arguments.of(
+                    "var x = 42;\nvar y = x + 3;",
+                    listOf(
+                        TokenType.VAR,
+                        TokenType.IDENTIFIER,
+                        TokenType.EQUAL,
+                        TokenType.NUMBER,
+                        TokenType.SEMICOLON,
+                        TokenType.VAR,
+                        TokenType.IDENTIFIER,
+                        TokenType.EQUAL,
+                        TokenType.IDENTIFIER,
+                        TokenType.PLUS,
+                        TokenType.NUMBER,
+                        TokenType.SEMICOLON,
+                    ),
+                ),
+                Arguments.of(
+                    "if(x)\n{\n  print(x);\n}",
+                    listOf(
+                        TokenType.IF,
+                        TokenType.LEFT_PAREN,
+                        TokenType.IDENTIFIER,
+                        TokenType.RIGHT_PAREN,
+                        TokenType.LEFT_BRACE,
+                        TokenType.PRINT,
+                        TokenType.LEFT_PAREN,
+                        TokenType.IDENTIFIER,
+                        TokenType.RIGHT_PAREN,
+                        TokenType.SEMICOLON,
+                        TokenType.RIGHT_BRACE,
+                    ),
+                ),
+            )
+
+        @JvmStatic
+        fun provideUnknownCharacterTestCases() =
+            listOf(
+                Arguments.of("#", listOf("[line 1] Error: Unexpected character: #")),
+                Arguments.of("@", listOf("[line 1] Error: Unexpected character: @")),
+                Arguments.of("$", listOf("[line 1] Error: Unexpected character: $")),
+            )
+
+        @JvmStatic
+        fun provideParenthesesTestCases() =
+            listOf(
+                Arguments.of("(", listOf(TokenType.LEFT_PAREN)),
+                Arguments.of(")", listOf(TokenType.RIGHT_PAREN)),
+                Arguments.of("()", listOf(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)),
+                Arguments.of("(()", listOf(TokenType.LEFT_PAREN, TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)),
+                Arguments.of("())", listOf(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN, TokenType.RIGHT_PAREN)),
+            )
     }
 }
