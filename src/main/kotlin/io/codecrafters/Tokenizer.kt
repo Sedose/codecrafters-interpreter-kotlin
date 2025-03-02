@@ -89,29 +89,29 @@ class Tokenizer : KoinComponent {
                     }
                 }
 
-              char.isDigit() -> {
-                val start = current
-                var dotCount = 0
+                char.isDigit() -> {
+                    val start = current
+                    var dotCount = 0
 
-                while (current < input.length && (input[current].isDigit() || input[current] == '.')) {
-                  if (input[current] == '.') {
-                    dotCount++
-                    if (dotCount > 1) {
-                      errors.add("[line $lineNumber] Error: Unexpected character: .")
-                      break
+                    while (current < input.length && (input[current].isDigit() || input[current] == '.')) {
+                        if (input[current] == '.') {
+                            dotCount++
+                            if (dotCount > 1) {
+                                errors.add("[line $lineNumber] Error: Unexpected character: .")
+                                break
+                            }
+                        }
+                        current++
                     }
-                  }
-                  current++
+
+                    if (dotCount == 1 || dotCount == 0) {
+                        val lexeme = input.substring(start, current)
+                        val literal = lexeme.toDoubleOrNull()
+                        tokens.add(Token(TokenType.NUMBER, lexeme, literal))
+                    }
                 }
 
-                if (dotCount == 1 || dotCount == 0) {
-                  val lexeme = input.substring(start, current)
-                  val literal = lexeme.toDoubleOrNull()
-                  tokens.add(Token(TokenType.NUMBER, lexeme, literal))
-                }
-              }
-
-              char.isLetter() || char == '_' -> {
+                char.isLetter() || char == '_' -> {
                     val start = current
                     while (current < input.length && (input[current].isLetterOrDigit() || input[current] == '_')) {
                         current++
