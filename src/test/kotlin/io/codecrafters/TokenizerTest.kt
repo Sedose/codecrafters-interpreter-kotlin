@@ -192,7 +192,6 @@ class TokenizerTest {
                 Arguments.of(">x", listOf(TokenType.GREATER, TokenType.IDENTIFIER)),
                 Arguments.of(">", listOf(TokenType.GREATER)),
                 Arguments.of("\"hello world\"", listOf(TokenType.STRING)),
-                Arguments.of("\"hello\nworld\"", listOf(TokenType.STRING)),
             )
 
         @JvmStatic

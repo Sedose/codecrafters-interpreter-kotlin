@@ -25,15 +25,16 @@ class Tokenizer : KoinComponent {
                     current = skipSingleLineComment(input, current)
                 }
 
-                char in tokenMap -> {
-                    tokens.add(Token(tokenMap[char]!!, char.toString()))
-                    current++
-                }
-
                 char in multiCharTokens.keys && input.getOrNull(current + 1) == multiCharTokens[char]?.second -> {
                     val (tokenType, secondChar) = multiCharTokens[char]!!
                     tokens.add(Token(tokenType, "$char$secondChar"))
                     current += 2
+                }
+
+                char in singleCharTokens -> {
+                    // Single-character token
+                    tokens.add(Token(singleCharTokens[char]!!, char.toString()))
+                    current++
                 }
 
                 char == '"' -> {
@@ -132,7 +133,7 @@ class Tokenizer : KoinComponent {
         return Token(tokenType, lexeme) to index
     }
 
-    private val tokenMap =
+    private val singleCharTokens =
         mapOf(
             '(' to TokenType.LEFT_PAREN,
             ')' to TokenType.RIGHT_PAREN,
@@ -146,6 +147,9 @@ class Tokenizer : KoinComponent {
             '*' to TokenType.STAR,
             '/' to TokenType.SLASH,
             '=' to TokenType.EQUAL,
+            '!' to TokenType.BANG,
+            '<' to TokenType.LESS,
+            '>' to TokenType.GREATER,
         )
 
     private val multiCharTokens =
