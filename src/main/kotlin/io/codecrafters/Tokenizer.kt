@@ -25,7 +25,7 @@ class Tokenizer : KoinComponent {
                     current = skipSingleLineComment(input, current)
                 }
 
-                char in multiCharTokens.keys && input.getOrNull(current + 1) == multiCharTokens[char]?.second -> {
+                char in multiCharTokens.keys && input.getOrNull(current + 1) == multiCharTokens[char]?.secondChar -> {
                     val (tokenType, secondChar) = multiCharTokens[char]!!
                     tokens.add(Token(tokenType, "$char$secondChar"))
                     current += 2
@@ -79,17 +79,17 @@ class Tokenizer : KoinComponent {
         input: String,
         startIndex: Int,
         lineNumber: Int,
-    ): StringProcessing {
+    ): ProcessingResult {
         val endIndex =
             (startIndex + 1 until input.length)
                 .find { input[it] == '"' || input[it] == '\n' }
                 ?: input.length
         return when {
             endIndex >= input.length || input[endIndex] == '\n' ->
-                StringProcessing(null, endIndex, "[line $lineNumber] Error: Unterminated string.")
+                ProcessingResult(null, endIndex, "[line $lineNumber] Error: Unterminated string.")
 
             else ->
-                StringProcessing(
+                ProcessingResult(
                     Token(
                         TokenType.STRING,
                         input.substring(startIndex, endIndex + 1),
@@ -105,7 +105,7 @@ class Tokenizer : KoinComponent {
         input: String,
         startIndex: Int,
         lineNumber: Int,
-    ): StringProcessing {
+    ): ProcessingResult {
         var currentIndex = startIndex
 
         while (
@@ -118,7 +118,7 @@ class Tokenizer : KoinComponent {
         val lexeme = input.substring(startIndex, currentIndex)
 
         if (lexeme.count { it == '.' } > 1) {
-            return StringProcessing(
+            return ProcessingResult(
                 token = null,
                 newIndex = currentIndex,
                 error = "[line $lineNumber] Error: Unexpected character: .",
@@ -126,7 +126,7 @@ class Tokenizer : KoinComponent {
         }
 
         val numericValue = lexeme.toDoubleOrNull()
-        return StringProcessing(
+        return ProcessingResult(
             token = Token(TokenType.NUMBER, lexeme, numericValue),
             newIndex = currentIndex,
             error = null,
@@ -168,10 +168,10 @@ class Tokenizer : KoinComponent {
 
     private val multiCharTokens =
         mapOf(
-            '=' to Pair(TokenType.EQUAL_EQUAL, '='),
-            '!' to Pair(TokenType.BANG_EQUAL, '='),
-            '<' to Pair(TokenType.LESS_EQUAL, '='),
-            '>' to Pair(TokenType.GREATER_EQUAL, '='),
+            '=' to MultiCharToken(TokenType.EQUAL_EQUAL, '='),
+            '!' to MultiCharToken(TokenType.BANG_EQUAL, '='),
+            '<' to MultiCharToken(TokenType.LESS_EQUAL, '='),
+            '>' to MultiCharToken(TokenType.GREATER_EQUAL, '='),
         )
 
     private val reservedWords =
@@ -195,7 +195,7 @@ class Tokenizer : KoinComponent {
         )
 }
 
-data class StringProcessing(
+data class ProcessingResult(
     val token: Token?,
     val newIndex: Int,
     val error: String?,
@@ -204,4 +204,9 @@ data class StringProcessing(
 data class IdentifierProcessingResult(
     val token: Token,
     val newIndex: Int,
+)
+
+data class MultiCharToken(
+    val tokenType: TokenType,
+    val secondChar: Char,
 )
