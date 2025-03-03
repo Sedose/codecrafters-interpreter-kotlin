@@ -38,15 +38,15 @@ class Tokenizer : KoinComponent {
 
                 char == '"' -> {
                     val (token, newIndex, error) = processString(input, current, lineNumber)
-                    token?.let (tokens::add)
-                    error?.let (errors::add)
+                    token?.let(tokens::add)
+                    error?.let(errors::add)
                     current = newIndex
                 }
 
                 char.isDigit() -> {
                     val (token, newIndex, error) = processNumber(input, current, lineNumber)
-                    token?.let (tokens::add)
-                    error?.let (errors::add)
+                    token?.let(tokens::add)
+                    error?.let(errors::add)
                     current = newIndex
                 }
 
@@ -69,32 +69,35 @@ class Tokenizer : KoinComponent {
     private fun skipSingleLineComment(
         input: String,
         current: Int,
-    ): Int {
-        var index = current
-        while (index < input.length && input[index] != '\n') {
-            index++
-        }
-        return index
-    }
+    ): Int =
+        input
+            .indexOf('\n', current)
+            .takeIf { it != -1 }
+            ?: input.length
 
     private fun processString(
         input: String,
         startIndex: Int,
         lineNumber: Int,
-    ): StringProcessingResult {
-        var index = startIndex + 1
-        while (index < input.length && input[index] != '"') {
-            if (input[index] == '\n')
-                return StringProcessingResult(null, index, "[line $lineNumber] Error: Unterminated string.")
-            index++
-        }
+    ): StringProcessing {
+        val endIndex =
+            (startIndex + 1 until input.length)
+                .find { input[it] == '"' || input[it] == '\n' }
+                ?: input.length
+        return when {
+            endIndex >= input.length || input[endIndex] == '\n' ->
+                StringProcessing(null, endIndex, "[line $lineNumber] Error: Unterminated string.")
 
-        return if (index >= input.length) {
-            StringProcessingResult(null, index, "[line $lineNumber] Error: Unterminated string.")
-        } else {
-            val lexeme = input.substring(startIndex, index + 1)
-            val literal = input.substring(startIndex + 1, index)
-            StringProcessingResult(Token(TokenType.STRING, lexeme, literal), index + 1, null)
+            else ->
+                StringProcessing(
+                    Token(
+                        TokenType.STRING,
+                        input.substring(startIndex, endIndex + 1),
+                        input.substring(startIndex + 1, endIndex),
+                    ),
+                    endIndex + 1,
+                    null,
+                )
         }
     }
 
@@ -102,22 +105,32 @@ class Tokenizer : KoinComponent {
         input: String,
         startIndex: Int,
         lineNumber: Int,
-    ): NumberProcessingResult {
-        var index = startIndex
-        var dotCount = 0
+    ): StringProcessing {
+        var currentIndex = startIndex
 
-        while (index < input.length && (input[index].isDigit() || input[index] == '.')) {
-            if (input[index] == '.') {
-                dotCount++
-                if (dotCount > 1)
-                    return NumberProcessingResult(null, index, "[line $lineNumber] Error: Unexpected character: .")
-            }
-            index++
+        while (
+            currentIndex < input.length &&
+            (input[currentIndex].isDigit() || input[currentIndex] == '.')
+        ) {
+            currentIndex++
         }
 
-        val lexeme = input.substring(startIndex, index)
-        val literal = lexeme.toDoubleOrNull()
-        return NumberProcessingResult(Token(TokenType.NUMBER, lexeme, literal), index, null)
+        val lexeme = input.substring(startIndex, currentIndex)
+
+        if (lexeme.count { it == '.' } > 1) {
+            return StringProcessing(
+                token = null,
+                newIndex = currentIndex,
+                error = "[line $lineNumber] Error: Unexpected character: .",
+            )
+        }
+
+        val numericValue = lexeme.toDoubleOrNull()
+        return StringProcessing(
+            token = Token(TokenType.NUMBER, lexeme, numericValue),
+            newIndex = currentIndex,
+            error = null,
+        )
     }
 
     private fun processIdentifierOrKeyword(
@@ -182,13 +195,7 @@ class Tokenizer : KoinComponent {
         )
 }
 
-data class StringProcessingResult(
-    val token: Token?,
-    val newIndex: Int,
-    val error: String?,
-)
-
-data class NumberProcessingResult(
+data class StringProcessing(
     val token: Token?,
     val newIndex: Int,
     val error: String?,

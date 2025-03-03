@@ -46,6 +46,13 @@ class TokenizerTest {
         @JvmStatic
         fun provideTokenTypeTestCases() =
             listOf(
+                Arguments.of(
+                    "=x",
+                    listOf(
+                        TokenType.EQUAL,
+                        TokenType.IDENTIFIER,
+                    ),
+                ),
                 Arguments.of("/", listOf(TokenType.SLASH)),
                 Arguments.of("/=", listOf(TokenType.SLASH, TokenType.EQUAL)),
                 Arguments.of("/x", listOf(TokenType.SLASH, TokenType.IDENTIFIER)),
