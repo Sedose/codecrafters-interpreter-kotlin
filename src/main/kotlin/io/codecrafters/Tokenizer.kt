@@ -32,22 +32,21 @@ class Tokenizer : KoinComponent {
                 }
 
                 char in singleCharTokens -> {
-                    // Single-character token
                     tokens.add(Token(singleCharTokens[char]!!, char.toString()))
                     current++
                 }
 
                 char == '"' -> {
                     val (token, newIndex, error) = processString(input, current, lineNumber)
-                    token?.let { tokens.add(it) }
-                    error?.let { errors.add(it) }
+                    token?.let (tokens::add)
+                    error?.let (errors::add)
                     current = newIndex
                 }
 
                 char.isDigit() -> {
                     val (token, newIndex, error) = processNumber(input, current, lineNumber)
-                    token?.let { tokens.add(it) }
-                    error?.let { errors.add(it) }
+                    token?.let (tokens::add)
+                    error?.let (errors::add)
                     current = newIndex
                 }
 
@@ -82,19 +81,20 @@ class Tokenizer : KoinComponent {
         input: String,
         startIndex: Int,
         lineNumber: Int,
-    ): Triple<Token?, Int, String?> {
+    ): StringProcessingResult {
         var index = startIndex + 1
         while (index < input.length && input[index] != '"') {
-            if (input[index] == '\n') return Triple(null, index, "[line $lineNumber] Error: Unterminated string.")
+            if (input[index] == '\n')
+                return StringProcessingResult(null, index, "[line $lineNumber] Error: Unterminated string.")
             index++
         }
 
         return if (index >= input.length) {
-            Triple(null, index, "[line $lineNumber] Error: Unterminated string.")
+            StringProcessingResult(null, index, "[line $lineNumber] Error: Unterminated string.")
         } else {
             val lexeme = input.substring(startIndex, index + 1)
             val literal = input.substring(startIndex + 1, index)
-            Triple(Token(TokenType.STRING, lexeme, literal), index + 1, null)
+            StringProcessingResult(Token(TokenType.STRING, lexeme, literal), index + 1, null)
         }
     }
 
@@ -102,27 +102,28 @@ class Tokenizer : KoinComponent {
         input: String,
         startIndex: Int,
         lineNumber: Int,
-    ): Triple<Token?, Int, String?> {
+    ): NumberProcessingResult {
         var index = startIndex
         var dotCount = 0
 
         while (index < input.length && (input[index].isDigit() || input[index] == '.')) {
             if (input[index] == '.') {
                 dotCount++
-                if (dotCount > 1) return Triple(null, index, "[line $lineNumber] Error: Unexpected character: .")
+                if (dotCount > 1)
+                    return NumberProcessingResult(null, index, "[line $lineNumber] Error: Unexpected character: .")
             }
             index++
         }
 
         val lexeme = input.substring(startIndex, index)
         val literal = lexeme.toDoubleOrNull()
-        return Triple(Token(TokenType.NUMBER, lexeme, literal), index, null)
+        return NumberProcessingResult(Token(TokenType.NUMBER, lexeme, literal), index, null)
     }
 
     private fun processIdentifierOrKeyword(
         input: String,
         startIndex: Int,
-    ): Pair<Token, Int> {
+    ): IdentifierProcessingResult {
         var index = startIndex
         while (index < input.length && (input[index].isLetterOrDigit() || input[index] == '_')) {
             index++
@@ -130,7 +131,7 @@ class Tokenizer : KoinComponent {
 
         val lexeme = input.substring(startIndex, index)
         val tokenType = reservedWords[lexeme] ?: TokenType.IDENTIFIER
-        return Token(tokenType, lexeme) to index
+        return IdentifierProcessingResult(Token(tokenType, lexeme), index)
     }
 
     private val singleCharTokens =
@@ -180,3 +181,20 @@ class Tokenizer : KoinComponent {
             "while" to TokenType.WHILE,
         )
 }
+
+data class StringProcessingResult(
+    val token: Token?,
+    val newIndex: Int,
+    val error: String?,
+)
+
+data class NumberProcessingResult(
+    val token: Token?,
+    val newIndex: Int,
+    val error: String?,
+)
+
+data class IdentifierProcessingResult(
+    val token: Token,
+    val newIndex: Int,
+)
