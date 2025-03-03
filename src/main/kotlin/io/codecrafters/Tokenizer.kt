@@ -10,55 +10,55 @@ class Tokenizer : KoinComponent {
         val tokens = mutableListOf<Token>()
         val errors = mutableListOf<String>()
         var lineNumber = 1
-        var current = 0
+        var currentIndex = 0
 
-        while (current < input.length) {
-            val char = input[current]
+        while (currentIndex < input.length) {
+            val char = input[currentIndex]
 
             when {
                 char.isWhitespace() -> {
                     if (char == '\n') lineNumber++
-                    current++
+                    currentIndex++
                 }
 
-                char == '/' && input.getOrNull(current + 1) == '/' -> {
-                    current = skipSingleLineComment(input, current)
+                char == '/' && input.getOrNull(currentIndex + 1) == '/' -> {
+                    currentIndex = skipSingleLineComment(input, currentIndex)
                 }
 
-                char in multiCharTokens.keys && input.getOrNull(current + 1) == multiCharTokens[char]?.secondChar -> {
+                char in multiCharTokens.keys && input.getOrNull(currentIndex + 1) == multiCharTokens[char]?.secondChar -> {
                     val (tokenType, secondChar) = multiCharTokens[char]!!
                     tokens.add(Token(tokenType, "$char$secondChar"))
-                    current += 2
+                    currentIndex += 2
                 }
 
                 char in singleCharTokens -> {
                     tokens.add(Token(singleCharTokens[char]!!, char.toString()))
-                    current++
+                    currentIndex++
                 }
 
                 char == '"' -> {
-                    val (token, newIndex, error) = processString(input, current, lineNumber)
+                    val (token, newIndex, error) = processString(input, currentIndex, lineNumber)
                     token?.let(tokens::add)
                     error?.let(errors::add)
-                    current = newIndex
+                    currentIndex = newIndex
                 }
 
                 char.isDigit() -> {
-                    val (token, newIndex, error) = processNumber(input, current, lineNumber)
+                    val (token, newIndex, error) = processNumber(input, currentIndex, lineNumber)
                     token?.let(tokens::add)
                     error?.let(errors::add)
-                    current = newIndex
+                    currentIndex = newIndex
                 }
 
                 char.isLetter() || char == '_' -> {
-                    val (token, newIndex) = processIdentifierOrKeyword(input, current)
+                    val (token, newIndex) = processIdentifierOrKeyword(input, currentIndex)
                     tokens.add(token)
-                    current = newIndex
+                    currentIndex = newIndex
                 }
 
                 else -> {
                     errors.add("[line $lineNumber] Error: Unexpected character: $char")
-                    current++
+                    currentIndex++
                 }
             }
         }
@@ -68,10 +68,10 @@ class Tokenizer : KoinComponent {
 
     private fun skipSingleLineComment(
         input: String,
-        current: Int,
+        currentIndex: Int,
     ): Int =
         input
-            .indexOf('\n', current)
+            .indexOf('\n', currentIndex)
             .takeIf { it != -1 }
             ?: input.length
 
