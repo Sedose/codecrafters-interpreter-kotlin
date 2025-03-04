@@ -1,4 +1,4 @@
-package io.codecrafters.tokenizer
+package io.codecrafters.tokenizer.component
 
 class SingleLineCommentSkipper {
   fun skipSingleLineComment(

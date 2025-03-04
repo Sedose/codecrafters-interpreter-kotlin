@@ -25,4 +25,5 @@ book that contains these chapters:
 
 # Notes
 - Make sure you set Maven to run ktlint:format before build
-- 
+- ./mvnw clean verify - includes generating test coverage report as `target/site/jacoco/index.html`
+- ./mvnw ktlint:format

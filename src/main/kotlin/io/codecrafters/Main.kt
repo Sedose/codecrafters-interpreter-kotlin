@@ -3,9 +3,9 @@ package io.codecrafters
 import org.koin.core.context.startKoin
 
 fun main(args: Array<String>) {
-    startKoin {
-        modules(appModule)
-    }
+  startKoin {
+    modules(appModule)
+  }
 
-    TokenizerApp().run(args)
+  TokenizerApp().run(args)
 }
