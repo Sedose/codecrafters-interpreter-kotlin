@@ -205,7 +205,6 @@ class TokenizerTest {
             every { singleCharProcessor.canProcess('/') } returns true
             every { singleCharProcessor.process('/') } returns Token(TokenType.SLASH, "/")
 
-            // For '+', we either skip or produce a plus token if we want to see 2 tokens in total.
             every { multiCharProcessor.isMultiCharToken('+') } returns false
             every { singleCharProcessor.canProcess('+') } returns true
             every { singleCharProcessor.process('+') } returns Token(TokenType.PLUS, "+")
