@@ -10,12 +10,11 @@ import io.codecrafters.tokenizer.component.SingleLineCommentSkipper
 import io.codecrafters.tokenizer.component.StringTokenProcessor
 import org.koin.core.component.KoinComponent
 
-class Tokenizer(
-  private val commentSkipper: SingleLineCommentSkipper,
-  private val stringProcessor: StringTokenProcessor,
-  private val numberProcessor: NumberTokenProcessor,
-  private val identifierProcessor: IdentifierProcessor,
-) : KoinComponent {
+class Tokenizer : KoinComponent {
+  private val commentSkipper = SingleLineCommentSkipper()
+  private val stringProcessor = StringTokenProcessor()
+  private val numberProcessor = NumberTokenProcessor()
+  private val identifierProcessor = IdentifierProcessor()
 
   fun tokenize(input: String): TokenizationResult {
     val tokens = mutableListOf<Token>()
