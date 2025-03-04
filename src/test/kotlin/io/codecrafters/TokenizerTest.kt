@@ -3,7 +3,13 @@ package io.codecrafters
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.Tokenizer
+import io.codecrafters.tokenizer.component.IdentifierProcessor
+import io.codecrafters.tokenizer.component.NumberTokenProcessor
+import io.codecrafters.tokenizer.component.SingleLineCommentSkipper
+import io.codecrafters.tokenizer.component.StringTokenProcessor
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -11,7 +17,18 @@ import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TokenizerTest {
-  private val tokenizer = Tokenizer()
+  private lateinit var tokenizer: Tokenizer
+
+  @BeforeEach
+  fun setUp() {
+    tokenizer =
+      Tokenizer(
+        mockk<SingleLineCommentSkipper>(),
+        mockk<StringTokenProcessor>(),
+        mockk<NumberTokenProcessor>(),
+        mockk<IdentifierProcessor>(),
+      )
+  }
 
   @ParameterizedTest
   @MethodSource("provideTokenTypeTestCases")

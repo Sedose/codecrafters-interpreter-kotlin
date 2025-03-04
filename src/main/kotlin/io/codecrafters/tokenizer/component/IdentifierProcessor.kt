@@ -3,7 +3,9 @@ package io.codecrafters.tokenizer.component
 import io.codecrafters.model.IdentifierProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import org.springframework.stereotype.Component
 
+@Component
 class IdentifierProcessor {
   fun processIdentifierOrKeyword(
     input: String,

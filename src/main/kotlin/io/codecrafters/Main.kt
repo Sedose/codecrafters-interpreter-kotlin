@@ -1,11 +1,11 @@
 package io.codecrafters
 
-import org.koin.core.context.startKoin
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+
+@SpringBootApplication
+class Main
 
 fun main(args: Array<String>) {
-  startKoin {
-    modules(appModule)
-  }
-
-  TokenizerApp().run(args)
+  runApplication<TokenizerApp>(*args)
 }
