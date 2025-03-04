@@ -2,6 +2,7 @@ package io.codecrafters
 
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.tokenizer.Tokenizer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest

@@ -1,4 +1,4 @@
-package io.codecrafters
+package io.codecrafters.tokenizer
 
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
@@ -6,6 +6,8 @@ import io.codecrafters.model.TokenizationResult
 import org.koin.core.component.KoinComponent
 
 class Tokenizer : KoinComponent {
+    private val commentSkipper = SingleLineCommentSkipper()
+
     fun tokenize(input: String): TokenizationResult {
         val tokens = mutableListOf<Token>()
         val errors = mutableListOf<String>()
@@ -22,7 +24,7 @@ class Tokenizer : KoinComponent {
                 }
 
                 char == '/' && input.getOrNull(currentIndex + 1) == '/' -> {
-                    currentIndex = skipSingleLineComment(input, currentIndex)
+                    currentIndex = commentSkipper.skipSingleLineComment(input, currentIndex)
                 }
 
                 char in multiCharTokens.keys && input.getOrNull(currentIndex + 1) == multiCharTokens[char]?.secondChar -> {
@@ -66,16 +68,7 @@ class Tokenizer : KoinComponent {
         return TokenizationResult(tokens, errors)
     }
 
-    private fun skipSingleLineComment(
-        input: String,
-        currentIndex: Int,
-    ): Int =
-        input
-            .indexOf('\n', currentIndex)
-            .takeIf { it != -1 }
-            ?: input.length
-
-    private fun processString(
+  private fun processString(
         input: String,
         startIndex: Int,
         lineNumber: Int,
