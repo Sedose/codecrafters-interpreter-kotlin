@@ -3,8 +3,9 @@ package io.codecrafters.tokenizer.component
 import io.codecrafters.model.IdentifierProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import org.koin.core.component.KoinComponent
 
-class IdentifierProcessor {
+class IdentifierProcessor : KoinComponent {
   fun processIdentifierOrKeyword(
     input: String,
     startIndex: Int,

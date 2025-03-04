@@ -1,242 +1,294 @@
 package io.codecrafters
 
+import io.codecrafters.model.IdentifierProcessingResult
+import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.model.TokenizationResult
 import io.codecrafters.tokenizer.Tokenizer
+import io.codecrafters.tokenizer.component.IdentifierProcessor
+import io.codecrafters.tokenizer.component.MultiCharTokenProcessor
+import io.codecrafters.tokenizer.component.NumberTokenProcessor
+import io.codecrafters.tokenizer.component.SingleCharTokenProcessor
+import io.codecrafters.tokenizer.component.SingleLineCommentSkipper
+import io.codecrafters.tokenizer.component.StringTokenProcessor
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TokenizerTest {
-  private val tokenizer = Tokenizer()
+  private val commentSkipper: SingleLineCommentSkipper = mockk()
+  private val stringProcessor: StringTokenProcessor = mockk()
+  private val numberProcessor: NumberTokenProcessor = mockk()
+  private val identifierProcessor: IdentifierProcessor = mockk()
+  private val singleCharProcessor: SingleCharTokenProcessor = mockk()
+  private val multiCharProcessor: MultiCharTokenProcessor = mockk()
 
-  @ParameterizedTest
-  @MethodSource("provideTokenTypeTestCases")
-  fun `should tokenize input correctly`(
-    input: String,
-    expectedTokenTypes: List<TokenType>,
-  ) {
-    val result = tokenizer.tokenize(input)
-    assertEquals(expectedTokenTypes, result.tokens.map { it.type })
+  private lateinit var tokenizer: Tokenizer
+
+  @BeforeEach
+  fun setup() {
+    tokenizer =
+      Tokenizer(
+        commentSkipper,
+        stringProcessor,
+        numberProcessor,
+        identifierProcessor,
+        singleCharProcessor,
+        multiCharProcessor,
+      )
   }
 
-  @ParameterizedTest
-  @MethodSource("provideExactTokenTestCases")
-  fun `should tokenize with correct token values`(
-    input: String,
-    expectedTokens: List<Token>,
-  ) {
-    val result = tokenizer.tokenize(input)
-    assertEquals(expectedTokens, result.tokens)
-  }
+  data class TestCase(
+    val name: String,
+    val input: String,
+    val mockSetup: () -> Unit,
+    val expectedTokens: List<Token>,
+    val expectedErrors: List<String>,
+  )
 
-  @ParameterizedTest
-  @MethodSource("provideErrorTestCases")
-  fun `should detect errors correctly`(
-    input: String,
-    expectedErrors: List<String>,
-  ) {
-    val result = tokenizer.tokenize(input)
-    assertEquals(expectedErrors, result.errors)
-  }
-
-  companion object {
-    @JvmStatic
-    fun provideTokenTypeTestCases() =
+  @TestFactory
+  fun comprehensiveTests(): List<DynamicTest> {
+    val cases =
       listOf(
-        Arguments.of(
-          "=x",
-          listOf(
-            TokenType.EQUAL,
-            TokenType.IDENTIFIER,
-          ),
+        TestCase(
+          name = "Whitespace only",
+          input = "   ",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of("/", listOf(TokenType.SLASH)),
-        Arguments.of("/=", listOf(TokenType.SLASH, TokenType.EQUAL)),
-        Arguments.of("/x", listOf(TokenType.SLASH, TokenType.IDENTIFIER)),
-        Arguments.of("/", listOf(TokenType.SLASH)),
-        Arguments.of("==", listOf(TokenType.EQUAL_EQUAL)),
-        Arguments.of("!=", listOf(TokenType.BANG_EQUAL)),
-        Arguments.of("<=", listOf(TokenType.LESS_EQUAL)),
-        Arguments.of(">=", listOf(TokenType.GREATER_EQUAL)),
-        Arguments.of(
-          "== != <= >=",
-          listOf(
-            TokenType.EQUAL_EQUAL,
-            TokenType.BANG_EQUAL,
-            TokenType.LESS_EQUAL,
-            TokenType.GREATER_EQUAL,
-          ),
+        TestCase(
+          name = "New line increments line number",
+          input = "\n",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of("var", listOf(TokenType.VAR)),
-        Arguments.of("if", listOf(TokenType.IF)),
-        Arguments.of("else", listOf(TokenType.ELSE)),
-        Arguments.of("true", listOf(TokenType.TRUE)),
-        Arguments.of("false", listOf(TokenType.FALSE)),
-        Arguments.of("foo", listOf(TokenType.IDENTIFIER)),
-        Arguments.of(
-          "var foo = 10 if else true false",
-          listOf(
-            TokenType.VAR,
-            TokenType.IDENTIFIER,
-            TokenType.EQUAL,
-            TokenType.NUMBER,
-            TokenType.IF,
-            TokenType.ELSE,
-            TokenType.TRUE,
-            TokenType.FALSE,
-          ),
+        TestCase(
+          name = "Single-line comment",
+          input = "// Hello world\n",
+          mockSetup = {
+            every { commentSkipper.skipSingleLineComment(any(), any()) } answers { (firstArg<String>()).length }
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of("// this is a comment", listOf<TokenType>()),
-        Arguments.of(
-          "var x = 42 // this is a comment",
-          listOf(
-            TokenType.VAR,
-            TokenType.IDENTIFIER,
-            TokenType.EQUAL,
-            TokenType.NUMBER,
-          ),
+        TestCase(
+          name = "Multi-char token recognized",
+          input = "==",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken('=') } returns true
+            every { multiCharProcessor.process('=', '=') } returns Token(TokenType.EQUAL_EQUAL, "==")
+            every { singleCharProcessor.canProcess(any()) } returns false
+          },
+          expectedTokens = listOf(Token(TokenType.EQUAL_EQUAL, "==")),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of(
-          "var x = 42 // this is a comment\nprint(x)",
-          listOf(
-            TokenType.VAR,
-            TokenType.IDENTIFIER,
-            TokenType.EQUAL,
-            TokenType.NUMBER,
-            TokenType.PRINT,
-            TokenType.LEFT_PAREN,
-            TokenType.IDENTIFIER,
-            TokenType.RIGHT_PAREN,
-          ),
+        TestCase(
+          name = "Single-char token recognized",
+          input = "+",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken('+') } returns false
+            every { singleCharProcessor.canProcess('+') } returns true
+            every { singleCharProcessor.process('+') } returns Token(TokenType.PLUS, "+")
+          },
+          expectedTokens = listOf(Token(TokenType.PLUS, "+")),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of(
-          "if(x > 10){print(\"yes\");}",
-          listOf(
-            TokenType.IF,
-            TokenType.LEFT_PAREN,
-            TokenType.IDENTIFIER,
-            TokenType.GREATER,
-            TokenType.NUMBER,
-            TokenType.RIGHT_PAREN,
-            TokenType.LEFT_BRACE,
-            TokenType.PRINT,
-            TokenType.LEFT_PAREN,
-            TokenType.STRING,
-            TokenType.RIGHT_PAREN,
-            TokenType.SEMICOLON,
-            TokenType.RIGHT_BRACE,
-          ),
+        TestCase(
+          name = "String token success",
+          input = "\"abc\"",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+            every { stringProcessor.processString("\"abc\"", 0, 1) } returns
+              ProcessingResult(
+                token = Token(TokenType.STRING, "\"abc\"", "abc"),
+                newIndex = 5,
+                error = null,
+              )
+          },
+          expectedTokens = listOf(Token(TokenType.STRING, "\"abc\"", "abc")),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of(
-          "while(true){var x = x + 1;}",
-          listOf(
-            TokenType.WHILE,
-            TokenType.LEFT_PAREN,
-            TokenType.TRUE,
-            TokenType.RIGHT_PAREN,
-            TokenType.LEFT_BRACE,
-            TokenType.VAR,
-            TokenType.IDENTIFIER,
-            TokenType.EQUAL,
-            TokenType.IDENTIFIER,
-            TokenType.PLUS,
-            TokenType.NUMBER,
-            TokenType.SEMICOLON,
-            TokenType.RIGHT_BRACE,
-          ),
+        TestCase(
+          name = "String token unterminated",
+          input = "\"abc\n",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+            every { stringProcessor.processString("\"abc\n", 0, 1) } returns
+              ProcessingResult(
+                token = null,
+                newIndex = 4,
+                error = "[line 1] Error: Unterminated string.",
+              )
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = listOf("[line 1] Error: Unterminated string."),
         ),
-        Arguments.of(
-          "var x = 42;\nvar y = x + 3;",
-          listOf(
-            TokenType.VAR,
-            TokenType.IDENTIFIER,
-            TokenType.EQUAL,
-            TokenType.NUMBER,
-            TokenType.SEMICOLON,
-            TokenType.VAR,
-            TokenType.IDENTIFIER,
-            TokenType.EQUAL,
-            TokenType.IDENTIFIER,
-            TokenType.PLUS,
-            TokenType.NUMBER,
-            TokenType.SEMICOLON,
-          ),
+        TestCase(
+          name = "Number token success",
+          input = "123",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+            every { numberProcessor.processNumber("123", 0, 1) } returns
+              io.codecrafters.model.ProcessingResult(
+                token = Token(TokenType.NUMBER, "123", 123.0),
+                newIndex = 3,
+                error = null,
+              )
+          },
+          expectedTokens = listOf(Token(TokenType.NUMBER, "123", 123.0)),
+          expectedErrors = emptyList(),
         ),
-        Arguments.of(
-          "if(x)\n{\n  print(x);\n}",
-          listOf(
-            TokenType.IF,
-            TokenType.LEFT_PAREN,
-            TokenType.IDENTIFIER,
-            TokenType.RIGHT_PAREN,
-            TokenType.LEFT_BRACE,
-            TokenType.PRINT,
-            TokenType.LEFT_PAREN,
-            TokenType.IDENTIFIER,
-            TokenType.RIGHT_PAREN,
-            TokenType.SEMICOLON,
-            TokenType.RIGHT_BRACE,
-          ),
+        TestCase(
+          name = "Number token with double dot error",
+          input = "123.45.67",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+            every { numberProcessor.processNumber("123.45.67", 0, 1) } returns
+              ProcessingResult(
+                token = null,
+                newIndex = 9,
+                error = "[line 1] Error: Unexpected character: .",
+              )
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = listOf("[line 1] Error: Unexpected character: ."),
         ),
-        // Parentheses test cases
-        Arguments.of("(", listOf(TokenType.LEFT_PAREN)),
-        Arguments.of(")", listOf(TokenType.RIGHT_PAREN)),
-        Arguments.of("()", listOf(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)),
-        Arguments.of("(()", listOf(TokenType.LEFT_PAREN, TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN)),
-        Arguments.of("())", listOf(TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN, TokenType.RIGHT_PAREN)),
-        Arguments.of("\t", listOf<TokenType>()),
-        Arguments.of(" \t ", listOf<TokenType>()),
-        Arguments.of("!", listOf(TokenType.BANG)),
-        Arguments.of("!x", listOf(TokenType.BANG, TokenType.IDENTIFIER)),
-        Arguments.of("!", listOf(TokenType.BANG)),
-        Arguments.of("<", listOf(TokenType.LESS)),
-        Arguments.of("<x", listOf(TokenType.LESS, TokenType.IDENTIFIER)),
-        Arguments.of("<", listOf(TokenType.LESS)),
-        Arguments.of(">", listOf(TokenType.GREATER)),
-        Arguments.of(">x", listOf(TokenType.GREATER, TokenType.IDENTIFIER)),
-        Arguments.of(">", listOf(TokenType.GREATER)),
-        Arguments.of("\"hello world\"", listOf(TokenType.STRING)),
+        TestCase(
+          name = "Identifier token success",
+          input = "abc123",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+            every { identifierProcessor.processIdentifierOrKeyword("abc123", 0) } returns
+              IdentifierProcessingResult(
+                token = Token(TokenType.IDENTIFIER, "abc123"),
+                newIndex = 6,
+              )
+          },
+          expectedTokens = listOf(Token(TokenType.IDENTIFIER, "abc123")),
+          expectedErrors = emptyList(),
+        ),
+        TestCase(
+          name = "Unknown character error",
+          input = "#",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken('#') } returns false
+            every { singleCharProcessor.canProcess('#') } returns false
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = listOf("[line 1] Error: Unexpected character: #"),
+        ),
+        TestCase(
+          name = "Slash not comment",
+          input = "/+",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken('/') } returns false
+            every { multiCharProcessor.process(any(), any()) } returns null
+            every { singleCharProcessor.canProcess('/') } returns true
+            every { singleCharProcessor.process('/') } returns Token(TokenType.SLASH, "/")
+
+            // For '+', we either skip or produce a plus token if we want to see 2 tokens in total.
+            every { multiCharProcessor.isMultiCharToken('+') } returns false
+            every { singleCharProcessor.canProcess('+') } returns true
+            every { singleCharProcessor.process('+') } returns Token(TokenType.PLUS, "+")
+          },
+          expectedTokens =
+            listOf(
+              Token(TokenType.SLASH, "/"),
+              Token(TokenType.PLUS, "+"),
+            ),
+          expectedErrors = emptyList(),
+        ),
+        TestCase(
+          name = "Multi-char token returns null",
+          input = "!x",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken('!') } returns true
+            every { multiCharProcessor.process('!', 'x') } returns null
+            every { singleCharProcessor.canProcess('!') } returns true
+            every { singleCharProcessor.process('!') } returns Token(TokenType.BANG, "!")
+            every { multiCharProcessor.isMultiCharToken('x') } returns false
+            every { singleCharProcessor.canProcess('x') } returns false
+            every { stringProcessor.processString(any(), any(), any()) } returns ProcessingResult(null, 0, null)
+            every { numberProcessor.processNumber(any(), any(), any()) } returns ProcessingResult(null, 0, null)
+            every {
+              identifierProcessor.processIdentifierOrKeyword("!x", 1)
+            } returns
+              IdentifierProcessingResult(
+                Token(TokenType.IDENTIFIER, "x"),
+                2,
+              )
+          },
+          expectedTokens =
+            listOf(
+              Token(TokenType.BANG, "!"),
+              Token(TokenType.IDENTIFIER, "x"),
+            ),
+          expectedErrors = emptyList(),
+        ),
+        TestCase(
+          name = "Underscore as identifier",
+          input = "_abc",
+          mockSetup = {
+            every { multiCharProcessor.isMultiCharToken('_') } returns false
+            every { singleCharProcessor.canProcess('_') } returns false
+            every { stringProcessor.processString(any(), any(), any()) } returns ProcessingResult(null, 0, null)
+            every { numberProcessor.processNumber(any(), any(), any()) } returns ProcessingResult(null, 0, null)
+            every {
+              identifierProcessor.processIdentifierOrKeyword("_abc", 0)
+            } returns
+              IdentifierProcessingResult(
+                Token(TokenType.IDENTIFIER, "_abc"),
+                4,
+              )
+          },
+          expectedTokens =
+            listOf(
+              Token(TokenType.IDENTIFIER, "_abc"),
+            ),
+          expectedErrors = emptyList(),
+        ),
+        TestCase(
+          name = "Single-line comment with no newline at the end",
+          input = "// No newline here",
+          mockSetup = {
+            every {
+              commentSkipper.skipSingleLineComment("// No newline here", 0)
+            } returns "// No newline here".length
+
+            every { multiCharProcessor.isMultiCharToken(any()) } returns false
+            every { singleCharProcessor.canProcess(any()) } returns false
+          },
+          expectedTokens = emptyList(),
+          expectedErrors = emptyList(),
+        ),
       )
 
-    @JvmStatic
-    fun provideExactTokenTestCases() =
-      listOf(
-        Arguments.of("42", listOf(Token(TokenType.NUMBER, "42", 42.0))),
-        Arguments.of("3.14", listOf(Token(TokenType.NUMBER, "3.14", 3.14))),
-        Arguments.of(
-          "42 3.14",
-          listOf(
-            Token(TokenType.NUMBER, "42", 42.0),
-            Token(TokenType.NUMBER, "3.14", 3.14),
-          ),
-        ),
-        Arguments.of("\"hello\"", listOf(Token(TokenType.STRING, "\"hello\"", "hello"))),
-        Arguments.of("\"world\"", listOf(Token(TokenType.STRING, "\"world\"", "world"))),
-        Arguments.of("\"\"", listOf(Token(TokenType.STRING, "\"\"", ""))),
-        Arguments.of(
-          "\"hello\" \"world\"",
-          listOf(
-            Token(TokenType.STRING, "\"hello\"", "hello"),
-            Token(TokenType.STRING, "\"world\"", "world"),
-          ),
-        ),
-        Arguments.of("varx", listOf(Token(TokenType.IDENTIFIER, "varx", null))),
-        Arguments.of("ifelse", listOf(Token(TokenType.IDENTIFIER, "ifelse", null))),
-        Arguments.of("_var", listOf(Token(TokenType.IDENTIFIER, "_var", null))),
-      )
-
-    @JvmStatic
-    fun provideErrorTestCases() =
-      listOf(
-        Arguments.of("3.14.159", listOf("[line 1] Error: Unexpected character: .")),
-        Arguments.of("\"unterminated", listOf("[line 1] Error: Unterminated string.")),
-        Arguments.of("#", listOf("[line 1] Error: Unexpected character: #")),
-        Arguments.of("@", listOf("[line 1] Error: Unexpected character: @")),
-        Arguments.of("$", listOf("[line 1] Error: Unexpected character: $")),
-      )
+    return cases.map { testCase ->
+      DynamicTest.dynamicTest(testCase.name) {
+        testCase.mockSetup()
+        val result: TokenizationResult = tokenizer.tokenize(testCase.input)
+        assertEquals(testCase.expectedTokens, result.tokens)
+        assertEquals(testCase.expectedErrors, result.errors)
+      }
+    }
   }
 }

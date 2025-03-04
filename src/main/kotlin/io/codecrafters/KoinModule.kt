@@ -2,7 +2,9 @@ package io.codecrafters
 
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.component.IdentifierProcessor
+import io.codecrafters.tokenizer.component.MultiCharTokenProcessor
 import io.codecrafters.tokenizer.component.NumberTokenProcessor
+import io.codecrafters.tokenizer.component.SingleCharTokenProcessor
 import io.codecrafters.tokenizer.component.SingleLineCommentSkipper
 import io.codecrafters.tokenizer.component.StringTokenProcessor
 import org.koin.dsl.module
@@ -13,5 +15,7 @@ val appModule =
     single { StringTokenProcessor() }
     single { NumberTokenProcessor() }
     single { IdentifierProcessor() }
-    single { Tokenizer(get(), get(), get(), get()) }
+    single { SingleCharTokenProcessor() }
+    single { MultiCharTokenProcessor() }
+    single { Tokenizer(get(), get(), get(), get(), get(), get()) }
   }

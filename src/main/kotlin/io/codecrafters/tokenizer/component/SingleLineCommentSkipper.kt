@@ -1,6 +1,8 @@
 package io.codecrafters.tokenizer.component
 
-class SingleLineCommentSkipper {
+import org.koin.core.component.KoinComponent
+
+class SingleLineCommentSkipper : KoinComponent {
   fun skipSingleLineComment(
     input: String,
     currentIndex: Int,

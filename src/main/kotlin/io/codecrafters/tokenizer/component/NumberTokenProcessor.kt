@@ -3,8 +3,9 @@ package io.codecrafters.tokenizer.component
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import org.koin.core.component.KoinComponent
 
-class NumberTokenProcessor {
+class NumberTokenProcessor : KoinComponent {
   fun processNumber(
     input: String,
     startIndex: Int,

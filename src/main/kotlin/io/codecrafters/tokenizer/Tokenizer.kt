@@ -1,11 +1,11 @@
 package io.codecrafters.tokenizer
 
-import io.codecrafters.model.MultiCharToken
 import io.codecrafters.model.Token
-import io.codecrafters.model.TokenType
 import io.codecrafters.model.TokenizationResult
 import io.codecrafters.tokenizer.component.IdentifierProcessor
+import io.codecrafters.tokenizer.component.MultiCharTokenProcessor
 import io.codecrafters.tokenizer.component.NumberTokenProcessor
+import io.codecrafters.tokenizer.component.SingleCharTokenProcessor
 import io.codecrafters.tokenizer.component.SingleLineCommentSkipper
 import io.codecrafters.tokenizer.component.StringTokenProcessor
 import org.koin.core.component.KoinComponent
@@ -15,8 +15,9 @@ class Tokenizer(
   private val stringProcessor: StringTokenProcessor,
   private val numberProcessor: NumberTokenProcessor,
   private val identifierProcessor: IdentifierProcessor,
+  private val singleCharProcessor: SingleCharTokenProcessor,
+  private val multiCharProcessor: MultiCharTokenProcessor,
 ) : KoinComponent {
-
   fun tokenize(input: String): TokenizationResult {
     val tokens = mutableListOf<Token>()
     val errors = mutableListOf<String>()
@@ -25,6 +26,7 @@ class Tokenizer(
 
     while (currentIndex < input.length) {
       val char = input[currentIndex]
+      val nextChar = input.getOrNull(currentIndex + 1)
 
       when {
         char.isWhitespace() -> {
@@ -32,18 +34,17 @@ class Tokenizer(
           currentIndex++
         }
 
-        char == '/' && input.getOrNull(currentIndex + 1) == '/' -> {
+        char == '/' && nextChar == '/' -> {
           currentIndex = commentSkipper.skipSingleLineComment(input, currentIndex)
         }
 
-        char in multiCharTokens.keys && input.getOrNull(currentIndex + 1) == multiCharTokens[char]?.secondChar -> {
-          val (tokenType, secondChar) = multiCharTokens[char]!!
-          tokens.add(Token(tokenType, "$char$secondChar"))
+        multiCharProcessor.isMultiCharToken(char) && multiCharProcessor.process(char, nextChar) != null -> {
+          tokens.add(multiCharProcessor.process(char, nextChar)!!)
           currentIndex += 2
         }
 
-        char in singleCharTokens -> {
-          tokens.add(Token(singleCharTokens[char]!!, char.toString()))
+        singleCharProcessor.canProcess(char) -> {
+          tokens.add(singleCharProcessor.process(char))
           currentIndex++
         }
 
@@ -76,31 +77,4 @@ class Tokenizer(
 
     return TokenizationResult(tokens, errors)
   }
-
-  private val singleCharTokens =
-    mapOf(
-      '(' to TokenType.LEFT_PAREN,
-      ')' to TokenType.RIGHT_PAREN,
-      '{' to TokenType.LEFT_BRACE,
-      '}' to TokenType.RIGHT_BRACE,
-      ',' to TokenType.COMMA,
-      '.' to TokenType.DOT,
-      '-' to TokenType.MINUS,
-      '+' to TokenType.PLUS,
-      ';' to TokenType.SEMICOLON,
-      '*' to TokenType.STAR,
-      '/' to TokenType.SLASH,
-      '=' to TokenType.EQUAL,
-      '!' to TokenType.BANG,
-      '<' to TokenType.LESS,
-      '>' to TokenType.GREATER,
-    )
-
-  private val multiCharTokens =
-    mapOf(
-      '=' to MultiCharToken(TokenType.EQUAL_EQUAL, '='),
-      '!' to MultiCharToken(TokenType.BANG_EQUAL, '='),
-      '<' to MultiCharToken(TokenType.LESS_EQUAL, '='),
-      '>' to MultiCharToken(TokenType.GREATER_EQUAL, '='),
-    )
 }
