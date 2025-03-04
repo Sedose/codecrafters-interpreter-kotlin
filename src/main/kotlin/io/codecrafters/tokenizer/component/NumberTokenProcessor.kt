@@ -3,9 +3,7 @@ package io.codecrafters.tokenizer.component
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import org.springframework.stereotype.Component
 
-@Component
 class NumberTokenProcessor {
   fun processNumber(
     input: String,
