@@ -16,6 +16,7 @@ class Tokenizer(
   private val numberProcessor: NumberTokenProcessor,
   private val identifierProcessor: IdentifierProcessor,
 ) : KoinComponent {
+
   fun tokenize(input: String): TokenizationResult {
     val tokens = mutableListOf<Token>()
     val errors = mutableListOf<String>()
