@@ -25,17 +25,17 @@ class IdentifierProcessor :
     }
     val lexeme = input.substring(index, newIndex)
     return ProcessingResult(
-      token = Token(
-        type = RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER,
-        lexeme = lexeme,
-      ),
+      token =
+        Token(
+          type = RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER,
+          lexeme = lexeme,
+        ),
       newIndex = newIndex,
       error = null,
     )
   }
 
-  private fun Char.isIdentifierChar() =
-    isLetterOrDigit() || this == '_'
+  private fun Char.isIdentifierChar() = isLetterOrDigit() || this == '_'
 }
 
 private val RESERVED_WORDS =
