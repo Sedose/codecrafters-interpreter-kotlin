@@ -1,17 +1,25 @@
-package io.codecrafters.tokenizer.component
+package io.codecrafters.tokenizer.component.impl
 
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.tokenizer.component.TokenProcessor
 import org.koin.core.component.KoinComponent
 
-class NumberTokenProcessor : KoinComponent {
-  fun processNumber(
+class NumberTokenProcessor :
+  TokenProcessor,
+  KoinComponent {
+  override fun canProcess(
     input: String,
-    startIndex: Int,
+    index: Int,
+  ): Boolean = index < input.length && input[index].isDigit()
+
+  override fun process(
+    input: String,
+    index: Int,
     lineNumber: Int,
   ): ProcessingResult {
-    var currentIndex = startIndex
+    var currentIndex = index
 
     while (
       currentIndex < input.length &&
@@ -20,7 +28,7 @@ class NumberTokenProcessor : KoinComponent {
       currentIndex++
     }
 
-    val lexeme = input.substring(startIndex, currentIndex)
+    val lexeme = input.substring(index, currentIndex)
 
     if (lexeme.count { it == '.' } > 1) {
       return ProcessingResult(
