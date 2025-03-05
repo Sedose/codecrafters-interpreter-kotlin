@@ -27,3 +27,11 @@ book that contains these chapters:
 - Make sure you set Maven to run ktlint:format before build
 - ./mvnw clean verify - includes generating test coverage report as `target/site/jacoco/index.html`
 - ./mvnw ktlint:format
+
+# 🔥 Rules for my codebase
+- 🚫 No Inheritance – Use composition instead of base classes.
+- 🚫 No Static Functions – Use dependency injection (DI) to inject reusable components rather than relying on object or static functions.
+- ✅ Favor Composition – Shared behavior should be extracted into injectable components, not inherited logic.
+- ✅ Use Koin for DI – Every dependency should be injected, not hardcoded or globally accessed.
+- ✅ Small, Focused Components – Keep responsibilities isolated to make testing and modification easier.
+- 
