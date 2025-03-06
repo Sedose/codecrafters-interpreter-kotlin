@@ -20,10 +20,13 @@ class StringTokenProcessor :
     lineNumber: Int,
   ): ProcessingResult {
     val end =
-      (index + 1 until input.length)
-        .find { input[it] == '"' || input[it] == '\n' }
+      input
+        .indexOfAny(
+          charArrayOf('"', '\n'),
+          startIndex = index + 1,
+        ).takeUnless { it == -1 }
         ?: input.length
-    if (end > input.lastIndex || input[end] == '\n') {
+    if (end !in input.indices || input[end] == '\n') {
       return ProcessingResult(null, end, "[line $lineNumber] Error: Unterminated string.")
     }
     return ProcessingResult(

@@ -1,8 +1,8 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.MULTI_CHAR_TOKENS
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
-import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
 
 class MultiCharTokenProcessor : TokenProcessor {
@@ -33,11 +33,3 @@ class MultiCharTokenProcessor : TokenProcessor {
     )
   }
 }
-
-private val MULTI_CHAR_TOKENS =
-  mapOf(
-    ('=' to '=') to TokenType.EQUAL_EQUAL,
-    ('!' to '=') to TokenType.BANG_EQUAL,
-    ('<' to '=') to TokenType.LESS_EQUAL,
-    ('>' to '=') to TokenType.GREATER_EQUAL,
-  )

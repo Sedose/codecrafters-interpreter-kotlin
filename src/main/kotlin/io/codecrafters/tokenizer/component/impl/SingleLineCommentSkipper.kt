@@ -21,14 +21,12 @@ class SingleLineCommentSkipper :
     input: String,
     index: Int,
     lineNumber: Int,
-  ): ProcessingResult =
-    ProcessingResult(
+  ): ProcessingResult {
+    val newLineIndex = input.indexOf('\n', startIndex = index)
+    return ProcessingResult(
       token = null,
-      newIndex =
-        input
-          .indexOf('\n', index)
-          .takeIf { it != -1 }
-          ?: input.length,
+      newIndex = if (newLineIndex != -1) newLineIndex else input.length,
       error = null,
     )
+  }
 }

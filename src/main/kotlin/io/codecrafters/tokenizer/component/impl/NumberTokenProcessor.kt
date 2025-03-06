@@ -1,5 +1,6 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.isNumberChar
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
@@ -12,7 +13,7 @@ class NumberTokenProcessor :
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean = index < input.length && input[index].isDigit()
+  ): Boolean = index in input.indices && input[index].isDigit()
 
   override fun process(
     input: String,
@@ -21,10 +22,7 @@ class NumberTokenProcessor :
   ): ProcessingResult {
     var currentIndex = index
 
-    while (
-      currentIndex < input.length &&
-      (input[currentIndex].isDigit() || input[currentIndex] == '.')
-    ) {
+    while (currentIndex in input.indices && input[currentIndex].isNumberChar()) {
       currentIndex++
     }
 
