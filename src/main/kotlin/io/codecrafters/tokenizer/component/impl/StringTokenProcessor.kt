@@ -12,7 +12,7 @@ class StringTokenProcessor :
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean = index <= input.lastIndex && input[index] == '"'
+  ): Boolean = index in input.indices && input[index] == '"'
 
   override fun process(
     input: String,

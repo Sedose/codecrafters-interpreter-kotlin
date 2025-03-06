@@ -12,7 +12,7 @@ class SingleLineCommentSkipper :
     index: Int,
   ): Boolean {
     val nextIndex = index + 1
-    return nextIndex <= input.lastIndex &&
+    return nextIndex in input.indices &&
       input[index] == '/' &&
       input[nextIndex] == '/'
   }

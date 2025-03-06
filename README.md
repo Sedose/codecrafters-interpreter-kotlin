@@ -1,37 +1,42 @@
 [![progress-banner](https://backend.codecrafters.io/progress/interpreter/2af86dd6-03ef-4a23-8c5b-de136419a078)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
-Kotlin solution for 
-["Build your own Interpreter" Challenge](https://app.codecrafters.io/courses/interpreter/overview).
+# Kotlin Interpreter for Lox
 
-This challenge follows the book
-[Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
+This repository contains my Kotlin implementation of the ["Build your own Interpreter" Challenge](https://app.codecrafters.io/courses/interpreter/overview), inspired by [Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
 
-In this challenge I build an interpreter for
-[Lox](https://craftinginterpreters.com/the-lox-language.html), a simple
-scripting language. Along the way, I'll learn about tokenization, ASTs,
-tree-walk interpreters and more.
+## Overview
+In this challenge, I'm building an interpreter for [Lox](https://craftinginterpreters.com/the-lox-language.html), a lightweight scripting language. Key concepts covered include:
 
-Make sure you've read the "Welcome" part of the
-book that contains these chapters:
+- **Tokenization**
+- **Abstract Syntax Trees (ASTs)**
+- **Tree-walk Interpreters**
 
-- [Introduction](https://craftinginterpreters.com/introduction.html) (chapter 1)
-- [A Map of the Territory](https://craftinginterpreters.com/a-map-of-the-territory.html)
-  (chapter 2)
-- [The Lox Language](https://craftinginterpreters.com/the-lox-language.html)
-  (chapter 3)
+It's recommended to familiarize yourself with these chapters from the book:
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- [Introduction](https://craftinginterpreters.com/introduction.html) (Chapter 1)
+- [A Map of the Territory](https://craftinginterpreters.com/a-map-of-the-territory.html) (Chapter 2)
+- [The Lox Language](https://craftinginterpreters.com/the-lox-language.html) (Chapter 3)
 
-# Notes
-- Make sure you set Maven to run ktlint:format before build
-- ./mvnw clean verify - includes generating test coverage report as `target/site/jacoco/index.html`
-- ./mvnw ktlint:format
+For the interactive challenge experience, visit [codecrafters.io](https://codecrafters.io).
 
-# 🔥 Rules for my codebase
-- 🚫 No Inheritance – Use composition instead of base classes.
-- 🚫 No Static Functions – Use dependency injection (DI) to inject reusable components rather than relying on object or static functions.
-- ✅ Favor Composition – Shared behavior should be extracted into injectable components, not inherited logic.
-- ✅ Use Koin for DI – Every dependency should be injected, not hardcoded or globally accessed.
-- ✅ Small, Focused Components – Keep responsibilities isolated to make testing and modification easier.
-- 
+## Getting Started
+
+Ensure you have Maven configured with the following commands:
+
+```bash
+# Format code according to ktlint guidelines
+./mvnw ktlint:format
+
+# Clean, verify, and generate a test coverage report
+./mvnw clean verify
+```
+
+The test coverage report will be available at `target/site/jacoco/index.html`.
+
+## Codebase Guidelines
+
+- 🚫 **Avoid Inheritance:** Prefer composition and aggregation over inheritance.
+- 🚫 **No Static Functions:** Use Dependency Injection (DI) to inject components.
+- ✅ **Favor Composition:** Extract shared behaviors into injectable, reusable components.
+- ✅ **Use Koin for DI:** Inject dependencies explicitly instead of using globals.
+- ✅ **Small, Focused Components:** Ensure each component has a single, well-defined responsibility for easier testing and maintenance.

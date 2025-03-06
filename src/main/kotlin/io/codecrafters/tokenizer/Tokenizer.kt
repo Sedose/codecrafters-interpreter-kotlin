@@ -14,7 +14,7 @@ class Tokenizer(
     var lineNumber = 1
     var index = 0
 
-    while (index < input.length) {
+    while (index in input.indices) {
       val char = input[index]
       if (char.isWhitespace()) {
         if (char == '\n') lineNumber++
