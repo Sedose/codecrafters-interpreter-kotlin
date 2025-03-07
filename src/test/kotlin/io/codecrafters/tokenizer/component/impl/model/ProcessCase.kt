@@ -8,7 +8,11 @@ data class SuccessProcessCase(
   val expectedNewIndex: Int,
   val expectedType: TokenType,
   val expectedLexeme: String,
-  val expectedValue: Any? = null,
+)
+
+data class SuccessProcessNumberCase(
+  val base: SuccessProcessCase,
+  val expectedValue: Double,
 )
 
 data class ErrorProcessCase(

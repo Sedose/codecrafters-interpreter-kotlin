@@ -4,6 +4,7 @@ import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
 import io.codecrafters.tokenizer.component.impl.model.ErrorProcessCase
 import io.codecrafters.tokenizer.component.impl.model.SuccessProcessCase
+import io.codecrafters.tokenizer.component.impl.model.SuccessProcessNumberCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Named
@@ -25,7 +26,7 @@ class NumberTokenProcessorTest {
     assertEquals(testCase.expectCanProcess, result)
   }
 
-  @Suppress("UnusedPrivateMember")
+  @Suppress("UnusedPrivateMember", "LongMethod")
   private fun canProcessDataProvider(): Stream<Arguments> =
     Stream.of(
       Arguments.of(Named.of("Digit at start", CanProcessCase("123", 0, true))),
@@ -38,18 +39,25 @@ class NumberTokenProcessorTest {
 
   @ParameterizedTest
   @MethodSource("successProcessDataProvider")
-  fun testProcessHappyPath(testCase: SuccessProcessCase) {
-    val result = processor.process(testCase.input, testCase.startIndex, 1)
-    assertEquals(testCase.expectedType, result.token?.type)
-    assertEquals(testCase.expectedLexeme, result.token?.lexeme)
+  fun testProcessHappyPath(testCase: SuccessProcessNumberCase) {
+    val (
+      input,
+      startIndex,
+      expectedNewIndex,
+      expectedType,
+      expectedLexeme,
+    ) = testCase.base
+    val result = processor.process(input, startIndex, 1)
+    assertEquals(expectedType, result.token?.type)
+    assertEquals(expectedLexeme, result.token?.lexeme)
     assertEquals(testCase.expectedValue, result.token?.literal)
-    assertEquals(testCase.expectedNewIndex, result.newIndex)
+    assertEquals(expectedNewIndex, result.newIndex)
     assertNull(result.error)
   }
 
   @ParameterizedTest
   @MethodSource("errorProcessDataProvider")
-  fun testProcessHappyPath(testCase: ErrorProcessCase) {
+  fun testProcessError(testCase: ErrorProcessCase) {
     val result = processor.process(testCase.input, testCase.startIndex, 1)
     assertNull(result.token)
     assertEquals(testCase.expectedError, result.error)
@@ -62,12 +70,15 @@ class NumberTokenProcessorTest {
       Arguments.of(
         Named.of(
           "Integer number",
-          SuccessProcessCase(
-            input = "123",
-            startIndex = 0,
-            expectedType = TokenType.NUMBER,
-            expectedLexeme = "123",
-            expectedNewIndex = 3,
+          SuccessProcessNumberCase(
+            base =
+              SuccessProcessCase(
+                input = "123",
+                startIndex = 0,
+                expectedNewIndex = 3,
+                expectedType = TokenType.NUMBER,
+                expectedLexeme = "123",
+              ),
             expectedValue = 123.0,
           ),
         ),
@@ -75,12 +86,15 @@ class NumberTokenProcessorTest {
       Arguments.of(
         Named.of(
           "Decimal number",
-          SuccessProcessCase(
-            input = "123.45",
-            startIndex = 0,
-            expectedType = TokenType.NUMBER,
-            expectedLexeme = "123.45",
-            expectedNewIndex = 6,
+          SuccessProcessNumberCase(
+            base =
+              SuccessProcessCase(
+                input = "123.45",
+                startIndex = 0,
+                expectedNewIndex = 6,
+                expectedType = TokenType.NUMBER,
+                expectedLexeme = "123.45",
+              ),
             expectedValue = 123.45,
           ),
         ),
@@ -88,12 +102,15 @@ class NumberTokenProcessorTest {
       Arguments.of(
         Named.of(
           "Number with trailing letter",
-          SuccessProcessCase(
-            input = "456abc",
-            startIndex = 0,
-            expectedType = TokenType.NUMBER,
-            expectedLexeme = "456",
-            expectedNewIndex = 3,
+          SuccessProcessNumberCase(
+            base =
+              SuccessProcessCase(
+                input = "456abc",
+                startIndex = 0,
+                expectedNewIndex = 3,
+                expectedType = TokenType.NUMBER,
+                expectedLexeme = "456",
+              ),
             expectedValue = 456.0,
           ),
         ),
@@ -101,12 +118,15 @@ class NumberTokenProcessorTest {
       Arguments.of(
         Named.of(
           "Number ending with dot",
-          SuccessProcessCase(
-            input = "789.",
-            startIndex = 0,
-            expectedType = TokenType.NUMBER,
-            expectedLexeme = "789.",
-            expectedNewIndex = 4,
+          SuccessProcessNumberCase(
+            base =
+              SuccessProcessCase(
+                input = "789.",
+                startIndex = 0,
+                expectedNewIndex = 4,
+                expectedType = TokenType.NUMBER,
+                expectedLexeme = "789.",
+              ),
             expectedValue = 789.0,
           ),
         ),
@@ -114,19 +134,22 @@ class NumberTokenProcessorTest {
       Arguments.of(
         Named.of(
           "Single digit",
-          SuccessProcessCase(
-            input = "0",
-            startIndex = 0,
-            expectedType = TokenType.NUMBER,
-            expectedLexeme = "0",
-            expectedNewIndex = 1,
+          SuccessProcessNumberCase(
+            base =
+              SuccessProcessCase(
+                input = "0",
+                startIndex = 0,
+                expectedNewIndex = 1,
+                expectedType = TokenType.NUMBER,
+                expectedLexeme = "0",
+              ),
             expectedValue = 0.0,
           ),
         ),
       ),
     )
 
-  @Suppress("UnusedPrivateMember", "LongMethod")
+  @Suppress("UnusedPrivateMember")
   private fun errorProcessDataProvider(): Stream<Arguments> =
     Stream.of(
       Arguments.of(
