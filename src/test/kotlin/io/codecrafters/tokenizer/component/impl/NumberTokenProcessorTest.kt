@@ -16,8 +16,8 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 @TestInstance(Lifecycle.PER_CLASS)
-class MultiCharTokenProcessorTest {
-  private val processor = MultiCharTokenProcessor()
+class NumberTokenProcessorTest {
+  private val processor = NumberTokenProcessor()
 
   @ParameterizedTest
   @MethodSource("canProcessDataProvider")
@@ -29,27 +29,12 @@ class MultiCharTokenProcessorTest {
   @Suppress("UnusedPrivateMember")
   private fun canProcessDataProvider(): Stream<Arguments> =
     Stream.of(
-      Arguments.of(
-        Named.of("Valid pair at start", CanProcessCase("==", 0, true)),
-      ),
-      Arguments.of(
-        Named.of("Valid pair in middle", CanProcessCase("a!=b", 1, true)),
-      ),
-      Arguments.of(
-        Named.of("Next index out of bounds", CanProcessCase("=", 0, false)),
-      ),
-      Arguments.of(
-        Named.of("Invalid pair", CanProcessCase("++", 0, false)),
-      ),
-      Arguments.of(
-        Named.of("Negative index", CanProcessCase("==", -1, false)),
-      ),
-      Arguments.of(
-        Named.of("Empty string", CanProcessCase("", 0, false)),
-      ),
-      Arguments.of(
-        Named.of("Valid pair at end", CanProcessCase(">=", 0, true)),
-      ),
+      Arguments.of(Named.of("Digit at start", CanProcessCase("123", 0, true))),
+      Arguments.of(Named.of("Non-digit character", CanProcessCase("a45", 0, false))),
+      Arguments.of(Named.of("Index out of bounds", CanProcessCase("5", 1, false))),
+      Arguments.of(Named.of("Negative index", CanProcessCase("9", -1, false))),
+      Arguments.of(Named.of("Decimal point first", CanProcessCase(".5", 0, false))),
+      Arguments.of(Named.of("Digit in middle", CanProcessCase("a5b", 1, true))),
     )
 
   @ParameterizedTest
@@ -61,6 +46,7 @@ class MultiCharTokenProcessorTest {
       is SuccessProcessCase -> {
         assertEquals(testCase.expectedType, result.token?.type)
         assertEquals(testCase.expectedLexeme, result.token?.lexeme)
+        assertEquals(testCase.expectedValue, result.token?.literal)
         assertEquals(testCase.expectedNewIndex, result.newIndex)
         assertNull(result.error)
       }
@@ -72,54 +58,82 @@ class MultiCharTokenProcessorTest {
     }
   }
 
-  @Suppress("UnusedPrivateMember")
+  @Suppress("UnusedPrivateMember", "LongMethod")
   private fun processDataProvider(): Stream<Arguments> =
     Stream.of(
       Arguments.of(
         Named.of(
-          "EQUAL_EQUAL",
+          "Integer number",
           SuccessProcessCase(
-            input = "==",
+            input = "123",
             startIndex = 0,
-            expectedType = TokenType.EQUAL_EQUAL,
-            expectedLexeme = "==",
-            expectedNewIndex = 2,
-          ),
-        ),
-      ),
-      Arguments.of(
-        Named.of(
-          "BANG_EQUAL in middle",
-          SuccessProcessCase(
-            input = "a!=b",
-            startIndex = 1,
-            expectedType = TokenType.BANG_EQUAL,
-            expectedLexeme = "!=",
+            expectedType = TokenType.NUMBER,
+            expectedLexeme = "123",
             expectedNewIndex = 3,
+            expectedValue = 123.0,
           ),
         ),
       ),
       Arguments.of(
         Named.of(
-          "LESS_EQUAL",
+          "Decimal number",
           SuccessProcessCase(
-            input = "<=",
+            input = "123.45",
             startIndex = 0,
-            expectedType = TokenType.LESS_EQUAL,
-            expectedLexeme = "<=",
-            expectedNewIndex = 2,
+            expectedType = TokenType.NUMBER,
+            expectedLexeme = "123.45",
+            expectedNewIndex = 6,
+            expectedValue = 123.45,
           ),
         ),
       ),
       Arguments.of(
         Named.of(
-          "GREATER_EQUAL at end",
+          "Multiple decimal points",
+          ErrorProcessCase(
+            input = "12.34.56",
+            startIndex = 0,
+            expectedNewIndex = 5,
+            expectedError = "[line 1] Error: Unexpected character: .",
+          ),
+        ),
+      ),
+      Arguments.of(
+        Named.of(
+          "Number with trailing letter",
           SuccessProcessCase(
-            input = "x>=5",
-            startIndex = 1,
-            expectedType = TokenType.GREATER_EQUAL,
-            expectedLexeme = ">=",
+            input = "456abc",
+            startIndex = 0,
+            expectedType = TokenType.NUMBER,
+            expectedLexeme = "456",
             expectedNewIndex = 3,
+            expectedValue = 456.0,
+          ),
+        ),
+      ),
+      Arguments.of(
+        Named.of(
+          "Number ending with dot",
+          SuccessProcessCase(
+            input = "789.",
+            startIndex = 0,
+            expectedType = TokenType.NUMBER,
+            expectedLexeme = "789.",
+            expectedNewIndex = 4,
+            expectedValue = 789.0,
+          ),
+        ),
+      ),
+      Arguments.of(
+        Named.of(
+          "Single digit",
+          SuccessProcessCase(
+            input = "0",
+            startIndex = 0,
+            expectedType = TokenType.NUMBER,
+            expectedLexeme = "0",
+            expectedNewIndex = 1,
+            expectedValue = 0.0,
           ),
         ),
       ),

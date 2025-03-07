@@ -21,22 +21,25 @@ class NumberTokenProcessor :
     lineNumber: Int,
   ): ProcessingResult {
     var currentIndex = index
+    var decimalPointCount = 0
 
     while (currentIndex in input.indices && input[currentIndex].isNumberChar()) {
+      if (input[currentIndex] == '.') {
+        decimalPointCount++
+        if (decimalPointCount > 1) {
+          return ProcessingResult(
+            token = null,
+            newIndex = currentIndex,
+            error = "[line $lineNumber] Error: Unexpected character: .",
+          )
+        }
+      }
       currentIndex++
     }
 
     val lexeme = input.substring(index, currentIndex)
-
-    if (lexeme.count { it == '.' } > 1) {
-      return ProcessingResult(
-        token = null,
-        newIndex = currentIndex,
-        error = "[line $lineNumber] Error: Unexpected character: .",
-      )
-    }
-
     val numericValue = lexeme.toDoubleOrNull()
+
     return ProcessingResult(
       token = Token(TokenType.NUMBER, lexeme, numericValue),
       newIndex = currentIndex,

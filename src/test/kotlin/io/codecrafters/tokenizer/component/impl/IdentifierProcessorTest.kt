@@ -3,7 +3,9 @@ package io.codecrafters.tokenizer.component.impl
 import io.codecrafters.model.RESERVED_WORDS
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
+import io.codecrafters.tokenizer.component.impl.model.ErrorProcessCase
 import io.codecrafters.tokenizer.component.impl.model.ProcessCase
+import io.codecrafters.tokenizer.component.impl.model.SuccessProcessCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Named
@@ -21,11 +23,7 @@ class IdentifierProcessorTest {
   @ParameterizedTest
   @MethodSource("canProcessDataProvider")
   fun testCanProcess(testCase: CanProcessCase) {
-    val result =
-      processor.canProcess(
-        input = testCase.input,
-        index = testCase.startIndex,
-      )
+    val result = processor.canProcess(testCase.input, testCase.startIndex)
     assertEquals(testCase.expectCanProcess, result)
   }
 
@@ -55,16 +53,21 @@ class IdentifierProcessorTest {
   @ParameterizedTest
   @MethodSource("processDataProvider")
   fun testProcess(testCase: ProcessCase) {
-    val (token, newIndex, error) =
-      processor.process(
-        input = testCase.input,
-        index = testCase.startIndex,
-        lineNumber = 1,
-      )
-    assertEquals(testCase.expectedType, token?.type)
-    assertEquals(testCase.expectedLexeme, token?.lexeme)
-    assertEquals(testCase.expectedNewIndex, newIndex)
-    assertNull(error)
+    val (token, newIndex, error) = processor.process(testCase.input, testCase.startIndex, 1)
+
+    when (testCase) {
+      is SuccessProcessCase -> {
+        assertEquals(testCase.expectedType, token?.type)
+        assertEquals(testCase.expectedLexeme, token?.lexeme)
+        assertEquals(testCase.expectedNewIndex, newIndex)
+        assertNull(error)
+      }
+      is ErrorProcessCase -> {
+        assertNull(token)
+        assertEquals(testCase.expectedError, error)
+        assertEquals(testCase.expectedNewIndex, newIndex)
+      }
+    }
   }
 
   @Suppress("UnusedPrivateMember", "LongMethod")
@@ -73,7 +76,7 @@ class IdentifierProcessorTest {
       Arguments.of(
         Named.of(
           "Simple identifier",
-          ProcessCase(
+          SuccessProcessCase(
             input = "foo",
             startIndex = 0,
             expectedType = TokenType.IDENTIFIER,
@@ -85,7 +88,7 @@ class IdentifierProcessorTest {
       Arguments.of(
         Named.of(
           "Reserved word",
-          ProcessCase(
+          SuccessProcessCase(
             input = "fun",
             startIndex = 0,
             expectedType = RESERVED_WORDS["fun"] ?: TokenType.IDENTIFIER,
@@ -97,7 +100,7 @@ class IdentifierProcessorTest {
       Arguments.of(
         Named.of(
           "Alphanumeric",
-          ProcessCase(
+          SuccessProcessCase(
             input = "foo123",
             startIndex = 0,
             expectedType = TokenType.IDENTIFIER,
@@ -109,7 +112,7 @@ class IdentifierProcessorTest {
       Arguments.of(
         Named.of(
           "Underscore",
-          ProcessCase(
+          SuccessProcessCase(
             input = "_bar",
             startIndex = 0,
             expectedType = TokenType.IDENTIFIER,
@@ -121,7 +124,7 @@ class IdentifierProcessorTest {
       Arguments.of(
         Named.of(
           "Stops on special char",
-          ProcessCase(
+          SuccessProcessCase(
             input = "abc!",
             startIndex = 0,
             expectedType = TokenType.IDENTIFIER,
