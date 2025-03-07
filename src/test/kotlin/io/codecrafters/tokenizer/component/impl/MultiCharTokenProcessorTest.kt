@@ -2,8 +2,6 @@ package io.codecrafters.tokenizer.component.impl
 
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
-import io.codecrafters.tokenizer.component.impl.model.ErrorProcessCase
-import io.codecrafters.tokenizer.component.impl.model.ProcessCase
 import io.codecrafters.tokenizer.component.impl.model.SuccessProcessCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -54,22 +52,13 @@ class MultiCharTokenProcessorTest {
 
   @ParameterizedTest
   @MethodSource("processDataProvider")
-  fun testProcess(testCase: ProcessCase) {
+  fun testProcess(testCase: SuccessProcessCase) {
     val result = processor.process(testCase.input, testCase.startIndex, 1)
 
-    when (testCase) {
-      is SuccessProcessCase -> {
-        assertEquals(testCase.expectedType, result.token?.type)
-        assertEquals(testCase.expectedLexeme, result.token?.lexeme)
-        assertEquals(testCase.expectedNewIndex, result.newIndex)
-        assertNull(result.error)
-      }
-      is ErrorProcessCase -> {
-        assertNull(result.token)
-        assertEquals(testCase.expectedError, result.error)
-        assertEquals(testCase.expectedNewIndex, result.newIndex)
-      }
-    }
+    assertEquals(testCase.expectedType, result.token?.type)
+    assertEquals(testCase.expectedLexeme, result.token?.lexeme)
+    assertEquals(testCase.expectedNewIndex, result.newIndex)
+    assertNull(result.error)
   }
 
   @Suppress("UnusedPrivateMember")

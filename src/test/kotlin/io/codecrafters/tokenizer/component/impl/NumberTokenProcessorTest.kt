@@ -3,7 +3,6 @@ package io.codecrafters.tokenizer.component.impl
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
 import io.codecrafters.tokenizer.component.impl.model.ErrorProcessCase
-import io.codecrafters.tokenizer.component.impl.model.ProcessCase
 import io.codecrafters.tokenizer.component.impl.model.SuccessProcessCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -38,28 +37,27 @@ class NumberTokenProcessorTest {
     )
 
   @ParameterizedTest
-  @MethodSource("processDataProvider")
-  fun testProcess(testCase: ProcessCase) {
+  @MethodSource("successProcessDataProvider")
+  fun testProcessHappyPath(testCase: SuccessProcessCase) {
     val result = processor.process(testCase.input, testCase.startIndex, 1)
+    assertEquals(testCase.expectedType, result.token?.type)
+    assertEquals(testCase.expectedLexeme, result.token?.lexeme)
+    assertEquals(testCase.expectedValue, result.token?.literal)
+    assertEquals(testCase.expectedNewIndex, result.newIndex)
+    assertNull(result.error)
+  }
 
-    when (testCase) {
-      is SuccessProcessCase -> {
-        assertEquals(testCase.expectedType, result.token?.type)
-        assertEquals(testCase.expectedLexeme, result.token?.lexeme)
-        assertEquals(testCase.expectedValue, result.token?.literal)
-        assertEquals(testCase.expectedNewIndex, result.newIndex)
-        assertNull(result.error)
-      }
-      is ErrorProcessCase -> {
-        assertNull(result.token)
-        assertEquals(testCase.expectedError, result.error)
-        assertEquals(testCase.expectedNewIndex, result.newIndex)
-      }
-    }
+  @ParameterizedTest
+  @MethodSource("errorProcessDataProvider")
+  fun testProcessHappyPath(testCase: ErrorProcessCase) {
+    val result = processor.process(testCase.input, testCase.startIndex, 1)
+    assertNull(result.token)
+    assertEquals(testCase.expectedError, result.error)
+    assertEquals(testCase.expectedNewIndex, result.newIndex)
   }
 
   @Suppress("UnusedPrivateMember", "LongMethod")
-  private fun processDataProvider(): Stream<Arguments> =
+  private fun successProcessDataProvider(): Stream<Arguments> =
     Stream.of(
       Arguments.of(
         Named.of(
@@ -84,17 +82,6 @@ class NumberTokenProcessorTest {
             expectedLexeme = "123.45",
             expectedNewIndex = 6,
             expectedValue = 123.45,
-          ),
-        ),
-      ),
-      Arguments.of(
-        Named.of(
-          "Multiple decimal points",
-          ErrorProcessCase(
-            input = "12.34.56",
-            startIndex = 0,
-            expectedNewIndex = 5,
-            expectedError = "[line 1] Error: Unexpected character: .",
           ),
         ),
       ),
@@ -134,6 +121,22 @@ class NumberTokenProcessorTest {
             expectedLexeme = "0",
             expectedNewIndex = 1,
             expectedValue = 0.0,
+          ),
+        ),
+      ),
+    )
+
+  @Suppress("UnusedPrivateMember", "LongMethod")
+  private fun errorProcessDataProvider(): Stream<Arguments> =
+    Stream.of(
+      Arguments.of(
+        Named.of(
+          "Multiple decimal points",
+          ErrorProcessCase(
+            input = "12.34.56",
+            startIndex = 0,
+            expectedNewIndex = 5,
+            expectedError = "[line 1] Error: Unexpected character: .",
           ),
         ),
       ),
