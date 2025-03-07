@@ -10,7 +10,7 @@ class MultiCharTokenProcessor : TokenProcessor {
     input: String,
     index: Int,
   ): Boolean {
-    if ((index + 1) !in input.indices) return false
+    if (index !in input.indices || index + 1 !in input.indices) return false
     val pair = input[index] to input[index + 1]
     return MULTI_CHAR_TOKENS.containsKey(pair)
   }

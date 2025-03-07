@@ -2,6 +2,8 @@ package io.codecrafters.tokenizer.component.impl
 
 import io.codecrafters.model.RESERVED_WORDS
 import io.codecrafters.model.TokenType
+import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
+import io.codecrafters.tokenizer.component.impl.model.ProcessCase
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Named
@@ -13,7 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 @TestInstance(Lifecycle.PER_CLASS)
-class IdentifierProcessorParameterizedTest {
+class IdentifierProcessorTest {
   private val processor = IdentifierProcessor()
 
   @ParameterizedTest
@@ -130,17 +132,3 @@ class IdentifierProcessorParameterizedTest {
       ),
     )
 }
-
-data class CanProcessCase(
-  val input: String,
-  val startIndex: Int,
-  val expectCanProcess: Boolean,
-)
-
-data class ProcessCase(
-  val input: String,
-  val startIndex: Int,
-  val expectedType: TokenType,
-  val expectedLexeme: String,
-  val expectedNewIndex: Int,
-)
