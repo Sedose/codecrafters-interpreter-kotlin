@@ -2,6 +2,12 @@ package io.codecrafters.tokenizer.component.impl.model
 
 import io.codecrafters.model.TokenType
 
+data class CanProcessCase(
+  val input: String,
+  val startIndex: Int,
+  val expectCanProcess: Boolean,
+)
+
 data class SuccessProcessCase(
   val input: String,
   val startIndex: Int,
