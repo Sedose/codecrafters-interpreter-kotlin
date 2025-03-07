@@ -11,6 +11,6 @@ interface TokenProcessor {
   fun process(
     input: String,
     index: Int,
-    lineNumber: Int,
+    lineNumber: Int = -1,
   ): ProcessingResult
 }
