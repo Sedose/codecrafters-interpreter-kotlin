@@ -21,6 +21,12 @@ data class SuccessProcessNumberCase(
   val expectedValue: Double,
 )
 
+data class SkipProcessingCase(
+  val input: String,
+  val startIndex: Int,
+  val expectedNewIndex: Int,
+)
+
 data class ErrorProcessCase(
   val input: String,
   val startIndex: Int,

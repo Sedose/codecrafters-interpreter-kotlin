@@ -57,7 +57,7 @@ class SingleCharTokenProcessorTest {
     assertNull(result.error)
   }
 
-  @Suppress("UnusedPrivateMember")
+  @Suppress("UnusedPrivateMember", "LongMethod")
   private fun processDataProvider(): Stream<Arguments> =
     Stream.of(
       Arguments.of(
