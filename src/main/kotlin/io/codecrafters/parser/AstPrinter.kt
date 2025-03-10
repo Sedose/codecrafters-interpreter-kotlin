@@ -12,13 +12,12 @@ class AstPrinter {
   private fun parenthesize(
     name: String,
     vararg exprs: Expr,
-  ): String {
-    return buildString {
+  ): String =
+    buildString {
       append("(").append(name)
       exprs.forEach { append(" ").append(print(it)) }
       append(")")
     }
-  }
 
   private fun literalToString(value: Any?): String =
     when (value) {

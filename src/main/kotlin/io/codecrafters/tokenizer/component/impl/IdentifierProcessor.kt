@@ -21,18 +21,18 @@ class IdentifierProcessor :
     index: Int,
     lineNumber: Int,
   ): ProcessingResult {
-    var newIndex = index
-    while (newIndex in input.indices && input[newIndex].isIdentifierChar()) {
-      newIndex++
-    }
-    val lexeme = input.substring(index, newIndex)
+    val length =
+      input.drop(index)
+        .takeWhile { it.isIdentifierChar() }
+        .length
+    val lexeme = input.substring(index, index + length)
     return ProcessingResult(
       token =
         Token(
           type = RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER,
           lexeme = lexeme,
         ),
-      newIndex = newIndex,
+      newIndex = index + length,
       error = null,
     )
   }

@@ -3,15 +3,17 @@ package io.codecrafters.parser
 import io.codecrafters.tokenizer.model.Token
 import io.codecrafters.tokenizer.model.TokenType
 
-fun parseTokens(tokens: List<Token>): ParseResult {
-  return parseExpression(tokens, 0)
-}
+fun parseTokens(tokens: List<Token>): ParseResult = parseExpression(tokens, 0)
 
-fun parseExpression(tokens: List<Token>, startIndex: Int): ParseResult {
-  return parseEquality(tokens, startIndex)
-}
+fun parseExpression(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult = parseEquality(tokens, startIndex)
 
-fun parseEquality(tokens: List<Token>, startIndex: Int): ParseResult {
+fun parseEquality(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult {
   val leftResult = parseComparison(tokens, startIndex)
   if (leftResult.hadError) return leftResult
   var (expr, currentIndex, _) = leftResult
@@ -25,7 +27,10 @@ fun parseEquality(tokens: List<Token>, startIndex: Int): ParseResult {
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseComparison(tokens: List<Token>, startIndex: Int): ParseResult {
+fun parseComparison(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult {
   val leftResult = parseTerm(tokens, startIndex)
   if (leftResult.hadError) return leftResult
   var (expr, currentIndex, _) = leftResult
@@ -39,7 +44,10 @@ fun parseComparison(tokens: List<Token>, startIndex: Int): ParseResult {
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseTerm(tokens: List<Token>, startIndex: Int): ParseResult {
+fun parseTerm(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult {
   val leftResult = parseFactor(tokens, startIndex)
   if (leftResult.hadError) return leftResult
   var (expr, currentIndex, _) = leftResult
@@ -53,7 +61,10 @@ fun parseTerm(tokens: List<Token>, startIndex: Int): ParseResult {
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseFactor(tokens: List<Token>, startIndex: Int): ParseResult {
+fun parseFactor(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult {
   val leftResult = parseUnary(tokens, startIndex)
   if (leftResult.hadError) return leftResult
   var (expr, currentIndex, _) = leftResult
@@ -67,7 +78,10 @@ fun parseFactor(tokens: List<Token>, startIndex: Int): ParseResult {
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseUnary(tokens: List<Token>, startIndex: Int): ParseResult {
+fun parseUnary(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult {
   if (match(tokens, startIndex, TokenType.BANG, TokenType.MINUS)) {
     val operator = tokens[startIndex]
     val (rightExpr, nextIndex, rightError) = parseUnary(tokens, startIndex + 1)
@@ -77,7 +91,10 @@ fun parseUnary(tokens: List<Token>, startIndex: Int): ParseResult {
   return parsePrimary(tokens, startIndex)
 }
 
-fun parsePrimary(tokens: List<Token>, startIndex: Int): ParseResult {
+fun parsePrimary(
+  tokens: List<Token>,
+  startIndex: Int,
+): ParseResult {
   if (outOfBounds(tokens, startIndex)) return ParseResult(null, startIndex, true)
   val token = tokens[startIndex]
   if (token.type == TokenType.FALSE) return ParseResult(Expr.Literal(false), startIndex + 1, false)
@@ -97,11 +114,16 @@ fun parsePrimary(tokens: List<Token>, startIndex: Int): ParseResult {
   return ParseResult(null, startIndex, true)
 }
 
-fun match(tokens: List<Token>, index: Int, vararg types: TokenType): Boolean {
+fun match(
+  tokens: List<Token>,
+  index: Int,
+  vararg types: TokenType,
+): Boolean {
   if (outOfBounds(tokens, index)) return false
   return types.contains(tokens[index].type)
 }
 
-fun outOfBounds(tokens: List<Token>, index: Int): Boolean {
-  return index !in tokens.indices
-}
+fun outOfBounds(
+  tokens: List<Token>,
+  index: Int,
+): Boolean = index !in tokens.indices
