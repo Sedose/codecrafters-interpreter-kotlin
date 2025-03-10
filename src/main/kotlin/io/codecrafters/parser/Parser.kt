@@ -9,8 +9,6 @@ class Parser(
   private var current = 0
   private var hadError = false
 
-  fun hadError() = hadError
-
   fun parse(): Expr = expression()
 
   private fun expression(): Expr = equality()

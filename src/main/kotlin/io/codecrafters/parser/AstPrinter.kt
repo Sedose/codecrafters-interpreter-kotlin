@@ -13,11 +13,11 @@ class AstPrinter {
     name: String,
     vararg exprs: Expr,
   ): String {
-    val builder = StringBuilder()
-    builder.append("(").append(name)
-    exprs.forEach { builder.append(" ").append(print(it)) }
-    builder.append(")")
-    return builder.toString()
+    return buildString {
+      append("(").append(name)
+      exprs.forEach { append(" ").append(print(it)) }
+      append(")")
+    }
   }
 
   private fun literalToString(value: Any?): String =
