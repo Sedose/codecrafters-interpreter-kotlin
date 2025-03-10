@@ -1,4 +1,4 @@
-package io.codecrafters.model
+package io.codecrafters.tokenizer.model
 
 enum class TokenType {
   LEFT_PAREN,
@@ -39,4 +39,5 @@ enum class TokenType {
   TRUE,
   VAR,
   WHILE,
+  EOF,
 }

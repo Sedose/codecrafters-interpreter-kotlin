@@ -1,4 +1,4 @@
-package io.codecrafters.model
+package io.codecrafters.tokenizer.model
 
 data class TokenizationResult(
   val tokens: List<Token>,

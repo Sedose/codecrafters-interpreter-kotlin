@@ -1,6 +1,6 @@
 package io.codecrafters.tokenizer.component.impl.model
 
-import io.codecrafters.model.TokenType
+import io.codecrafters.tokenizer.model.TokenType
 
 data class CanProcessCase(
   val input: String,
