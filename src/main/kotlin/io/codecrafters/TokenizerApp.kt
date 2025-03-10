@@ -3,7 +3,7 @@ package io.codecrafters
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.parser.AstPrinter
-import io.codecrafters.parser.Parser
+import io.codecrafters.parser.parseTokens
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.model.Token
 import io.codecrafters.tokenizer.model.TokenType
@@ -62,7 +62,11 @@ class TokenizerApp : KoinComponent {
       } else {
         tokenList + Token(type = TokenType.EOF, lexeme = "", literal = null)
       }
-    val expr = Parser(tokens).parse()
+    val (expr, _, hadError) = parseTokens(tokens)
+    if (hadError || expr == null) {
+      System.err.println("Parse error.")
+      exitProcess(65)
+    }
     println(astPrinter.print(expr))
   }
 }
