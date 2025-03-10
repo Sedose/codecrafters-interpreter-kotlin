@@ -24,8 +24,8 @@ val appModule =
         get<StringTokenProcessor>(),
         get<NumberTokenProcessor>(),
         get<IdentifierProcessor>(),
-        get<SingleCharTokenProcessor>(),
         get<MultiCharTokenProcessor>(),
+        get<SingleCharTokenProcessor>(),
       )
     }
 
