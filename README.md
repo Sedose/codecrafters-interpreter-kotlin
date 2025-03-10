@@ -38,8 +38,9 @@ The test coverage report will be available at `target/site/jacoco/index.html`.
 
 ## Codebase Guidelines
 
-- 🚫 **Avoid Inheritance:** Prefer composition and aggregation over inheritance.
-- 🚫 **No Static Functions:** Use Dependency Injection (DI) to inject components.
-- ✅ **Favor Composition:** Extract shared behaviors into injectable, reusable components.
-- ✅ **Use Koin for DI:** Inject dependencies explicitly instead of using globals.
-- ✅ **Small, Focused Components:** Ensure each component has a single, well-defined responsibility for easier testing and maintenance.
+🚫 Avoid Inheritance → Prefer composition/aggregation over inheritance.
+🚫 No Static Functions → Use Dependency Injection (DI) instead.
+✅ Favor Composition → Extract shared behavior into reusable, injectable components.
+✅ Use Koin for DI → Inject dependencies explicitly.
+✅ Keep Components Small & Focused → Ensure single responsibility for better testability and maintainability.
+✅ Keep the Codebase Auto-Formatted → Use Ktlint linter

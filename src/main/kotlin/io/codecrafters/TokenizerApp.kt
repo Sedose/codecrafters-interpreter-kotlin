@@ -1,5 +1,7 @@
 package io.codecrafters
 
+import io.codecrafters.model.CliArgs
+import io.codecrafters.model.Command
 import io.codecrafters.parser.AstPrinter
 import io.codecrafters.parser.Parser
 import io.codecrafters.tokenizer.Tokenizer
@@ -12,74 +14,55 @@ import kotlin.system.exitProcess
 
 class TokenizerApp : KoinComponent {
   private val tokenizer: Tokenizer by inject()
+  private val astPrinter: AstPrinter by inject()
 
   fun run(args: Array<String>) {
     System.err.println("Logs from your program will appear here!")
+    val cli = parseCliArgs(args)
+    when (cli.command) {
+      Command.TOKENIZE -> tokenizeFile(cli.filename)
+      Command.PARSE -> parseFile(cli.filename)
+    }
+  }
 
+  private fun parseCliArgs(args: Array<String>): CliArgs {
     if (args.size < 2) {
       System.err.println("Usage: ./your_program.sh <command> <filename>")
       exitProcess(1)
     }
-
-    val (command, filename) = args
-    when (command) {
-      "tokenize" -> tokenizeFile(filename)
-      "parse" -> parseFile(filename)
-      else -> {
-        System.err.println("Unknown command: $command")
-        exitProcess(1)
-      }
-    }
+    val (commandString, filename) = args
+    val command =
+      Command.parse(commandString)
+        ?: run {
+          System.err.println("Unknown command: $commandString")
+          exitProcess(1)
+        }
+    return CliArgs(command, filename)
   }
 
   private fun tokenizeFile(filename: String) {
-    val fileContents = File(filename).readText()
-
-    val result = tokenizer.tokenize(fileContents)
-
-    result.tokens.forEach { token ->
-      println("${token.type} ${token.lexeme} ${token.literal}")
-    }
-
+    val (tokens, errors) = tokenizer.tokenize(File(filename).readText())
+    tokens.forEach { println("${it.type} ${it.lexeme} ${it.literal}") }
     println("EOF  null")
-
-    if (result.errors.isNotEmpty()) {
-      result.errors.forEach(System.err::println)
+    if (errors.isNotEmpty()) {
+      errors.forEach(System.err::println)
       exitProcess(65)
     }
   }
 
   private fun parseFile(filename: String) {
-    val fileContents = File(filename).readText()
-    val result = tokenizer.tokenize(fileContents)
-
-    if (result.errors.isNotEmpty()) {
-      result.errors.forEach(System.err::println)
+    val (tokenList, errors) = tokenizer.tokenize(File(filename).readText())
+    if (errors.isNotEmpty()) {
+      errors.forEach(System.err::println)
       exitProcess(65)
     }
-
-    // Insert an EOF token if not present, so the Parser can rely on it.
     val tokens =
-      if (result.tokens.lastOrNull()?.type == TokenType.EOF) {
-        result.tokens
+      if (tokenList.lastOrNull()?.type == TokenType.EOF) {
+        tokenList
       } else {
-        result.tokens +
-          Token(
-            type = TokenType.EOF,
-            lexeme = "",
-            literal = null,
-          )
+        tokenList + Token(type = TokenType.EOF, lexeme = "", literal = null)
       }
-
-    val parser = Parser(tokens)
-    val expr = parser.parse()
-
-    if (parser.hadError()) {
-      System.err.println("Parse error occurred.")
-      exitProcess(65)
-    }
-
-    val output = AstPrinter().print(expr)
-    println(output)
+    val expr = Parser(tokens).parse()
+    println(astPrinter.print(expr))
   }
 }

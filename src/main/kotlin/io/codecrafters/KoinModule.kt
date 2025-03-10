@@ -1,5 +1,6 @@
 package io.codecrafters
 
+import io.codecrafters.parser.AstPrinter
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.component.impl.IdentifierProcessor
 import io.codecrafters.tokenizer.component.impl.MultiCharTokenProcessor
@@ -30,4 +31,6 @@ val appModule =
     }
 
     single { Tokenizer(get()) }
+
+    single { AstPrinter() }
   }
