@@ -3,14 +3,16 @@ package io.codecrafters.parser
 import io.codecrafters.tokenizer.model.Token
 import io.codecrafters.tokenizer.model.TokenType
 
+// TODO provide refactoring for this file
+
 fun parseTokens(tokens: List<Token>): ParseResult = parseExpression(tokens, 0)
 
-fun parseExpression(
+private fun parseExpression(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult = parseEquality(tokens, startIndex)
 
-fun parseEquality(
+private fun parseEquality(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
@@ -27,7 +29,7 @@ fun parseEquality(
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseComparison(
+private fun parseComparison(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
@@ -44,7 +46,7 @@ fun parseComparison(
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseTerm(
+private fun parseTerm(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
@@ -61,7 +63,7 @@ fun parseTerm(
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseFactor(
+private fun parseFactor(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
@@ -78,7 +80,7 @@ fun parseFactor(
   return ParseResult(expr, currentIndex, false)
 }
 
-fun parseUnary(
+private fun parseUnary(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
@@ -91,7 +93,7 @@ fun parseUnary(
   return parsePrimary(tokens, startIndex)
 }
 
-fun parsePrimary(
+private fun parsePrimary(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
@@ -114,7 +116,7 @@ fun parsePrimary(
   return ParseResult(null, startIndex, true)
 }
 
-fun match(
+private fun match(
   tokens: List<Token>,
   index: Int,
   vararg types: TokenType,
@@ -123,7 +125,7 @@ fun match(
   return types.contains(tokens[index].type)
 }
 
-fun outOfBounds(
+private fun outOfBounds(
   tokens: List<Token>,
   index: Int,
 ): Boolean = index !in tokens.indices

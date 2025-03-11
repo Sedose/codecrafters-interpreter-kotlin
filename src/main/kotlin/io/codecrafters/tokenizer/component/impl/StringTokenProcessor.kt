@@ -6,6 +6,8 @@ import io.codecrafters.tokenizer.model.Token
 import io.codecrafters.tokenizer.model.TokenType
 import org.koin.core.component.KoinComponent
 
+private val STRING_TERMINATORS = charArrayOf('"', '\n')
+
 class StringTokenProcessor :
   TokenProcessor,
   KoinComponent {
@@ -21,10 +23,8 @@ class StringTokenProcessor :
   ): ProcessingResult {
     val end =
       input
-        .indexOfAny(
-          charArrayOf('"', '\n'),
-          startIndex = index + 1,
-        ).takeUnless { it == -1 }
+        .indexOfAny(STRING_TERMINATORS, startIndex = index + 1)
+        .takeUnless { it == -1 }
         ?: input.length
     if (end !in input.indices || input[end] == '\n') {
       return ProcessingResult(null, end, "[line $lineNumber] Error: Unterminated string.")
