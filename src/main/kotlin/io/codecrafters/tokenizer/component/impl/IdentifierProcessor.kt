@@ -22,7 +22,8 @@ class IdentifierProcessor :
     lineNumber: Int,
   ): ProcessingResult {
     val length =
-      input.drop(index)
+      input
+        .drop(index)
         .takeWhile { it.isIdentifierChar() }
         .length
     val lexeme = input.substring(index, index + length)
