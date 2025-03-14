@@ -17,7 +17,6 @@ class TokenizerApp : KoinComponent {
   private val astPrinter: AstPrinter by inject()
 
   fun run(args: Array<String>) {
-    System.err.println("Logs from your program will appear here!")
     val cli = parseCliArgs(args)
     when (cli.command) {
       Command.TOKENIZE -> tokenizeFile(cli.filename)
