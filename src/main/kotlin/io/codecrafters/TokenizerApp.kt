@@ -41,10 +41,12 @@ class TokenizerApp : KoinComponent {
 
   private fun tokenizeFile(filename: String) {
     val (tokens, errors) = tokenizer.tokenize(File(filename).readText())
-    tokens.forEach { println("${it.type} ${it.lexeme} ${it.literal}") }
+    errors.forEach { println(it) }
+    tokens.forEach {
+      println("${it.type} ${it.lexeme} ${it.literal}")
+    }
     println("EOF  null")
     if (errors.isNotEmpty()) {
-      errors.forEach(System.err::println)
       exitProcess(65)
     }
   }
