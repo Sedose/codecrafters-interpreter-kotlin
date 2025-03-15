@@ -41,7 +41,7 @@ class TokenizerApp : KoinComponent {
 
   private fun tokenizeFile(filename: String) {
     val (tokens, errors) = tokenizer.tokenize(File(filename).readText())
-    errors.forEach { println(it) }
+    errors.forEach(System.err::println)
     tokens.forEach {
       println("${it.type} ${it.lexeme} ${it.literal}")
     }
