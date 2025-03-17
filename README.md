@@ -38,9 +38,9 @@ The test coverage report will be available at `target/site/jacoco/index.html`.
 
 ## Guidelines
 
-🚫 Avoid Inheritance → Prefer composition/aggregation over inheritance.
-🚫 No Static Functions for business logic → Use Dependency Injection (DI) instead.
-✅ Favor Aggregation → Extract shared behavior into reusable, injectable components.
-✅ Keep Components Small & Focused → Ensure single responsibility for better testability and maintainability.
-✅ Keep the Codebase Auto-Formatted → Use Ktlint linter.
-✅ Commit messages according to https://www.conventionalcommits.org/en/v1.0.0/.
+- 🚫 Avoid Inheritance → Prefer composition/aggregation over inheritance.
+- 🚫 No Static Functions for business logic → Use Dependency Injection (DI) instead.
+- ✅ Favor Aggregation → Extract shared behavior into reusable, injectable components.
+- ✅ Keep Components Small & Focused → Ensure single responsibility for better testability and maintainability.
+- ✅ Keep the Codebase Auto-Formatted → Use Ktlint linter.
+- ✅ Commit messages according to https://www.conventionalcommits.org/en/v1.0.0/.

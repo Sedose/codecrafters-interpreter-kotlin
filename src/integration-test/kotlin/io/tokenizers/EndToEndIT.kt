@@ -62,6 +62,17 @@ class EndToEndIT {
           ),
           expectedExitCode = 65,
         ),
+        TokenizerTestCase(
+          "src/integration-test/resources/assignment_equality_test.lox",
+          listOf(
+            "EQUAL = null",
+            "LEFT_BRACE { null",
+            "EQUAL_EQUAL == null",
+            "EQUAL = null",
+            "RIGHT_BRACE } null",
+            "EOF  null",
+          ),
+        ),
       )
   }
 
