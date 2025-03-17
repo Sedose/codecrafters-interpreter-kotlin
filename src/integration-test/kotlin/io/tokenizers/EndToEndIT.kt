@@ -109,6 +109,78 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
+        TokenizerTestCase(
+          "src/integration-test/resources/whitespace_test.lox",
+          listOf(
+            "LEFT_PAREN ( null",
+            "RIGHT_PAREN ) null",
+            "EOF  null",
+          ),
+        ),
+        // 2. Lexical errors spanning multiple lines.
+        TokenizerTestCase(
+          "src/integration-test/resources/multiline_errors_test.lox",
+          listOf(
+            "[line 1] Error: Unexpected character: #",
+            "[line 2] Error: Unexpected character: @",
+            "LEFT_PAREN ( null",
+            "RIGHT_PAREN ) null",
+            "EOF  null",
+          ),
+          expectedExitCode = 65,
+        ),
+        // 3. String literals.
+        TokenizerTestCase(
+          "src/integration-test/resources/string_literal_test.lox",
+          listOf(
+            "STRING \"foo baz\" foo baz",
+            "EOF  null",
+          ),
+        ),
+        // 3b. Unterminated string literal.
+        TokenizerTestCase(
+          "src/integration-test/resources/unterminated_string_test.lox",
+          listOf(
+            "[line 1] Error: Unterminated string.",
+            "EOF  null",
+          ),
+          expectedExitCode = 65,
+        ),
+        // 4. Number literals.
+        // Integer literal.
+        TokenizerTestCase(
+          "src/integration-test/resources/number_integer_test.lox",
+          listOf(
+            "NUMBER 42 42.0",
+            "EOF  null",
+          ),
+        ),
+        // Floating-point literal.
+        TokenizerTestCase(
+          "src/integration-test/resources/number_float_test.lox",
+          listOf(
+            "NUMBER 1234.1234 1234.1234",
+            "EOF  null",
+          ),
+        ),
+        // 5. Identifiers.
+        TokenizerTestCase(
+          "src/integration-test/resources/identifiers_test.lox",
+          listOf(
+            "IDENTIFIER foo null",
+            "IDENTIFIER bar null",
+            "IDENTIFIER _hello null",
+            "EOF  null",
+          ),
+        ),
+        // 6. Reserved words.
+        TokenizerTestCase(
+          "src/integration-test/resources/reserved_words_test.lox",
+          listOf(
+            "AND and null",
+            "EOF  null",
+          ),
+        ),
       )
   }
 
