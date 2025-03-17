@@ -73,6 +73,42 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
+        TokenizerTestCase(
+          "src/integration-test/resources/negation_inequality_test.lox",
+          listOf(
+            "BANG ! null",
+            "BANG_EQUAL != null",
+            "EQUAL_EQUAL == null",
+            "EOF  null",
+          ),
+        ),
+        TokenizerTestCase(
+          "src/integration-test/resources/relational_operators_test.lox",
+          listOf(
+            "LESS < null",
+            "LESS_EQUAL <= null",
+            "GREATER > null",
+            "GREATER_EQUAL >= null",
+            "EOF  null",
+          ),
+        ),
+        TokenizerTestCase(
+          "src/integration-test/resources/division_comments_test.lox",
+          listOf(
+            "LEFT_PAREN ( null",
+            "RIGHT_PAREN ) null",
+            "EOF  null",
+          ),
+        ),
+        TokenizerTestCase(
+          "src/integration-test/resources/division_operator_test.lox",
+          listOf(
+            "SLASH / null",
+            "LEFT_PAREN ( null",
+            "RIGHT_PAREN ) null",
+            "EOF  null",
+          ),
+        ),
       )
   }
 
