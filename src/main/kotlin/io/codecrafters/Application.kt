@@ -7,15 +7,13 @@ import io.codecrafters.parser.parseTokens
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.model.Token
 import io.codecrafters.tokenizer.model.TokenType
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import java.io.File
 import kotlin.system.exitProcess
 
-class TokenizerApp : KoinComponent {
-  private val tokenizer: Tokenizer by inject()
-  private val astPrinter: AstPrinter by inject()
-
+class Application(
+  private val tokenizer: Tokenizer,
+  private val astPrinter: AstPrinter,
+) {
   fun run(args: Array<String>) {
     val cli = parseCliArgs(args)
     when (cli.command) {

@@ -117,7 +117,6 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
-        // 2. Lexical errors spanning multiple lines.
         TokenizerTestCase(
           "src/integration-test/resources/multiline_errors_test.lox",
           listOf(
@@ -129,7 +128,6 @@ class EndToEndIT {
           ),
           expectedExitCode = 65,
         ),
-        // 3. String literals.
         TokenizerTestCase(
           "src/integration-test/resources/string_literal_test.lox",
           listOf(
@@ -137,7 +135,6 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
-        // 3b. Unterminated string literal.
         TokenizerTestCase(
           "src/integration-test/resources/unterminated_string_test.lox",
           listOf(
@@ -146,8 +143,6 @@ class EndToEndIT {
           ),
           expectedExitCode = 65,
         ),
-        // 4. Number literals.
-        // Integer literal.
         TokenizerTestCase(
           "src/integration-test/resources/number_integer_test.lox",
           listOf(
@@ -155,7 +150,6 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
-        // Floating-point literal.
         TokenizerTestCase(
           "src/integration-test/resources/number_float_test.lox",
           listOf(
@@ -163,7 +157,6 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
-        // 5. Identifiers.
         TokenizerTestCase(
           "src/integration-test/resources/identifiers_test.lox",
           listOf(
@@ -173,7 +166,6 @@ class EndToEndIT {
             "EOF  null",
           ),
         ),
-        // 6. Reserved words.
         TokenizerTestCase(
           "src/integration-test/resources/reserved_words_test.lox",
           listOf(
