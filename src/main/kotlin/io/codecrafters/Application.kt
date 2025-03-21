@@ -15,10 +15,15 @@ class Application(
   private val astPrinter: AstPrinter,
 ) {
   fun run(args: Array<String>) {
-    val cli = parseCliArgs(args)
-    when (cli.command) {
-      Command.TOKENIZE -> tokenizeFile(cli.filename)
-      Command.PARSE -> parseFile(cli.filename)
+    val cliArgs = parseCliArgs(args)
+    val (tokenList, errors) =
+      File(cliArgs.filename)
+        .readText()
+        .let { tokenizer.tokenize(it) }
+    errors.forEach(System.err::println)
+    when (cliArgs.command) {
+      Command.TOKENIZE -> tokenizeFile(tokenList, errors)
+      Command.PARSE -> parseFile(tokenList, errors)
     }
   }
 
@@ -37,10 +42,8 @@ class Application(
     return CliArgs(command, filename)
   }
 
-  private fun tokenizeFile(filename: String) {
-    val (tokens, errors) = tokenizer.tokenize(File(filename).readText())
-    errors.forEach(System.err::println)
-    tokens.forEach {
+  private fun tokenizeFile(tokenList: List<Token>, errors: List<String>) {
+    tokenList.forEach {
       println("${it.type} ${it.lexeme} ${it.literal}")
     }
     println("EOF  null")
@@ -49,10 +52,8 @@ class Application(
     }
   }
 
-  private fun parseFile(filename: String) {
-    val (tokenList, errors) = tokenizer.tokenize(File(filename).readText())
+  private fun parseFile(tokenList: List<Token>, errors: List<String>) {
     if (errors.isNotEmpty()) {
-      errors.forEach(System.err::println)
       exitProcess(65)
     }
     val tokens =
