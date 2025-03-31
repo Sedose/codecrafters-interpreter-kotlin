@@ -22,7 +22,7 @@ class Application(
         .let { tokenizer.tokenize(it) }
     errors.forEach(System.err::println)
     when (cliArgs.command) {
-      Command.TOKENIZE -> tokenizeFile(tokenList, errors)
+      Command.TOKENIZE -> printTokens(tokenList, errors)
       Command.PARSE -> parseFile(tokenList, errors)
     }
   }
@@ -42,7 +42,10 @@ class Application(
     return CliArgs(command, filename)
   }
 
-  private fun tokenizeFile(tokenList: List<Token>, errors: List<String>) {
+  private fun printTokens(
+    tokenList: List<Token>,
+    errors: List<String>,
+  ) {
     tokenList.forEach {
       println("${it.type} ${it.lexeme} ${it.literal}")
     }
@@ -52,7 +55,10 @@ class Application(
     }
   }
 
-  private fun parseFile(tokenList: List<Token>, errors: List<String>) {
+  private fun parseFile(
+    tokenList: List<Token>,
+    errors: List<String>,
+  ) {
     if (errors.isNotEmpty()) {
       exitProcess(65)
     }

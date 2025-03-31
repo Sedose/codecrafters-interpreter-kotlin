@@ -32,6 +32,8 @@ Useful commands:
 
 # Automatically update versions in pom.xml
 ./mvnw versions:use-latest-releases
+
+./mvnw clean install
 ```
 
 The test coverage report will be available at `target/site/jacoco/index.html`.

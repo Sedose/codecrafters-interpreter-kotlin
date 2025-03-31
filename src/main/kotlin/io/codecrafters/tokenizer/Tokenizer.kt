@@ -1,6 +1,7 @@
 package io.codecrafters.tokenizer
 
 import io.codecrafters.tokenizer.component.TokenProcessor
+import io.codecrafters.tokenizer.model.ProcessingResult // Import for clarity
 import io.codecrafters.tokenizer.model.Token
 import io.codecrafters.tokenizer.model.TokenizationResult
 import org.koin.core.component.KoinComponent
@@ -15,21 +16,25 @@ class Tokenizer(
     var index = 0
 
     while (index in input.indices) {
-      val char = input[index]
-      if (char.isWhitespace()) {
-        if (char == '\n') lineNumber++
+      val currentChar = input[index]
+      if (currentChar.isWhitespace()) {
+        if (currentChar == '\n') {
+          lineNumber++
+        }
+        index++
+        continue
+      }
+
+      val processor = processors.firstOrNull { it.canProcess(input, index) }
+      if (processor == null) {
+        errors.add("[line $lineNumber] Error: Unexpected character: $currentChar")
         index++
       } else {
-        val processor = processors.firstOrNull { it.canProcess(input, index) }
-        if (processor == null) {
-          errors.add("[line $lineNumber] Error: Unexpected character: $char")
-          index++
-        } else {
-          val (token, newIndex, error) = processor.process(input, index, lineNumber)
-          token?.let(tokens::add)
-          error?.let(errors::add)
-          index = newIndex
-        }
+        val result: ProcessingResult = processor.process(input, index, lineNumber)
+        result.token?.let(tokens::add)
+        result.error?.let(errors::add)
+
+        index = result.newIndex
       }
     }
 
