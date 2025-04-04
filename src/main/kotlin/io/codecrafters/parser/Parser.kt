@@ -97,7 +97,7 @@ private fun parsePrimary(
   tokens: List<Token>,
   startIndex: Int,
 ): ParseResult {
-  if (outOfBounds(tokens, startIndex)) return ParseResult(null, startIndex, true)
+  if (startIndex !in tokens.indices) return ParseResult(null, startIndex, true)
   val token = tokens[startIndex]
   if (token.type == TokenType.FALSE) return ParseResult(Expr.Literal(false), startIndex + 1, false)
   if (token.type == TokenType.TRUE) return ParseResult(Expr.Literal(true), startIndex + 1, false)
@@ -108,7 +108,7 @@ private fun parsePrimary(
   if (token.type == TokenType.LEFT_PAREN) {
     val (expr, nextIndex, error) = parseExpression(tokens, startIndex + 1)
     if (error) return ParseResult(null, nextIndex, true)
-    if (outOfBounds(tokens, nextIndex) || tokens[nextIndex].type != TokenType.RIGHT_PAREN) {
+    if (nextIndex !in tokens.indices || tokens[nextIndex].type != TokenType.RIGHT_PAREN) {
       return ParseResult(null, nextIndex, true)
     }
     return ParseResult(Expr.Grouping(expr!!), nextIndex + 1, false)
@@ -121,11 +121,5 @@ private fun match(
   index: Int,
   vararg types: TokenType,
 ): Boolean {
-  if (outOfBounds(tokens, index)) return false
-  return types.contains(tokens[index].type)
+  return tokens.getOrNull(index)?.type in types
 }
-
-private fun outOfBounds(
-  tokens: List<Token>,
-  index: Int,
-): Boolean = index !in tokens.indices

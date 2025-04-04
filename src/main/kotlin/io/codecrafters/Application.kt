@@ -16,14 +16,14 @@ class Application(
 ) {
   fun run(args: Array<String>) {
     val cliArgs = parseCliArgs(args)
-    val (tokenList, errors) =
+    val (tokens, errors) =
       File(cliArgs.filename)
         .readText()
         .let { tokenizer.tokenize(it) }
     errors.forEach(System.err::println)
     when (cliArgs.command) {
-      Command.TOKENIZE -> printTokens(tokenList, errors)
-      Command.PARSE -> parseFile(tokenList, errors)
+      Command.TOKENIZE -> printTokens(tokens, errors)
+      Command.PARSE -> parseFile(tokens, errors)
     }
   }
 
@@ -43,10 +43,10 @@ class Application(
   }
 
   private fun printTokens(
-    tokenList: List<Token>,
+    tokens: List<Token>,
     errors: List<String>,
   ) {
-    tokenList.forEach {
+    tokens.forEach {
       println("${it.type} ${it.lexeme} ${it.literal}")
     }
     println("EOF  null")
@@ -56,17 +56,17 @@ class Application(
   }
 
   private fun parseFile(
-    tokenList: List<Token>,
+    tokens: List<Token>,
     errors: List<String>,
   ) {
     if (errors.isNotEmpty()) {
       exitProcess(65)
     }
-    val tokens =
-      if (tokenList.lastOrNull()?.type == TokenType.EOF) {
-        tokenList
+    val tokenList =
+      if (tokens.lastOrNull()?.type == TokenType.EOF) {
+        tokens
       } else {
-        tokenList + Token(type = TokenType.EOF, lexeme = "", literal = null)
+        tokens + Token(type = TokenType.EOF, lexeme = "", literal = null)
       }
     val (expr, _, hadError) = parseTokens(tokens)
     if (hadError || expr == null) {
