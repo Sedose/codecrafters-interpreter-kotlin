@@ -67,8 +67,8 @@ class Application(
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null)
       }
-    val parser = Parser(tokenList)
-    val expr = parser.parse()
-    println(AstPrinter().print(expr))
+    Parser(tokenList).parse()
+      .let { AstPrinter().print(it) }
+      .let(::println)
   }
 }
