@@ -1,45 +1,50 @@
-[![progress-banner](https://backend.codecrafters.io/progress/interpreter/2af86dd6-03ef-4a23-8c5b-de136419a078)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+[![progress-banner](https://backend.codecrafters.io/progress/interpreter/75e5991e-62ad-442d-b268-107f9de02c37)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
-# Kotlin Interpreter for Lox
+This is a starting point for Kotlin solutions to the
+["Build your own Interpreter" Challenge](https://app.codecrafters.io/courses/interpreter/overview).
 
-This repository contains my Kotlin implementation of the ["Build your own Interpreter" Challenge](https://app.codecrafters.io/courses/interpreter/overview), inspired by [Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
+This challenge follows the book
+[Crafting Interpreters](https://craftinginterpreters.com/) by Robert Nystrom.
 
-## Overview
-In this challenge, I'm building an interpreter for [Lox](https://craftinginterpreters.com/the-lox-language.html), a lightweight scripting language. Key concepts covered include:
+In this challenge you'll build an interpreter for
+[Lox](https://craftinginterpreters.com/the-lox-language.html), a simple
+scripting language. Along the way, you'll learn about tokenization, ASTs,
+tree-walk interpreters and more.
 
-- **Tokenization**
-- **Abstract Syntax Trees (ASTs)**
-- **Tree-walk Interpreters**
+Before starting this challenge, make sure you've read the "Welcome" part of the
+book that contains these chapters:
 
-It's recommended to familiarize yourself with these chapters from the book:
+- [Introduction](https://craftinginterpreters.com/introduction.html) (chapter 1)
+- [A Map of the Territory](https://craftinginterpreters.com/a-map-of-the-territory.html)
+  (chapter 2)
+- [The Lox Language](https://craftinginterpreters.com/the-lox-language.html)
+  (chapter 3)
 
-- [Introduction](https://craftinginterpreters.com/introduction.html) (Chapter 1)
-- [A Map of the Territory](https://craftinginterpreters.com/a-map-of-the-territory.html) (Chapter 2)
-- [The Lox Language](https://craftinginterpreters.com/the-lox-language.html) (Chapter 3)
+These chapters don't involve writing code, so they won't be covered in this
+challenge. This challenge will start from chapter 4,
+[Scanning](https://craftinginterpreters.com/scanning.html).
 
-For the interactive challenge experience, visit [codecrafters.io](https://codecrafters.io).
+**Note**: If you're viewing this repo on GitHub, head over to
+[codecrafters.io](https://codecrafters.io) to try the challenge.
 
-## Getting Started
+# Passing the first stage
 
-Useful commands:
+The entry point for your program is in `src/main/kotlin/Main.kt`. Study and
+uncomment the relevant code, and push your changes to pass the first stage:
 
-```bash
-# Format code according to ktlint guidelines
-./mvnw ktlint:format
-
-# Clean, verify, and generate a test coverage report
-./mvnw clean verify
-
-# Automatically update versions in pom.xml
-./mvnw versions:use-latest-releases
-
-./mvnw clean install
+```sh
+git commit -am "pass 1st stage" # any msg
+git push origin master
 ```
 
-The test coverage report will be available at `target/site/jacoco/index.html`.
+Time to move on to the next stage!
 
-## Guidelines
+# Stage 2 & beyond
 
-- ✅ Prefer Dependency Injection using Koin.
-- ✅ Keep the Codebase Auto-Formatted → Use Ktlint linter.
-- ✅ Commit messages according to https://www.conventionalcommits.org/en/v1.0.0/.
+Note: This section is for stages 2 and beyond.
+
+1. Ensure you have `kotlin (>=2.0)` installed locally
+2. Run `./your_program.sh` to run your program, which is implemented in
+   `src/main/kotlin/Main.kt`.
+3. Commit your changes and run `git push origin master` to submit your solution
+   to CodeCrafters. Test output will be streamed to your terminal.
