@@ -1,4 +1,4 @@
-package io.tokenizers
+package io.codecrafters
 
 import org.junit.jupiter.api.Assertions.assertLinesMatch
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,7 +11,7 @@ data class TokenizerTestCase(
   val expectedExitCode: Int = 0,
 )
 
-class EndToEndIT {
+class TokenizerExternalProcessIT {
   companion object {
     @JvmStatic
     fun testCases() =

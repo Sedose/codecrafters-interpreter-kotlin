@@ -1,9 +1,9 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
 import io.codecrafters.tokenizer.component.impl.model.SuccessProcessCase
 import io.codecrafters.tokenizer.model.RESERVED_WORDS
-import io.codecrafters.tokenizer.model.TokenType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Named

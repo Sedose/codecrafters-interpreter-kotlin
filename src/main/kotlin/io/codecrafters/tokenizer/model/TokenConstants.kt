@@ -1,5 +1,7 @@
 package io.codecrafters.tokenizer.model
 
+import io.codecrafters.model.TokenType
+
 val RESERVED_WORDS =
   mapOf(
     "and" to TokenType.AND,

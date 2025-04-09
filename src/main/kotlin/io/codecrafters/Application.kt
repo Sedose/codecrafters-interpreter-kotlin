@@ -2,9 +2,11 @@ package io.codecrafters
 
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
+import io.codecrafters.model.TokenType
+import io.codecrafters.parser.AstPrinter
+import io.codecrafters.parser.Parser
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.model.Token
-import io.codecrafters.tokenizer.model.TokenType
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -65,11 +67,8 @@ class Application(
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null)
       }
-//    val (expr, _, hadError) = parseTokens(tokens)
-//    if (hadError || expr == null) {
-//      System.err.println("Parse error.")
-//      exitProcess(65)
-//    }
-//    println(astPrinter.print(expr))
+    val parser = Parser(tokenList)
+    val expr = parser.parse()
+    println(AstPrinter().print(expr))
   }
 }

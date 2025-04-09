@@ -1,11 +1,11 @@
 package io.codecrafters.tokenizer.component.impl
 
 import io.codecrafters.isIdentifierChar
+import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
 import io.codecrafters.tokenizer.model.ProcessingResult
 import io.codecrafters.tokenizer.model.RESERVED_WORDS
 import io.codecrafters.tokenizer.model.Token
-import io.codecrafters.tokenizer.model.TokenType
 import org.koin.core.component.KoinComponent
 
 class IdentifierProcessor :

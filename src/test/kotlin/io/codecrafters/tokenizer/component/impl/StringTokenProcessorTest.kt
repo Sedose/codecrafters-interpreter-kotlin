@@ -1,9 +1,9 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.model.CanProcessCase
 import io.codecrafters.tokenizer.component.impl.model.ErrorProcessCase
 import io.codecrafters.tokenizer.component.impl.model.SuccessProcessCase
-import io.codecrafters.tokenizer.model.TokenType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.TestInstance

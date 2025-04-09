@@ -1,9 +1,9 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
 import io.codecrafters.tokenizer.model.ProcessingResult
 import io.codecrafters.tokenizer.model.Token
-import io.codecrafters.tokenizer.model.TokenType
 import org.koin.core.component.KoinComponent
 
 private val STRING_TERMINATORS = charArrayOf('"', '\n')

@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
   }
 }
 
-private val appModule =
+val appModule =
   module {
     single { SingleLineCommentSkipper() }
     single { StringTokenProcessor() }

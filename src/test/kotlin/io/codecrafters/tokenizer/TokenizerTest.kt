@@ -1,8 +1,8 @@
 package io.codecrafters.tokenizer
 
+import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.impl.IdentifierProcessor
 import io.codecrafters.tokenizer.component.impl.MultiCharTokenProcessor
-import io.codecrafters.tokenizer.model.TokenType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.TestInstance

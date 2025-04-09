@@ -1,4 +1,4 @@
-package io.codecrafters.tokenizer.model
+package io.codecrafters.model
 
 enum class TokenType {
   LEFT_PAREN,
