@@ -13,8 +13,8 @@ import kotlin.system.exitProcess
 class Application(
   private val tokenizer: Tokenizer,
 ) {
-  fun run(args: Array<String>) {
-    val cliArgs = parseCliArgs(args)
+  fun run(commandLineArguments: Array<String>) {
+    val cliArgs = parseCliArgs(commandLineArguments)
     val (tokens, errors) =
       File(cliArgs.filename)
         .readText()
@@ -22,7 +22,7 @@ class Application(
     errors.forEach(System.err::println)
     when (cliArgs.command) {
       Command.TOKENIZE -> printTokens(tokens, errors)
-      Command.PARSE -> parseFile(tokens, errors)
+      Command.PARSE -> parse(tokens, errors)
     }
   }
 
@@ -54,7 +54,7 @@ class Application(
     }
   }
 
-  private fun parseFile(
+  private fun parse(
     tokens: List<Token>,
     errors: List<String>,
   ) {
