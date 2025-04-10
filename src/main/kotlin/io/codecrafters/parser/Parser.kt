@@ -30,15 +30,14 @@ class Parser(
     }
 
   private fun advance(): Token {
-    if (!isAtEnd()) current++
-    return previous()
+    return peek().also {
+      if (!isAtEnd()) current++
+    }
   }
 
   private fun isAtEnd(): Boolean = peek().type == TokenType.EOF
 
   private fun peek(): Token = tokens[current]
-
-  private fun previous(): Token = tokens[current - 1]
 
   private fun error(
     token: Token,

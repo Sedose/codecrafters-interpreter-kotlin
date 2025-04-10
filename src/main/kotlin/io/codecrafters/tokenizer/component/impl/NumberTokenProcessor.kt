@@ -27,7 +27,7 @@ class NumberTokenProcessor :
       ProcessingResult(null, errorIndex, "[line $lineNumber] Error: Unexpected character: .")
     } else {
       ProcessingResult(
-        Token(TokenType.NUMBER, lexemeCandidate, lexemeCandidate.toDoubleOrNull()),
+        Token(TokenType.NUMBER, lexemeCandidate, lexemeCandidate.toDoubleOrNull(), lineNumber),
         index + lexemeCandidate.length,
         null,
       )

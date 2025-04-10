@@ -65,7 +65,7 @@ class Application(
       if (tokens.lastOrNull()?.type == TokenType.EOF) {
         tokens
       } else {
-        tokens + Token(type = TokenType.EOF, lexeme = "", literal = null)
+        tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1) // Added line number
       }
     Parser(tokenList)
       .parse()

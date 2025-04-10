@@ -22,7 +22,7 @@ class IdentifierProcessor :
     lineNumber: Int,
   ): ProcessingResult {
     val lexeme = extractLexeme(input, index)
-    return ProcessingResult(Token(RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER, lexeme), index + lexeme.length, null)
+    return ProcessingResult(Token(RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER, lexeme, null, lineNumber), index + lexeme.length, null)
   }
 
   private fun extractLexeme(

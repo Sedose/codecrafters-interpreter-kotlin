@@ -27,6 +27,7 @@ class MultiCharTokenProcessor : TokenProcessor {
         Token(
           type = tokenType,
           lexeme = "$first$second",
+          lineNumber = lineNumber // Added line number
         ),
       newIndex = index + 2,
       error = null,
