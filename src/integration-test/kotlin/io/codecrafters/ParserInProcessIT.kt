@@ -35,6 +35,7 @@ class ParserInProcessIT : KoinTest {
         ParseTestCase("src/integration-test/resources/literal_true.lox", "true"),
         ParseTestCase("src/integration-test/resources/literal_false.lox", "false"),
         ParseTestCase("src/integration-test/resources/literal_nil.lox", "nil"),
+        ParseTestCase("src/integration-test/resources/literal_number.lox", "42.47"),
       )
   }
 

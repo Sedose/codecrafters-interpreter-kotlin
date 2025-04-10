@@ -43,3 +43,7 @@ The test coverage report will be available at `target/site/jacoco/index.html`.
 - ✅ Prefer Dependency Injection using Koin.
 - ✅ Keep the Codebase Auto-Formatted → Use Ktlint linter.
 - ✅ Commit messages according to https://www.conventionalcommits.org/en/v1.0.0/.
+
+## Notes
+- No GitHub actions are used in this repository cause CodeCrafters provides a CI/CD pipeline. \
+And adding GitHub actions will cause the build to fail cause it would interfere with the CodeCrafters pipeline.
