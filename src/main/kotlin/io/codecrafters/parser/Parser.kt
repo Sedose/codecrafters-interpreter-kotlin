@@ -31,6 +31,11 @@ class Parser(
         advance()
         Expr.Literal(value)
       }
+      TokenType.STRING -> {
+        val value = peek().lexeme.removeSurrounding("\"")
+        advance()
+        Expr.Literal(value)
+      }
       else -> throw error(peek(), "Expected literal.")
     }
 

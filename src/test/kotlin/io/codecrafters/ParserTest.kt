@@ -31,6 +31,10 @@ class ParserTest {
           listOf(Token(TokenType.NIL, "nil", "nil", 1), Token(TokenType.EOF, "", "", 1)),
           null,
         ),
+        Arguments.of(
+          listOf(Token(TokenType.STRING, "\"hello\"", "hello", 1), Token(TokenType.EOF, "", "", 1)),
+          "hello",
+        ),
       )
   }
 
