@@ -37,6 +37,8 @@ class ParserInProcessIT : KoinTest {
         ParseTestCase("src/integration-test/resources/literal_nil.lox", "nil"),
         ParseTestCase("src/integration-test/resources/literal_number.lox", "42.47"),
         ParseTestCase("src/integration-test/resources/literal_string.lox", "hello"),
+        ParseTestCase("src/integration-test/resources/grouping_expression.lox", "(group 42.47)"),
+        ParseTestCase("src/integration-test/resources/grouping_string.lox", "(group hello)"),
       )
   }
 

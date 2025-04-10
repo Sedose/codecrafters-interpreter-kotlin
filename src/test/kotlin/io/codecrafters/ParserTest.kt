@@ -36,6 +36,29 @@ class ParserTest {
           "hello",
         ),
       )
+
+    @JvmStatic
+    fun provideGroupingTestCases(): Stream<Arguments> =
+      Stream.of(
+        Arguments.of(
+          listOf(
+            Token(TokenType.LEFT_PAREN, "(", "(", 1),
+            Token(TokenType.NUMBER, "42", "42", 1),
+            Token(TokenType.RIGHT_PAREN, ")", ")", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Grouping(Expr.Literal(42.0)),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.LEFT_PAREN, "(", "(", 1),
+            Token(TokenType.STRING, "\"hello\"", "hello", 1),
+            Token(TokenType.RIGHT_PAREN, ")", ")", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Grouping(Expr.Literal("hello")),
+        ),
+      )
   }
 
   @ParameterizedTest
@@ -46,5 +69,15 @@ class ParserTest {
   ) {
     val expr = Parser(tokens).parse()
     assertEquals(expectedValue, (expr as Expr.Literal).value)
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideGroupingTestCases")
+  fun `parses grouping expressions correctly`(
+    tokens: List<Token>,
+    expectedExpr: Expr,
+  ) {
+    val expr = Parser(tokens).parse()
+    assertEquals(expectedExpr, expr)
   }
 }

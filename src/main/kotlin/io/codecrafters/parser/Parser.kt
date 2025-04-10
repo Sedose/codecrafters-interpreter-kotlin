@@ -10,7 +10,14 @@ class Parser(
 
   fun parse(): Expr = expression()
 
-  private fun expression(): Expr = literal()
+  private fun expression(): Expr =
+    if (match(TokenType.LEFT_PAREN)) {
+      val expr = expression()
+      consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
+      Expr.Grouping(expr)
+    } else {
+      literal()
+    }
 
   private fun literal(): Expr =
     when (peek().type) {
@@ -47,6 +54,23 @@ class Parser(
   private fun isAtEnd(): Boolean = peek().type == TokenType.EOF
 
   private fun peek(): Token = tokens[current]
+
+  private fun match(vararg types: TokenType): Boolean {
+    for (type in types) {
+      if (check(type)) {
+        advance()
+        return true
+      }
+    }
+    return false
+  }
+
+  private fun check(type: TokenType): Boolean = if (isAtEnd()) false else peek().type == type
+
+  private fun consume(
+    type: TokenType,
+    message: String,
+  ): Token = if (check(type)) advance() else throw error(peek(), message)
 
   private fun error(
     token: Token,
