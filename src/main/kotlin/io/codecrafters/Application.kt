@@ -67,7 +67,8 @@ class Application(
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null)
       }
-    Parser(tokenList).parse()
+    Parser(tokenList)
+      .parse()
       .let { AstPrinter().print(it) }
       .let(::println)
   }

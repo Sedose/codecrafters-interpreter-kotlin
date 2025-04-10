@@ -23,11 +23,19 @@ class SingleLineCommentSkipper :
     index: Int,
     lineNumber: Int,
   ): ProcessingResult {
-    val newLineIndex = input.indexOf('\n', startIndex = index)
+    val newIndex = findNewIndex(input, index)
     return ProcessingResult(
       token = null,
-      newIndex = if (newLineIndex != -1) newLineIndex else input.length,
+      newIndex = newIndex,
       error = null,
     )
+  }
+
+  private fun findNewIndex(
+    input: String,
+    index: Int,
+  ): Int {
+    val newLineIndex = input.indexOf('\n', startIndex = index)
+    return if (newLineIndex != -1) newLineIndex else input.length
   }
 }
