@@ -5,5 +5,6 @@ class AstPrinter {
     when (expr) {
       is Expr.Literal -> expr.value?.toString() ?: "nil"
       is Expr.Grouping -> "(group ${print(expr.expression)})"
+      is Expr.Unary -> "(${expr.operator.lexeme} ${print(expr.right)})"
     }
 }

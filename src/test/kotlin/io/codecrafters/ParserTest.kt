@@ -59,6 +59,27 @@ class ParserTest {
           Expr.Grouping(Expr.Literal("hello")),
         ),
       )
+
+    @JvmStatic
+    fun provideUnaryTestCases(): Stream<Arguments> =
+      Stream.of(
+        Arguments.of(
+          listOf(
+            Token(TokenType.MINUS, "-", null, 1),
+            Token(TokenType.NUMBER, "42", 42.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Unary(Token(TokenType.MINUS, "-", null, 1), Expr.Literal(42.0)),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.BANG, "!", null, 1),
+            Token(TokenType.TRUE, "true", true, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Unary(Token(TokenType.BANG, "!", null, 1), Expr.Literal(true)),
+        ),
+      )
   }
 
   @ParameterizedTest
@@ -74,6 +95,16 @@ class ParserTest {
   @ParameterizedTest
   @MethodSource("provideGroupingTestCases")
   fun `parses grouping expressions correctly`(
+    tokens: List<Token>,
+    expectedExpr: Expr,
+  ) {
+    val expr = Parser(tokens).parse()
+    assertEquals(expectedExpr, expr)
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideUnaryTestCases")
+  fun `parses unary expressions correctly`(
     tokens: List<Token>,
     expectedExpr: Expr,
   ) {

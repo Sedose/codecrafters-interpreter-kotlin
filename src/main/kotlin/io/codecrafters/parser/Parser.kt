@@ -10,16 +10,18 @@ class Parser(
 
   fun parse(): Expr = expression()
 
-  private fun expression(): Expr =
-    if (match(TokenType.LEFT_PAREN)) {
-      val expr = expression()
-      consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
-      Expr.Grouping(expr)
+  private fun expression(): Expr = unary()
+
+  private fun unary(): Expr =
+    if (match(TokenType.BANG, TokenType.MINUS)) {
+      val operator = previous()
+      val right = unary()
+      Expr.Unary(operator, right)
     } else {
-      literal()
+      primary()
     }
 
-  private fun literal(): Expr =
+  private fun primary(): Expr =
     when (peek().type) {
       TokenType.FALSE -> {
         advance()
@@ -43,7 +45,13 @@ class Parser(
         advance()
         Expr.Literal(value)
       }
-      else -> throw error(peek(), "Expected literal.")
+      TokenType.LEFT_PAREN -> {
+        advance()
+        val expr = expression()
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
+        Expr.Grouping(expr)
+      }
+      else -> throw error(peek(), "Expected expression.")
     }
 
   private fun advance(): Token =
@@ -79,4 +87,6 @@ class Parser(
     System.err.println("[line number: ${token.lineNumber}] Error at '${token.lexeme}': $message")
     return RuntimeException(message)
   }
+
+  private fun previous(): Token = tokens[current - 1]
 }
