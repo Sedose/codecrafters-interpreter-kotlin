@@ -10,7 +10,20 @@ class Parser(
 
   fun parse(): Expr = expression()
 
-  private fun expression(): Expr = unary()
+  private fun expression(): Expr = multiplicative()
+
+  // New method to handle multiplicative expressions
+  private fun multiplicative(): Expr {
+    var expr = unary()
+
+    while (match(TokenType.STAR, TokenType.SLASH)) {
+      val operator = previous()
+      val right = unary()
+      expr = Expr.Binary(expr, operator, right)
+    }
+
+    return expr
+  }
 
   private fun unary(): Expr =
     if (match(TokenType.BANG, TokenType.MINUS)) {

@@ -80,6 +80,56 @@ class ParserTest {
           Expr.Unary(Token(TokenType.BANG, "!", null, 1), Expr.Literal(true)),
         ),
       )
+
+    @JvmStatic
+    fun provideMultiplicativeTestCases(): Stream<Arguments> =
+      Stream.of(
+        Arguments.of(
+          listOf(
+            Token(TokenType.NUMBER, "16", 16.0, 1),
+            Token(TokenType.STAR, "*", null, 1),
+            Token(TokenType.NUMBER, "38", 38.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Literal(16.0),
+            Token(TokenType.STAR, "*", null, 1),
+            Expr.Literal(38.0),
+          ),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.NUMBER, "38", 38.0, 1),
+            Token(TokenType.SLASH, "/", null, 1),
+            Token(TokenType.NUMBER, "58", 58.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Literal(38.0),
+            Token(TokenType.SLASH, "/", null, 1),
+            Expr.Literal(58.0),
+          ),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.NUMBER, "16", 16.0, 1),
+            Token(TokenType.STAR, "*", null, 1),
+            Token(TokenType.NUMBER, "38", 38.0, 1),
+            Token(TokenType.SLASH, "/", null, 1),
+            Token(TokenType.NUMBER, "58", 58.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Binary(
+              Expr.Literal(16.0),
+              Token(TokenType.STAR, "*", null, 1),
+              Expr.Literal(38.0),
+            ),
+            Token(TokenType.SLASH, "/", null, 1),
+            Expr.Literal(58.0),
+          ),
+        ),
+      )
   }
 
   @ParameterizedTest
@@ -105,6 +155,16 @@ class ParserTest {
   @ParameterizedTest
   @MethodSource("provideUnaryTestCases")
   fun `parses unary expressions correctly`(
+    tokens: List<Token>,
+    expectedExpr: Expr,
+  ) {
+    val expr = Parser(tokens).parse()
+    assertEquals(expectedExpr, expr)
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideMultiplicativeTestCases")
+  fun `parses multiplicative expressions correctly`(
     tokens: List<Token>,
     expectedExpr: Expr,
   ) {
