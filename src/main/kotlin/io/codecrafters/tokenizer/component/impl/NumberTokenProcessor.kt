@@ -14,41 +14,25 @@ class NumberTokenProcessor :
     index: Int,
   ): Boolean = index in input.indices && input[index].isDigit()
 
-  @Suppress("ReturnCount")
   override fun process(
     input: String,
     index: Int,
     lineNumber: Int,
   ): ProcessingResult {
-    val remainingInput = input.substring(index)
-    val regex = Regex("^\\d[.\\d]*")
-    val match =
-      regex.find(remainingInput)
-        ?: return ProcessingResult(
-          token = null,
-          newIndex = index,
-          error = "[line $lineNumber] Error: Invalid number format.",
-        )
-
-    val lexemeCandidate = match.value
+    val lexemeCandidate =
+      extractLexeme(input.substring(index)) ?: return ProcessingResult(null, index, "[line $lineNumber] Error: Invalid number format.")
     val dotCount = lexemeCandidate.count { it == '.' }
-
-    if (dotCount > 1) {
-      val firstDotIndex = lexemeCandidate.indexOf('.')
-      val secondDotIndex = lexemeCandidate.indexOf('.', startIndex = firstDotIndex + 1)
-      val errorIndex = index + secondDotIndex
-      return ProcessingResult(
-        token = null,
-        newIndex = errorIndex,
-        error = "[line $lineNumber] Error: Unexpected character: .",
+    return if (dotCount > 1) {
+      val errorIndex = index + lexemeCandidate.indexOf('.', lexemeCandidate.indexOf('.') + 1)
+      ProcessingResult(null, errorIndex, "[line $lineNumber] Error: Unexpected character: .")
+    } else {
+      ProcessingResult(
+        Token(TokenType.NUMBER, lexemeCandidate, lexemeCandidate.toDoubleOrNull()),
+        index + lexemeCandidate.length,
+        null,
       )
     }
-
-    val numericValue = lexemeCandidate.toDoubleOrNull()
-    return ProcessingResult(
-      token = Token(TokenType.NUMBER, lexemeCandidate, numericValue),
-      newIndex = index + lexemeCandidate.length,
-      error = null,
-    )
   }
+
+  private fun extractLexeme(input: String): String? = Regex("^\\d[.\\d]*").find(input)?.value
 }

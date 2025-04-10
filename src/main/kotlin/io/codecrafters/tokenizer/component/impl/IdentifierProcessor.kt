@@ -22,28 +22,11 @@ class IdentifierProcessor :
     lineNumber: Int,
   ): ProcessingResult {
     val lexeme = extractLexeme(input, index)
-    return ProcessingResult(
-      token =
-        Token(
-          type = RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER,
-          lexeme = lexeme,
-        ),
-      newIndex = index + lexeme.length,
-      error = null,
-    )
+    return ProcessingResult(Token(RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER, lexeme), index + lexeme.length, null)
   }
 
   private fun extractLexeme(
     input: String,
-    startIndex: Int,
-  ): String =
-    input.substring(
-      startIndex = startIndex,
-      endIndex =
-        startIndex +
-          input
-            .drop(startIndex)
-            .takeWhile { it.isIdentifierChar() }
-            .length,
-    )
+    start: Int,
+  ): String = input.substring(start, start + input.drop(start).takeWhile { it.isIdentifierChar() }.length)
 }
