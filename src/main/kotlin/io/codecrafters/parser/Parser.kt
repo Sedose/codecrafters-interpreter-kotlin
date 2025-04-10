@@ -26,14 +26,18 @@ class Parser(
         advance()
         Expr.Literal(null)
       }
+      TokenType.NUMBER -> {
+        val value = peek().lexeme.toDouble()
+        advance()
+        Expr.Literal(value)
+      }
       else -> throw error(peek(), "Expected literal.")
     }
 
-  private fun advance(): Token {
-    return peek().also {
+  private fun advance(): Token =
+    peek().also {
       if (!isAtEnd()) current++
     }
-  }
 
   private fun isAtEnd(): Boolean = peek().type == TokenType.EOF
 
@@ -43,7 +47,7 @@ class Parser(
     token: Token,
     message: String,
   ): RuntimeException {
-    System.err.println("[line TODO add line to token] Error at '${token.lexeme}': $message")
+    System.err.println("[line number: ${token.lineNumber}] Error at '${token.lexeme}': $message")
     return RuntimeException(message)
   }
 }

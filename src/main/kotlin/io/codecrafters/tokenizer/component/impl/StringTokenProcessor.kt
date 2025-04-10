@@ -35,7 +35,7 @@ class StringTokenProcessor :
           TokenType.STRING,
           input.substring(index, end + 1),
           input.substring(index + 1, end),
-          lineNumber // Added line number
+          lineNumber,
         ),
       newIndex = end + 1,
       error = null,

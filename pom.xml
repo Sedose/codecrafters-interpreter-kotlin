@@ -212,17 +212,17 @@
         <dependency>
             <groupId>io.insert-koin</groupId>
             <artifactId>koin-core</artifactId>
-            <version>4.1.0-Beta6</version>
+            <version>4.1.0-Beta7</version>
         </dependency>
         <dependency>
             <groupId>io.insert-koin</groupId>
             <artifactId>koin-core-jvm</artifactId>
-            <version>4.1.0-Beta6</version>
+            <version>4.1.0-Beta7</version>
         </dependency>
         <dependency>
             <groupId>io.insert-koin</groupId>
             <artifactId>koin-test-junit5</artifactId>
-            <version>4.1.0-Beta6</version>
+            <version>4.1.0-Beta7</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.junit.jupiter</groupId>
