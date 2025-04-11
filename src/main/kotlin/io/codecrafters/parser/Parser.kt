@@ -1,96 +1,109 @@
 package io.codecrafters.parser
 
+import arrow.core.Either
+import arrow.core.raise.Raise
+import arrow.core.raise.either
+import arrow.core.raise.ensure
+import arrow.core.raise.ensureNotNull
+import io.codecrafters.model.ParseError
+import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.tokenizer.model.Token
 
 class Parser(
   private val tokens: List<Token>,
 ) {
-  private var current = 0
+  private var currentTokenIndex = 0
 
-  fun parse(): Expr = expression()
+  fun parse(): Either<ParseError, Expr> =
+    either {
+      parseExpression(this)
+    }
 
-  private fun expression(): Expr = additive()
+  private fun parseExpression(raise: Raise<ParseError>): Expr = parseAdditive(raise)
 
-  private fun additive(): Expr {
-    var expr = multiplicative()
+  private fun parseAdditive(raise: Raise<ParseError>): Expr {
+    var expression = parseMultiplicative(raise)
 
     while (match(TokenType.PLUS, TokenType.MINUS)) {
-      val operator = previous()
-      val right = multiplicative()
-      expr = Expr.Binary(expr, operator, right)
+      val operator = previousToken()
+      val right = parseMultiplicative(raise)
+      expression = Expr.Binary(expression, operator, right)
     }
 
-    return expr
+    return expression
   }
 
-  private fun multiplicative(): Expr {
-    var expr = unary()
+  private fun parseMultiplicative(raise: Raise<ParseError>): Expr {
+    var expression = parseUnary(raise)
 
     while (match(TokenType.STAR, TokenType.SLASH)) {
-      val operator = previous()
-      val right = unary()
-      expr = Expr.Binary(expr, operator, right)
+      val operator = previousToken()
+      val right = parseUnary(raise)
+      expression = Expr.Binary(expression, operator, right)
     }
 
-    return expr
+    return expression
   }
 
-  private fun unary(): Expr =
+  private fun parseUnary(raise: Raise<ParseError>): Expr =
     if (match(TokenType.BANG, TokenType.MINUS)) {
-      val operator = previous()
-      val right = unary()
+      val operator = previousToken()
+      val right = parseUnary(raise)
       Expr.Unary(operator, right)
     } else {
-      primary()
+      parsePrimary(raise)
     }
 
-  private fun primary(): Expr =
-    when (peek().type) {
+  private fun parsePrimary(raise: Raise<ParseError>): Expr {
+    val token = peek()
+    return when (token.type) {
       TokenType.FALSE -> {
-        advance()
+        advanceToken()
         Expr.Literal(false)
       }
       TokenType.TRUE -> {
-        advance()
+        advanceToken()
         Expr.Literal(true)
       }
       TokenType.NIL -> {
-        advance()
+        advanceToken()
         Expr.Literal(null)
       }
       TokenType.NUMBER -> {
-        val value = peek().lexeme.toDouble()
-        advance()
+        val value = token.lexeme.toDoubleOrNull()
+        raise.ensureNotNull(value) { ParseError("Invalid number literal", token) }
+        advanceToken()
         Expr.Literal(value)
       }
       TokenType.STRING -> {
-        val value = peek().lexeme.removeSurrounding("\"")
-        advance()
+        val value = token.lexeme.removeSurrounding("\"")
+        advanceToken()
         Expr.Literal(value)
       }
       TokenType.LEFT_PAREN -> {
-        advance()
-        val expr = expression()
-        consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
-        Expr.Grouping(expr)
+        advanceToken()
+        val expression = parseExpression(raise)
+        raise.ensure(check(TokenType.RIGHT_PAREN)) { ParseError("Expected ')' after expression", peek()) }
+        advanceToken()
+        Expr.Grouping(expression)
       }
-      else -> throw error(peek(), "Expected expression.")
+      else -> raise.raise(ParseError("Expected expression", token))
     }
+  }
 
-  private fun advance(): Token =
+  private fun advanceToken(): Token =
     peek().also {
-      if (!isAtEnd()) current++
+      if (!isAtEnd()) currentTokenIndex++
     }
 
   private fun isAtEnd(): Boolean = peek().type == TokenType.EOF
 
-  private fun peek(): Token = tokens[current]
+  private fun peek(): Token = tokens[currentTokenIndex]
 
   private fun match(vararg types: TokenType): Boolean {
     for (type in types) {
       if (check(type)) {
-        advance()
+        advanceToken()
         return true
       }
     }
@@ -99,18 +112,5 @@ class Parser(
 
   private fun check(type: TokenType): Boolean = if (isAtEnd()) false else peek().type == type
 
-  private fun consume(
-    type: TokenType,
-    message: String,
-  ): Token = if (check(type)) advance() else throw error(peek(), message)
-
-  private fun error(
-    token: Token,
-    message: String,
-  ): RuntimeException {
-    System.err.println("[line number: ${token.lineNumber}] Error at '${token.lexeme}': $message")
-    return RuntimeException(message)
-  }
-
-  private fun previous(): Token = tokens[current - 1]
+  private fun previousToken(): Token = tokens[currentTokenIndex - 1]
 }

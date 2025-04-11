@@ -1,6 +1,6 @@
 package io.codecrafters.tokenizer.component
 
-import io.codecrafters.tokenizer.model.ProcessingResult
+import io.codecrafters.model.ProcessingResult
 
 interface TokenProcessor {
   fun canProcess(

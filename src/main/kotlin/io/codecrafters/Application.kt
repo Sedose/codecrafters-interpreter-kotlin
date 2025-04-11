@@ -1,12 +1,13 @@
 package io.codecrafters
 
+import arrow.core.Either
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
+import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.parser.AstPrinter
+import io.codecrafters.parser.AstStringifier
 import io.codecrafters.parser.Parser
 import io.codecrafters.tokenizer.Tokenizer
-import io.codecrafters.tokenizer.model.Token
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -19,7 +20,9 @@ class Application(
       File(cliArgs.filename)
         .readText()
         .let { tokenizer.tokenize(it) }
+
     errors.forEach(System.err::println)
+
     when (cliArgs.command) {
       Command.TOKENIZE -> printTokens(tokens, errors)
       Command.PARSE -> parse(tokens, errors)
@@ -61,15 +64,24 @@ class Application(
     if (errors.isNotEmpty()) {
       exitProcess(65)
     }
+
     val tokenList =
       if (tokens.lastOrNull()?.type == TokenType.EOF) {
         tokens
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
       }
-    Parser(tokenList)
-      .parse()
-      .let { AstPrinter().print(it) }
-      .let(::println)
+
+    when (val result = Parser(tokenList).parse()) {
+      is Either.Left -> {
+        val error = result.value
+        System.err.println("[line ${error.token.lineNumber}] Error at '${error.token.lexeme}': ${error.message}")
+        exitProcess(65)
+      }
+
+      is Either.Right -> {
+        println(AstStringifier().stringifyExpression(result.value))
+      }
+    }
   }
 }

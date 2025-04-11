@@ -1,10 +1,12 @@
 package io.codecrafters
 
+import arrow.core.Either
+import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.parser.Expr
 import io.codecrafters.parser.Parser
-import io.codecrafters.tokenizer.model.Token
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -17,11 +19,29 @@ class ParserTest {
     tokens: List<Token>,
     expectedExpression: Expr,
   ) {
-    val actualExpression = Parser(tokens).parse()
-    assertEquals(expectedExpression, actualExpression)
+    when (val result = Parser(tokens).parse()) {
+      is Either.Right -> assertEquals(expectedExpression, result.value)
+      is Either.Left -> fail("Expected successful parse, but got error: ${result.value}")
+    }
   }
 
   companion object {
+    @JvmStatic
+    fun provideTestCases(): Stream<Arguments> =
+      Stream.concat(
+        provideLiteralTestCases(),
+        Stream.concat(
+          provideGroupingTestCases(),
+          Stream.concat(
+            provideUnaryTestCases(),
+            Stream.concat(
+              provideMultiplicativeTestCases(),
+              provideAdditiveTestCases(),
+            ),
+          ),
+        ),
+      )
+
     @JvmStatic
     fun provideLiteralTestCases(): Stream<Arguments> =
       Stream.of(
@@ -208,22 +228,6 @@ class ParserTest {
             ),
             Token(TokenType.MINUS, "-", null, 1),
             Expr.Literal(94.0),
-          ),
-        ),
-      )
-
-    @JvmStatic
-    fun provideTestCases(): Stream<Arguments> =
-      Stream.concat(
-        provideLiteralTestCases(),
-        Stream.concat(
-          provideGroupingTestCases(),
-          Stream.concat(
-            provideUnaryTestCases(),
-            Stream.concat(
-              provideMultiplicativeTestCases(),
-              provideAdditiveTestCases(),
-            ),
           ),
         ),
       )

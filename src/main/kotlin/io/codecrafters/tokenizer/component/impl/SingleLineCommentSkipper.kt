@@ -1,7 +1,7 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.ProcessingResult
 import io.codecrafters.tokenizer.component.TokenProcessor
-import io.codecrafters.tokenizer.model.ProcessingResult
 import org.koin.core.component.KoinComponent
 
 class SingleLineCommentSkipper :

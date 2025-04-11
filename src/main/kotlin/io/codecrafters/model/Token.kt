@@ -1,6 +1,4 @@
-package io.codecrafters.tokenizer.model
-
-import io.codecrafters.model.TokenType
+package io.codecrafters.model
 
 data class Token(
   val type: TokenType,

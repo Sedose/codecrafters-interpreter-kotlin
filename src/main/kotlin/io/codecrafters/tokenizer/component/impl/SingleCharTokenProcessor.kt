@@ -1,9 +1,9 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.ProcessingResult
+import io.codecrafters.model.SINGLE_CHAR_TOKENS
+import io.codecrafters.model.Token
 import io.codecrafters.tokenizer.component.TokenProcessor
-import io.codecrafters.tokenizer.model.ProcessingResult
-import io.codecrafters.tokenizer.model.SINGLE_CHAR_TOKENS
-import io.codecrafters.tokenizer.model.Token
 import org.koin.core.component.KoinComponent
 
 class SingleCharTokenProcessor :

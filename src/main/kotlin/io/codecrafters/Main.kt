@@ -39,7 +39,5 @@ val appModule =
     }
 
     single { Tokenizer(get()) }
-//    single { AstPrinter() }
-//    single { Application(get(), get()) }
     single { Application(get()) }
   }
