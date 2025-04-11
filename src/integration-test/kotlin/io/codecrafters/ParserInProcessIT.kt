@@ -45,6 +45,11 @@ class ParserInProcessIT : KoinTest {
         ParseTestCase("src/integration-test/resources/division_test.lox", "(/ 38.0 58.0)"),
         ParseTestCase("src/integration-test/resources/combined_multiplication_division_test.lox", "(/ (* 16.0 38.0) 58.0)"),
         ParseTestCase("src/integration-test/resources/addition_subtraction_operators.lox", "(- (+ 52.0 80.0) 94.0)"),
+        ParseTestCase("src/integration-test/resources/comparison_less.lox", "(< 5.0 10.0)"),
+        ParseTestCase("src/integration-test/resources/comparison_less_equal.lox", "(<= 8.0 9.0)"),
+        ParseTestCase("src/integration-test/resources/comparison_greater.lox", "(> 11.0 7.0)"),
+        ParseTestCase("src/integration-test/resources/comparison_greater_equal.lox", "(>= 15.0 15.0)"),
+        ParseTestCase("src/integration-test/resources/chain_comparisons.lox", "(< (< 1.0 2.0) 3.0)"),
       )
   }
 

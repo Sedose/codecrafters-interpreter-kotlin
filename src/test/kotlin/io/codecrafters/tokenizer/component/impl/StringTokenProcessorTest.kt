@@ -63,6 +63,7 @@ class StringTokenProcessorTest {
     assertEquals(TokenType.STRING, token.type)
     assertEquals(testCase.expectedLexeme, token.lexeme)
     assertEquals(testCase.expectedNewIndex, newIndex)
+    // The literal should be the substring without the surrounding quotes
     val expectedLiteral = testCase.expectedLexeme.substring(1, testCase.expectedLexeme.lastIndex)
     assertEquals(expectedLiteral, token.literal)
     assertNull(error)
@@ -78,7 +79,7 @@ class StringTokenProcessorTest {
             input = "\"hello\"",
             startIndex = 0,
             expectedNewIndex = 7,
-            expectedType = TokenType.STRING,
+            expectedType = TokenType.STRING, // not strictly used here, but included for reference
             expectedLexeme = "\"hello\"",
           ),
         ),
