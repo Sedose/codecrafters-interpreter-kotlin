@@ -9,10 +9,16 @@ import io.codecrafters.model.ParseError
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 
+private val UNARY_TOKEN_TYPES = setOf(TokenType.BANG, TokenType.MINUS)
+private val EQUALITY_OPERATORS = setOf(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL)
+private val COMPARISON_OPERATORS = setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)
+private val ADDITIVE_OPERATORS = setOf(TokenType.PLUS, TokenType.MINUS)
+private val MULTIPLICATIVE_OPERATORS = setOf(TokenType.STAR, TokenType.SLASH)
+
 class Parser(
   private val tokens: List<Token>,
 ) {
-  private val unaryTokenTypes = setOf(TokenType.BANG, TokenType.MINUS)
+
   private var currentTokenIndex = 0
 
   fun parse(): Either<ParseError, Expr> =
@@ -26,28 +32,28 @@ class Parser(
     parseBinaryRightAssociative(
       raise,
       ::parseComparison,
-      setOf(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL),
+      EQUALITY_OPERATORS,
     )
 
   private fun parseComparison(raise: Raise<ParseError>): Expr =
     parseBinaryRightAssociative(
       raise,
       ::parseAdditive,
-      setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL),
+      COMPARISON_OPERATORS,
     )
 
   private fun parseAdditive(raise: Raise<ParseError>): Expr =
     parseBinaryRightAssociative(
       raise,
       ::parseMultiplicative,
-      setOf(TokenType.PLUS, TokenType.MINUS),
+      ADDITIVE_OPERATORS,
     )
 
   private fun parseMultiplicative(raise: Raise<ParseError>): Expr =
     parseBinaryRightAssociative(
       raise,
       ::parseUnary,
-      setOf(TokenType.STAR, TokenType.SLASH),
+      MULTIPLICATIVE_OPERATORS,
     )
 
   private inline fun parseBinaryRightAssociative(
@@ -67,7 +73,7 @@ class Parser(
   }
 
   private fun parseUnary(raise: Raise<ParseError>): Expr =
-    if (match(unaryTokenTypes)) {
+    if (match(UNARY_TOKEN_TYPES)) {
       val operator = previousToken()
       val right = parseUnary(raise)
       Expr.Unary(operator, right)
