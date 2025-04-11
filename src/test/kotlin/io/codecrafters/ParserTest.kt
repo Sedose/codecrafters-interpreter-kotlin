@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.stream.Stream
 
 class ParserTest {
   @ParameterizedTest
@@ -27,27 +26,19 @@ class ParserTest {
 
   companion object {
     @JvmStatic
-    fun provideTestCases(): Stream<Arguments> =
-      Stream.concat(
+    fun provideTestCases(): List<Arguments> =
+      listOf(
         provideLiteralTestCases(),
-        Stream.concat(
-          provideGroupingTestCases(),
-          Stream.concat(
-            provideUnaryTestCases(),
-            Stream.concat(
-              provideMultiplicativeTestCases(),
-              Stream.concat(
-                provideAdditiveTestCases(),
-                provideComparisonTestCases(),
-              ),
-            ),
-          ),
-        ),
-      )
+        provideGroupingTestCases(),
+        provideUnaryTestCases(),
+        provideMultiplicativeTestCases(),
+        provideAdditiveTestCases(),
+        provideComparisonTestCases(),
+      ).flatten()
 
     @JvmStatic
-    fun provideLiteralTestCases(): Stream<Arguments> =
-      Stream.of(
+    fun provideLiteralTestCases(): List<Arguments> =
+      listOf(
         Arguments.of(
           listOf(Token(TokenType.NUMBER, "42.47", "42.47", 1), Token(TokenType.EOF, "", "", 1)),
           Expr.Literal(42.47),
@@ -71,8 +62,8 @@ class ParserTest {
       )
 
     @JvmStatic
-    fun provideGroupingTestCases(): Stream<Arguments> =
-      Stream.of(
+    fun provideGroupingTestCases(): List<Arguments> =
+      listOf(
         Arguments.of(
           listOf(
             Token(TokenType.LEFT_PAREN, "(", "(", 1),
@@ -85,8 +76,8 @@ class ParserTest {
       )
 
     @JvmStatic
-    fun provideUnaryTestCases(): Stream<Arguments> =
-      Stream.of(
+    fun provideUnaryTestCases(): List<Arguments> =
+      listOf(
         Arguments.of(
           listOf(
             Token(TokenType.MINUS, "-", null, 1),
@@ -98,8 +89,8 @@ class ParserTest {
       )
 
     @JvmStatic
-    fun provideMultiplicativeTestCases(): Stream<Arguments> =
-      Stream.of(
+    fun provideMultiplicativeTestCases(): List<Arguments> =
+      listOf(
         Arguments.of(
           listOf(
             Token(TokenType.NUMBER, "3", 3.0, 1),
@@ -112,8 +103,8 @@ class ParserTest {
       )
 
     @JvmStatic
-    fun provideAdditiveTestCases(): Stream<Arguments> =
-      Stream.of(
+    fun provideAdditiveTestCases(): List<Arguments> =
+      listOf(
         Arguments.of(
           listOf(
             Token(TokenType.NUMBER, "1", 1.0, 1),
@@ -126,8 +117,8 @@ class ParserTest {
       )
 
     @JvmStatic
-    fun provideComparisonTestCases(): Stream<Arguments> =
-      Stream.of(
+    fun provideComparisonTestCases(): List<Arguments> =
+      listOf(
         Arguments.of(
           listOf(
             Token(TokenType.NUMBER, "5", 5.0, 1),
