@@ -1,6 +1,6 @@
 package io.codecrafters.tokenizer
 
-import io.codecrafters.model.ProcessingResult // Import for clarity
+import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenizationResult
 import io.codecrafters.tokenizer.component.TokenProcessor

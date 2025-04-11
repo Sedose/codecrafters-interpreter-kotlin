@@ -19,7 +19,26 @@ class Parser(
       parseExpression(this)
     }
 
-  private fun parseExpression(raise: Raise<ParseError>): Expr = parseAdditive(raise)
+  private fun parseExpression(raise: Raise<ParseError>): Expr = parseComparison(raise)
+
+  private fun parseComparison(raise: Raise<ParseError>): Expr {
+    var expression = parseAdditive(raise)
+
+    while (
+      match(
+        TokenType.GREATER,
+        TokenType.GREATER_EQUAL,
+        TokenType.LESS,
+        TokenType.LESS_EQUAL,
+      )
+    ) {
+      val operator = previousToken()
+      val right = parseAdditive(raise)
+      expression = Expr.Binary(expression, operator, right)
+    }
+
+    return expression
+  }
 
   private fun parseAdditive(raise: Raise<ParseError>): Expr {
     var expression = parseMultiplicative(raise)
@@ -83,7 +102,9 @@ class Parser(
       TokenType.LEFT_PAREN -> {
         advanceToken()
         val expression = parseExpression(raise)
-        raise.ensure(check(TokenType.RIGHT_PAREN)) { ParseError("Expected ')' after expression", peek()) }
+        raise.ensure(check(TokenType.RIGHT_PAREN)) {
+          ParseError("Expected ')' after expression", peek())
+        }
         advanceToken()
         Expr.Grouping(expression)
       }

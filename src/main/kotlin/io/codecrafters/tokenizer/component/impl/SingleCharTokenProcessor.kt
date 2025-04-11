@@ -20,7 +20,7 @@ class SingleCharTokenProcessor :
     lineNumber: Int,
   ): ProcessingResult {
     val type = SINGLE_CHAR_TOKENS[input[index]]!!
-    val token = Token(type, input[index].toString(), null, lineNumber) // Added line number
+    val token = Token(type, input[index].toString(), null, lineNumber)
     return ProcessingResult(
       token = token,
       newIndex = index + 1,
