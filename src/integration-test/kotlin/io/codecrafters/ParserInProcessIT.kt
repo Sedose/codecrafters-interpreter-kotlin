@@ -50,6 +50,9 @@ class ParserInProcessIT : KoinTest {
         ParseTestCase("src/integration-test/resources/comparison_greater.lox", "(> 11.0 7.0)"),
         ParseTestCase("src/integration-test/resources/comparison_greater_equal.lox", "(>= 15.0 15.0)"),
         ParseTestCase("src/integration-test/resources/chain_comparisons.lox", "(< (< 1.0 2.0) 3.0)"),
+        ParseTestCase("src/integration-test/resources/equality_equal.lox", "(== baz baz)"),
+        ParseTestCase("src/integration-test/resources/equality_not_equal.lox", "(!= foo bar)"),
+        ParseTestCase("src/integration-test/resources/chained_equality.lox", "(== (!= foo bar) baz)"),
       )
   }
 

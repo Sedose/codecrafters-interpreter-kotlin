@@ -19,7 +19,19 @@ class Parser(
       parseExpression(this)
     }
 
-  private fun parseExpression(raise: Raise<ParseError>): Expr = parseComparison(raise)
+  private fun parseExpression(raise: Raise<ParseError>): Expr = parseEquality(raise)
+
+  private fun parseEquality(raise: Raise<ParseError>): Expr {
+    var expression = parseComparison(raise)
+
+    while (match(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL)) {
+      val operator = previousToken()
+      val right = parseComparison(raise)
+      expression = Expr.Binary(expression, operator, right)
+    }
+
+    return expression
+  }
 
   private fun parseComparison(raise: Raise<ParseError>): Expr {
     var expression = parseAdditive(raise)

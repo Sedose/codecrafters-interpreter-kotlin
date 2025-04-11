@@ -34,6 +34,7 @@ class ParserTest {
         provideMultiplicativeTestCases(),
         provideAdditiveTestCases(),
         provideComparisonTestCases(),
+        provideEqualityTestCases(), // Added equality test cases
       ).flatten()
 
     @JvmStatic
@@ -188,6 +189,56 @@ class ParserTest {
             ),
             Token(TokenType.LESS, "<", null, 1),
             Expr.Literal(3.0),
+          ),
+        ),
+      )
+
+    @JvmStatic
+    fun provideEqualityTestCases(): List<Arguments> =
+      listOf(
+        Arguments.of(
+          listOf(
+            Token(TokenType.STRING, "\"baz\"", "baz", 1),
+            Token(TokenType.EQUAL_EQUAL, "==", null, 1),
+            Token(TokenType.STRING, "\"baz\"", "baz", 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Literal("baz"),
+            Token(TokenType.EQUAL_EQUAL, "==", null, 1),
+            Expr.Literal("baz"),
+          ),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.STRING, "\"foo\"", "foo", 1),
+            Token(TokenType.BANG_EQUAL, "!=", null, 1),
+            Token(TokenType.STRING, "\"bar\"", "bar", 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Literal("foo"),
+            Token(TokenType.BANG_EQUAL, "!=", null, 1),
+            Expr.Literal("bar"),
+          ),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.STRING, "\"foo\"", "foo", 1),
+            Token(TokenType.BANG_EQUAL, "!=", null, 1),
+            Token(TokenType.STRING, "\"bar\"", "bar", 1),
+            Token(TokenType.EQUAL_EQUAL, "==", null, 1),
+            Token(TokenType.STRING, "\"baz\"", "baz", 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Binary(
+              Expr.Literal("foo"),
+              Token(TokenType.BANG_EQUAL, "!=", null, 1),
+              Expr.Literal("bar"),
+            ),
+            Token(TokenType.EQUAL_EQUAL, "==", null, 1),
+            Expr.Literal("baz"),
           ),
         ),
       )
