@@ -44,6 +44,7 @@ class ParserInProcessIT : KoinTest {
         ParseTestCase("src/integration-test/resources/multiplication_test.lox", "(* 16 38)"),
         ParseTestCase("src/integration-test/resources/division_test.lox", "(/ 38 58)"),
         ParseTestCase("src/integration-test/resources/combined_multiplication_division_test.lox", "(/ (* 16 38) 58)"),
+        ParseTestCase("src/integration-test/resources/addition_subtraction_operators.lox", "(- (+ 52 80) 94)"),
       )
   }
 

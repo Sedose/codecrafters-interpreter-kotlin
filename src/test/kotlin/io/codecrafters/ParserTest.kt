@@ -11,29 +11,54 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 class ParserTest {
+  @ParameterizedTest
+  @MethodSource("provideTestCases")
+  fun parseExpressionsCorrectly(
+    tokens: List<Token>,
+    expectedExpression: Expr,
+  ) {
+    val actualExpression = Parser(tokens).parse()
+    assertEquals(expectedExpression, actualExpression)
+  }
+
   companion object {
     @JvmStatic
     fun provideLiteralTestCases(): Stream<Arguments> =
       Stream.of(
         Arguments.of(
-          listOf(Token(TokenType.NUMBER, "42.47", "42.47", 1), Token(TokenType.EOF, "", "", 1)),
-          42.47,
+          listOf(
+            Token(TokenType.NUMBER, "42.47", "42.47", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Literal(42.47),
         ),
         Arguments.of(
-          listOf(Token(TokenType.TRUE, "true", "true", 1), Token(TokenType.EOF, "", "", 1)),
-          true,
+          listOf(
+            Token(TokenType.TRUE, "true", "true", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Literal(true),
         ),
         Arguments.of(
-          listOf(Token(TokenType.FALSE, "false", "false", 1), Token(TokenType.EOF, "", "", 1)),
-          false,
+          listOf(
+            Token(TokenType.FALSE, "false", "false", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Literal(false),
         ),
         Arguments.of(
-          listOf(Token(TokenType.NIL, "nil", "nil", 1), Token(TokenType.EOF, "", "", 1)),
-          null,
+          listOf(
+            Token(TokenType.NIL, "nil", "nil", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Literal(null),
         ),
         Arguments.of(
-          listOf(Token(TokenType.STRING, "\"hello\"", "hello", 1), Token(TokenType.EOF, "", "", 1)),
-          "hello",
+          listOf(
+            Token(TokenType.STRING, "\"hello\"", "hello", 1),
+            Token(TokenType.EOF, "", "", 1),
+          ),
+          Expr.Literal("hello"),
         ),
       )
 
@@ -69,7 +94,10 @@ class ParserTest {
             Token(TokenType.NUMBER, "42", 42.0, 1),
             Token(TokenType.EOF, "", null, 1),
           ),
-          Expr.Unary(Token(TokenType.MINUS, "-", null, 1), Expr.Literal(42.0)),
+          Expr.Unary(
+            Token(TokenType.MINUS, "-", null, 1),
+            Expr.Literal(42.0),
+          ),
         ),
         Arguments.of(
           listOf(
@@ -77,7 +105,10 @@ class ParserTest {
             Token(TokenType.TRUE, "true", true, 1),
             Token(TokenType.EOF, "", null, 1),
           ),
-          Expr.Unary(Token(TokenType.BANG, "!", null, 1), Expr.Literal(true)),
+          Expr.Unary(
+            Token(TokenType.BANG, "!", null, 1),
+            Expr.Literal(true),
+          ),
         ),
       )
 
@@ -130,45 +161,71 @@ class ParserTest {
           ),
         ),
       )
-  }
 
-  @ParameterizedTest
-  @MethodSource("provideLiteralTestCases")
-  fun `parses literals correctly`(
-    tokens: List<Token>,
-    expectedValue: Any?,
-  ) {
-    val expr = Parser(tokens).parse()
-    assertEquals(expectedValue, (expr as Expr.Literal).value)
-  }
+    @JvmStatic
+    fun provideAdditiveTestCases(): Stream<Arguments> =
+      Stream.of(
+        Arguments.of(
+          listOf(
+            Token(TokenType.NUMBER, "52", 52.0, 1),
+            Token(TokenType.PLUS, "+", null, 1),
+            Token(TokenType.NUMBER, "80", 80.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Literal(52.0),
+            Token(TokenType.PLUS, "+", null, 1),
+            Expr.Literal(80.0),
+          ),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.NUMBER, "94", 94.0, 1),
+            Token(TokenType.MINUS, "-", null, 1),
+            Token(TokenType.NUMBER, "36", 36.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Literal(94.0),
+            Token(TokenType.MINUS, "-", null, 1),
+            Expr.Literal(36.0),
+          ),
+        ),
+        Arguments.of(
+          listOf(
+            Token(TokenType.NUMBER, "52", 52.0, 1),
+            Token(TokenType.PLUS, "+", null, 1),
+            Token(TokenType.NUMBER, "80", 80.0, 1),
+            Token(TokenType.MINUS, "-", null, 1),
+            Token(TokenType.NUMBER, "94", 94.0, 1),
+            Token(TokenType.EOF, "", null, 1),
+          ),
+          Expr.Binary(
+            Expr.Binary(
+              Expr.Literal(52.0),
+              Token(TokenType.PLUS, "+", null, 1),
+              Expr.Literal(80.0),
+            ),
+            Token(TokenType.MINUS, "-", null, 1),
+            Expr.Literal(94.0),
+          ),
+        ),
+      )
 
-  @ParameterizedTest
-  @MethodSource("provideGroupingTestCases")
-  fun `parses grouping expressions correctly`(
-    tokens: List<Token>,
-    expectedExpr: Expr,
-  ) {
-    val expr = Parser(tokens).parse()
-    assertEquals(expectedExpr, expr)
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideUnaryTestCases")
-  fun `parses unary expressions correctly`(
-    tokens: List<Token>,
-    expectedExpr: Expr,
-  ) {
-    val expr = Parser(tokens).parse()
-    assertEquals(expectedExpr, expr)
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideMultiplicativeTestCases")
-  fun `parses multiplicative expressions correctly`(
-    tokens: List<Token>,
-    expectedExpr: Expr,
-  ) {
-    val expr = Parser(tokens).parse()
-    assertEquals(expectedExpr, expr)
+    @JvmStatic
+    fun provideTestCases(): Stream<Arguments> =
+      Stream.concat(
+        provideLiteralTestCases(),
+        Stream.concat(
+          provideGroupingTestCases(),
+          Stream.concat(
+            provideUnaryTestCases(),
+            Stream.concat(
+              provideMultiplicativeTestCases(),
+              provideAdditiveTestCases(),
+            ),
+          ),
+        ),
+      )
   }
 }
