@@ -6,7 +6,6 @@ class AstPrinter {
       is Expr.Literal -> {
         when (val value = expr.value) {
           null -> "nil"
-          is Double -> "%.2f".format(value).trimEnd('0').trimEnd('.')
           else -> value.toString()
         }
       }

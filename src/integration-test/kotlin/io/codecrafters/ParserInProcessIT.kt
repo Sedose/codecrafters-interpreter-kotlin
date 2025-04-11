@@ -39,12 +39,12 @@ class ParserInProcessIT : KoinTest {
         ParseTestCase("src/integration-test/resources/literal_string.lox", "hello"),
         ParseTestCase("src/integration-test/resources/grouping_expression.lox", "(group 42.47)"),
         ParseTestCase("src/integration-test/resources/grouping_string.lox", "(group hello)"),
-        ParseTestCase("src/integration-test/resources/unary_negation.lox", "(- 42)"),
+        ParseTestCase("src/integration-test/resources/unary_negation.lox", "(- 42.0)"),
         ParseTestCase("src/integration-test/resources/unary_not.lox", "(! true)"),
-        ParseTestCase("src/integration-test/resources/multiplication_test.lox", "(* 16 38)"),
-        ParseTestCase("src/integration-test/resources/division_test.lox", "(/ 38 58)"),
-        ParseTestCase("src/integration-test/resources/combined_multiplication_division_test.lox", "(/ (* 16 38) 58)"),
-        ParseTestCase("src/integration-test/resources/addition_subtraction_operators.lox", "(- (+ 52 80) 94)"),
+        ParseTestCase("src/integration-test/resources/multiplication_test.lox", "(* 16.0 38.0)"),
+        ParseTestCase("src/integration-test/resources/division_test.lox", "(/ 38.0 58.0)"),
+        ParseTestCase("src/integration-test/resources/combined_multiplication_division_test.lox", "(/ (* 16.0 38.0) 58.0)"),
+        ParseTestCase("src/integration-test/resources/addition_subtraction_operators.lox", "(- (+ 52.0 80.0) 94.0)"),
       )
   }
 
