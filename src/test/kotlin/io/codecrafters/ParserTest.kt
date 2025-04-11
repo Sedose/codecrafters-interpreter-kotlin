@@ -1,6 +1,7 @@
 package io.codecrafters
 
 import arrow.core.Either
+import arrow.core.raise.either
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.parser.Expr
@@ -18,7 +19,7 @@ class ParserTest {
     tokens: List<Token>,
     expectedExpression: Expr,
   ) {
-    when (val result = Parser(tokens).parse()) {
+    when (val result = either { Parser(tokens, this).parse() }) {
       is Either.Right -> assertEquals(expectedExpression, result.value)
       is Either.Left -> fail("Expected successful parse, but got error: ${result.value}")
     }
@@ -34,7 +35,7 @@ class ParserTest {
         provideMultiplicativeTestCases(),
         provideAdditiveTestCases(),
         provideComparisonTestCases(),
-        provideEqualityTestCases(), // Added equality test cases
+        provideEqualityTestCases(),
       ).flatten()
 
     @JvmStatic

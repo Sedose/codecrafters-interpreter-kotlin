@@ -1,6 +1,5 @@
 package io.codecrafters.tokenizer
 
-import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenizationResult
 import io.codecrafters.tokenizer.component.TokenProcessor
@@ -10,34 +9,32 @@ class Tokenizer(
   private val processors: List<TokenProcessor>,
 ) : KoinComponent {
   fun tokenize(input: String): TokenizationResult {
-    val tokens = mutableListOf<Token>()
-    val errors = mutableListOf<String>()
-    var lineNumber = 1
-    var index = 0
-
-    while (index in input.indices) {
-      val currentChar = input[index]
-      if (currentChar.isWhitespace()) {
-        if (currentChar == '\n') {
-          lineNumber++
-        }
-        index++
-        continue
+    fun process(
+      currentIndex: Int,
+      currentLine: Int,
+      collectedTokens: List<Token>,
+      collectedErrors: List<String>,
+    ): TokenizationResult {
+      if (currentIndex !in input.indices) {
+        return TokenizationResult(collectedTokens, collectedErrors)
       }
-
-      val processor = processors.firstOrNull { it.canProcess(input, index) }
-      if (processor == null) {
-        errors.add("[line $lineNumber] Error: Unexpected character: $currentChar")
-        index++
+      val currentChar = input[currentIndex]
+      return if (currentChar.isWhitespace()) {
+        val nextLine = if (currentChar == '\n') currentLine + 1 else currentLine
+        process(currentIndex + 1, nextLine, collectedTokens, collectedErrors)
       } else {
-        val result: ProcessingResult = processor.process(input, index, lineNumber)
-        result.token?.let(tokens::add)
-        result.error?.let(errors::add)
-
-        index = result.newIndex
+        val processor = processors.firstOrNull { it.canProcess(input, currentIndex) }
+        if (processor == null) {
+          val errorMessage = "[line $currentLine] Error: Unexpected character: $currentChar"
+          process(currentIndex + 1, currentLine, collectedTokens, collectedErrors + errorMessage)
+        } else {
+          val result = processor.process(input, currentIndex, currentLine)
+          val updatedTokens = result.token?.let { collectedTokens + it } ?: collectedTokens
+          val updatedErrors = result.error?.let { collectedErrors + it } ?: collectedErrors
+          process(result.newIndex, currentLine, updatedTokens, updatedErrors)
+        }
       }
     }
-
-    return TokenizationResult(tokens, errors)
+    return process(0, 1, emptyList(), emptyList())
   }
 }

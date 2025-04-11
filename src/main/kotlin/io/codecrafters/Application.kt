@@ -1,6 +1,7 @@
 package io.codecrafters
 
 import arrow.core.Either
+import arrow.core.raise.either
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.model.Token
@@ -13,6 +14,7 @@ import kotlin.system.exitProcess
 
 class Application(
   private val tokenizer: Tokenizer,
+  private val astStringifier: AstStringifier,
 ) {
   fun run(commandLineArguments: Array<String>) {
     val cliArgs = parseCliArgs(commandLineArguments)
@@ -72,7 +74,7 @@ class Application(
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
       }
 
-    when (val result = Parser(tokenList).parse()) {
+    when (val result = either { Parser(tokenList, this).parse() }) {
       is Either.Left -> {
         val error = result.value
         System.err.println("[line ${error.token.lineNumber}] Error at '${error.token.lexeme}': ${error.message}")
@@ -80,7 +82,7 @@ class Application(
       }
 
       is Either.Right -> {
-        println(AstStringifier().stringifyExpression(result.value))
+        println(astStringifier.stringifyExpression(result.value))
       }
     }
   }
