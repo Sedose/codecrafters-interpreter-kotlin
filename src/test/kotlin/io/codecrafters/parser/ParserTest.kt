@@ -1,11 +1,9 @@
-package io.codecrafters
+package io.codecrafters.parser
 
 import arrow.core.Either
 import arrow.core.raise.either
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.parser.Expr
-import io.codecrafters.parser.Parser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.params.ParameterizedTest

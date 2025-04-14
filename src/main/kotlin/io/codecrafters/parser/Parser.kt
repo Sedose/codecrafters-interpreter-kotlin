@@ -9,91 +9,120 @@ import io.codecrafters.model.TokenType
 
 private val UNARY_TOKEN_TYPES = setOf(TokenType.BANG, TokenType.MINUS)
 private val EQUALITY_OPERATORS = setOf(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL)
-private val COMPARISON_OPERATORS = setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)
+private val COMPARISON_OPERATORS =
+  setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)
 private val ADDITIVE_OPERATORS = setOf(TokenType.PLUS, TokenType.MINUS)
 private val MULTIPLICATIVE_OPERATORS = setOf(TokenType.STAR, TokenType.SLASH)
-
-data class ExpressionResult(
-  val expression: Expr,
-  val nextIndex: Int,
-)
 
 class Parser(
   private val tokens: List<Token>,
   private val raise: Raise<ParseError>,
 ) {
-  private var currentIndex: Int = 0
+  private var currentIndex = 0
 
-  fun parse(): Expr {
-    val (expression, _) = parseExpression()
-    return expression
-  }
+  fun parse(): Expr = parseExpression()
 
-  private fun parseExpression(): ExpressionResult = parseEquality()
+  private fun parseExpression(): Expr = parseEquality()
 
-  private fun parseEquality(): ExpressionResult = parseBinary(::parseComparison, EQUALITY_OPERATORS)
-
-  private fun parseComparison(): ExpressionResult = parseBinary(::parseAdditive, COMPARISON_OPERATORS)
-
-  private fun parseAdditive(): ExpressionResult = parseBinary(::parseMultiplicative, ADDITIVE_OPERATORS)
-
-  private fun parseMultiplicative(): ExpressionResult = parseBinary(::parseUnary, MULTIPLICATIVE_OPERATORS)
-
-  private fun parseBinary(
-    parseNext: () -> ExpressionResult,
-    operators: Set<TokenType>,
-  ): ExpressionResult {
-    var (left, index) = parseNext()
-
-    while (index in tokens.indices && tokens[index].type in operators) {
-      val operator = tokens[index]
-      currentIndex = index + 1
-      val (right, nextIndex) = parseNext()
-      left = Expr.Binary(left, operator, right)
-      index = nextIndex
+  private fun parseEquality(): Expr {
+    var leftExpression = parseComparison()
+    while (tokens.getOrNull(currentIndex)?.type in EQUALITY_OPERATORS) {
+      val operatorToken = advanceToken()
+      val rightExpression = parseComparison()
+      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
     }
-
-    return ExpressionResult(left, index)
+    return leftExpression
   }
 
-  private fun parseUnary(): ExpressionResult {
-    if (currentIndex in tokens.indices && tokens[currentIndex].type in UNARY_TOKEN_TYPES) {
-      val operator = tokens[currentIndex++]
-      val (right, nextIndex) = parseUnary()
-      return ExpressionResult(Expr.Unary(operator, right), nextIndex)
+  private fun parseComparison(): Expr {
+    var leftExpression = parseAdditive()
+    while (tokens.getOrNull(currentIndex)?.type in COMPARISON_OPERATORS) {
+      val operatorToken = advanceToken()
+      val rightExpression = parseAdditive()
+      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    }
+    return leftExpression
+  }
+
+  private fun parseAdditive(): Expr {
+    var leftExpression = parseMultiplicative()
+    while (tokens.getOrNull(currentIndex)?.type in ADDITIVE_OPERATORS) {
+      val operatorToken = advanceToken()
+      val rightExpression = parseMultiplicative()
+      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    }
+    return leftExpression
+  }
+
+  private fun parseMultiplicative(): Expr {
+    var leftExpression = parseUnary()
+    while (tokens.getOrNull(currentIndex)?.type in MULTIPLICATIVE_OPERATORS) {
+      val operatorToken = advanceToken()
+      val rightExpression = parseUnary()
+      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    }
+    return leftExpression
+  }
+
+  private fun parseUnary(): Expr {
+    if (tokens.getOrNull(currentIndex)?.type in UNARY_TOKEN_TYPES) {
+      val operatorToken = advanceToken()
+      val rightExpression = parseUnary()
+      return Expr.Unary(operatorToken, rightExpression)
     }
     return parsePrimary()
   }
 
-  private fun parsePrimary(): ExpressionResult {
+  private fun parsePrimary(): Expr {
     val token =
       tokens.getOrNull(currentIndex)
         ?: raise.raise(ParseError("Unexpected end of input", tokens.last()))
-
     return when (token.type) {
-      TokenType.FALSE -> ExpressionResult(Expr.Literal(false), ++currentIndex)
-      TokenType.TRUE -> ExpressionResult(Expr.Literal(true), ++currentIndex)
-      TokenType.NIL -> ExpressionResult(Expr.Literal(null), ++currentIndex)
+      TokenType.FALSE -> {
+        advanceToken()
+        Expr.Literal(false)
+      }
+
+      TokenType.TRUE -> {
+        advanceToken()
+        Expr.Literal(true)
+      }
+
+      TokenType.NIL -> {
+        advanceToken()
+        Expr.Literal(null)
+      }
+
       TokenType.NUMBER -> {
-        val value = token.lexeme.toDoubleOrNull()
-        raise.ensureNotNull(value) { ParseError("Invalid number literal '${token.lexeme}'", token) }
-        ExpressionResult(Expr.Literal(value), ++currentIndex)
+        val numberValue = token.lexeme.toDoubleOrNull()
+        raise.ensureNotNull(numberValue) { ParseError("Invalid number literal '${token.lexeme}'", token) }
+        advanceToken()
+        Expr.Literal(numberValue)
       }
+
       TokenType.STRING -> {
-        val value = token.lexeme.removeSurrounding("\"")
-        ExpressionResult(Expr.Literal(value), ++currentIndex)
+        val stringValue = token.lexeme.removeSurrounding("\"")
+        advanceToken()
+        Expr.Literal(stringValue)
       }
+
       TokenType.LEFT_PAREN -> {
-        currentIndex++
-        val (expression, _) = parseExpression()
-        val closing = tokens.getOrNull(currentIndex)
-        raise.ensure(closing?.type == TokenType.RIGHT_PAREN) {
-          ParseError("Expected ')' after expression", closing ?: token)
+        advanceToken()
+        val innerExpression = parseExpression()
+        val closingToken = tokens.getOrNull(currentIndex)
+        raise.ensure(closingToken?.type == TokenType.RIGHT_PAREN) {
+          ParseError(
+            "Expected ')' after expression",
+            closingToken ?: token,
+          )
         }
-        currentIndex++
-        ExpressionResult(Expr.Grouping(expression), currentIndex)
+        advanceToken()
+        Expr.Grouping(innerExpression)
       }
+
       else -> raise.raise(ParseError("Expected expression, found '${token.lexeme}'", token))
     }
   }
+
+  private fun advanceToken(): Token = tokens[currentIndex++]
 }

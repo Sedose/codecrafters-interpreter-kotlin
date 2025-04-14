@@ -257,5 +257,10 @@
             <version>1.14.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.lemonappdev</groupId>
+            <artifactId>konsist</artifactId>
+            <version>0.17.3</version>
+        </dependency>
     </dependencies>
 </project>
