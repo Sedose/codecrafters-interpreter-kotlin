@@ -2,11 +2,13 @@ package io.codecrafters
 
 import arrow.core.Either
 import arrow.core.raise.either
+import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.parser.AstStringifier
+import io.codecrafters.parser.Expr
 import io.codecrafters.parser.Parser
 import io.codecrafters.tokenizer.Tokenizer
 import java.io.File
@@ -27,8 +29,16 @@ class Application(
 
     when (cliArgs.command) {
       Command.TOKENIZE -> printTokens(tokens, errors)
-      Command.PARSE -> parse(tokens, errors)
-      Command.EVALUATE -> evaluate(tokens, errors)
+      Command.PARSE -> {
+        val expression = processParsedResult(tokens, errors)
+        println(astStringifier.stringifyExpression(expression))
+      }
+      Command.EVALUATE -> {
+        val expression = processParsedResult(tokens, errors)
+        val interpreter = Interpreter()
+        val evaluationResult = interpreter.evaluate(expression)
+        println(resultToLoxString(evaluationResult))
+      }
     }
   }
 
@@ -60,10 +70,10 @@ class Application(
     }
   }
 
-  private fun parse(
+  private fun processParsedResult(
     tokens: List<Token>,
     errors: List<String>,
-  ) {
+  ): Expr {
     if (errors.isNotEmpty()) {
       exitProcess(65)
     }
@@ -75,47 +85,13 @@ class Application(
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
       }
 
-    when (val result = either { Parser(tokenList, this).parse() }) {
+    return when (val result = either { Parser(tokenList, this).parse() }) {
       is Either.Left -> {
         val error = result.value
         System.err.println("[line ${error.token.lineNumber}] Error at '${error.token.lexeme}': ${error.message}")
         exitProcess(65)
       }
-
-      is Either.Right -> {
-        println(astStringifier.stringifyExpression(result.value))
-      }
-    }
-  }
-
-  private fun evaluate(
-    tokens: List<Token>,
-    errors: List<String>,
-  ) {
-    if (errors.isNotEmpty()) {
-      exitProcess(65)
-    }
-
-    val tokenList =
-      if (tokens.lastOrNull()?.type == TokenType.EOF) {
-        tokens
-      } else {
-        tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
-      }
-
-    when (val result = either { Parser(tokenList, this).parse() }) {
-      is Either.Left -> {
-        val error = result.value
-        System.err.println("[line ${error.token.lineNumber}] Error at '${error.token.lexeme}': ${error.message}")
-        exitProcess(65)
-      }
-
-      is Either.Right -> {
-        val expression = result.value
-        val interpreter = io.codecrafters.interpreter.Interpreter()
-        val evaluationResult = interpreter.evaluate(expression)
-        println(resultToLoxString(evaluationResult))
-      }
+      is Either.Right -> result.value
     }
   }
 
