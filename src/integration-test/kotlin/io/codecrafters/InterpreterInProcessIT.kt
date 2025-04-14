@@ -10,7 +10,6 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.PrintStream
 
 data class EvaluateTestCase(
   val resourcePath: String,
@@ -41,15 +40,11 @@ class InterpreterInProcessIT : KoinTest {
   @MethodSource("evaluateTestCases")
   fun `evaluate expressions and print result - in process`(testCase: EvaluateTestCase) {
     val (resourcePath, expectedOutput) = testCase
-    val stdout = ByteArrayOutputStream()
-    val originalOut = System.out
-    System.setOut(PrintStream(stdout))
-    try {
+    val capturedOutput = ByteArrayOutputStream()
+    withSystemOutRedirectedTo(capturedOutput) {
       application.run(arrayOf("evaluate", File(resourcePath).absolutePath))
-    } finally {
-      System.setOut(originalOut)
     }
-    val output = stdout.toString().trim()
+    val output = capturedOutput.toString().trim()
     assert(output == expectedOutput) {
       "Expected: $expectedOutput\nActual: $output"
     }

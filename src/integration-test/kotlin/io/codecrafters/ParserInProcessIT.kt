@@ -10,7 +10,6 @@ import org.koin.test.KoinTest
 import org.koin.test.inject
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.PrintStream
 
 data class ParseTestCase(
   val resourcePath: String,
@@ -59,15 +58,11 @@ class ParserInProcessIT : KoinTest {
   @MethodSource("parseTestCases")
   fun `parse literals and print AST - in process`(testCase: ParseTestCase) {
     val (resourcePath, expectedOutput) = testCase
-    val stdout = ByteArrayOutputStream()
-    val originalOut = System.out
-    System.setOut(PrintStream(stdout))
-    try {
+    val capturedOutput = ByteArrayOutputStream()
+    withSystemOutRedirectedTo(capturedOutput) {
       application.run(arrayOf("parse", File(resourcePath).absolutePath))
-    } finally {
-      System.setOut(originalOut)
     }
-    val output = stdout.toString().trim()
+    val output = capturedOutput.toString().trim()
     assert(output == expectedOutput) {
       "Expected: $expectedOutput\nActual: $output"
     }
