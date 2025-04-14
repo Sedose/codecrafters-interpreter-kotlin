@@ -28,6 +28,7 @@ class Application(
     when (cliArgs.command) {
       Command.TOKENIZE -> printTokens(tokens, errors)
       Command.PARSE -> parse(tokens, errors)
+      Command.EVALUATE -> evaluate(tokens, errors)
     }
   }
 
@@ -86,4 +87,41 @@ class Application(
       }
     }
   }
+
+  private fun evaluate(
+    tokens: List<Token>,
+    errors: List<String>,
+  ) {
+    if (errors.isNotEmpty()) {
+      exitProcess(65)
+    }
+
+    val tokenList =
+      if (tokens.lastOrNull()?.type == TokenType.EOF) {
+        tokens
+      } else {
+        tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
+      }
+
+    when (val result = either { Parser(tokenList, this).parse() }) {
+      is Either.Left -> {
+        val error = result.value
+        System.err.println("[line ${error.token.lineNumber}] Error at '${error.token.lexeme}': ${error.message}")
+        exitProcess(65)
+      }
+
+      is Either.Right -> {
+        val expression = result.value
+        val interpreter = io.codecrafters.interpreter.Interpreter()
+        val evaluationResult = interpreter.evaluate(expression)
+        println(resultToLoxString(evaluationResult))
+      }
+    }
+  }
+
+  private fun resultToLoxString(value: Any?): String =
+    when (value) {
+      null -> "nil"
+      else -> value.toString()
+    }
 }

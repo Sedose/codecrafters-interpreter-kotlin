@@ -60,17 +60,14 @@ class ParserInProcessIT : KoinTest {
   @MethodSource("parseTestCases")
   fun `parse literals and print AST - in process`(testCase: ParseTestCase) {
     val (resourcePath, expectedOutput) = testCase
-
     val stdout = ByteArrayOutputStream()
     val originalOut = System.out
     System.setOut(PrintStream(stdout))
-
     try {
       application.run(arrayOf("parse", File(resourcePath).absolutePath))
     } finally {
       System.setOut(originalOut)
     }
-
     val output = stdout.toString().trim()
     assert(output == expectedOutput) {
       "Expected: $expectedOutput\nActual: $output"
