@@ -1,7 +1,7 @@
 package io.codecrafters.parser
 
 class AstStringifier {
-  fun stringifyExpression(expr: Expr): String =
+  fun stringify(expr: Expr): String =
     when (expr) {
       is Expr.Literal -> {
         when (val value = expr.value) {
@@ -9,8 +9,8 @@ class AstStringifier {
           else -> value.toString()
         }
       }
-      is Expr.Grouping -> "(group ${stringifyExpression(expr.expression)})"
-      is Expr.Unary -> "(${expr.operator.lexeme} ${stringifyExpression(expr.right)})"
-      is Expr.Binary -> "(${expr.operator.lexeme} ${stringifyExpression(expr.left)} ${stringifyExpression(expr.right)})"
+      is Expr.Grouping -> "(group ${stringify(expr.expression)})"
+      is Expr.Unary -> "(${expr.operator.lexeme} ${stringify(expr.right)})"
+      is Expr.Binary -> "(${expr.operator.lexeme} ${stringify(expr.left)} ${stringify(expr.right)})"
     }
 }

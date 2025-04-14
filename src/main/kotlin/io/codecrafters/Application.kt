@@ -17,6 +17,7 @@ import kotlin.system.exitProcess
 class Application(
   private val tokenizer: Tokenizer,
   private val astStringifier: AstStringifier,
+  private val interpreter: Interpreter,
 ) {
   fun run(commandLineArguments: Array<String>) {
     val cliArgs = parseCliArgs(commandLineArguments)
@@ -30,14 +31,13 @@ class Application(
     when (cliArgs.command) {
       Command.TOKENIZE -> printTokens(tokens, errors)
       Command.PARSE -> {
-        val expression = processParsedResult(tokens, errors)
-        println(astStringifier.stringifyExpression(expression))
+        parseTokens(tokens, errors)
+          .let { astStringifier.stringify(it) }
       }
       Command.EVALUATE -> {
-        val expression = processParsedResult(tokens, errors)
-        val interpreter = Interpreter()
-        val evaluationResult = interpreter.evaluate(expression)
-        println(resultToLoxString(evaluationResult))
+        parseTokens(tokens, errors)
+          .let { interpreter.evaluate(it) }
+          .let { it.toLoxString() }
       }
     }
   }
@@ -70,21 +70,19 @@ class Application(
     }
   }
 
-  private fun processParsedResult(
+  private fun parseTokens(
     tokens: List<Token>,
     errors: List<String>,
   ): Expr {
     if (errors.isNotEmpty()) {
       exitProcess(65)
     }
-
     val tokenList =
       if (tokens.lastOrNull()?.type == TokenType.EOF) {
         tokens
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
       }
-
     return when (val result = either { Parser(tokenList, this).parse() }) {
       is Either.Left -> {
         val error = result.value
@@ -95,9 +93,9 @@ class Application(
     }
   }
 
-  private fun resultToLoxString(value: Any?): String =
-    when (value) {
+  private fun Any?.toLoxString(): String =
+    when (this) {
       null -> "nil"
-      else -> value.toString()
+      else -> this.toString()
     }
 }

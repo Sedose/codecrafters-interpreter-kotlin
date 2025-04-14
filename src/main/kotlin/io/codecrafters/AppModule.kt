@@ -1,5 +1,6 @@
 package io.codecrafters
 
+import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.parser.AstStringifier
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.component.impl.IdentifierProcessor
@@ -32,5 +33,6 @@ val appModule =
 
     single { Tokenizer(get()) }
     single { AstStringifier() }
-    single { Application(get(), get()) }
+    single { Interpreter() }
+    single { Application(get(), get(), get()) }
   }
