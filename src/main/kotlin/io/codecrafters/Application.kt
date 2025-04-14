@@ -33,11 +33,13 @@ class Application(
       Command.PARSE -> {
         parseTokens(tokens, errors)
           .let { astStringifier.stringify(it) }
+          .let { println(it) }
       }
       Command.EVALUATE -> {
         parseTokens(tokens, errors)
           .let { interpreter.evaluate(it) }
           .let { it.toLoxString() }
+          .let { println(it) }
       }
     }
   }

@@ -15,7 +15,6 @@ import java.io.PrintStream
 data class ParseTestCase(
   val resourcePath: String,
   val expectedOutput: String,
-  val expectedExitCode: Int = 0,
 )
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
