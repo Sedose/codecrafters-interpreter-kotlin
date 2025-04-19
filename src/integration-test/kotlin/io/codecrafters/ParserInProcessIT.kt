@@ -8,7 +8,6 @@ import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.context.GlobalContext.stopKoin
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import java.io.ByteArrayOutputStream
 import java.io.File
 
 data class ParseTestCase(
@@ -58,11 +57,7 @@ class ParserInProcessIT : KoinTest {
   @MethodSource("parseTestCases")
   fun `parse literals and print AST - in process`(testCase: ParseTestCase) {
     val (resourcePath, expectedOutput) = testCase
-    val capturedOutput = ByteArrayOutputStream()
-    withSystemOutRedirectedTo(capturedOutput) {
-      application.run(arrayOf("parse", File(resourcePath).absolutePath))
-    }
-    val output = capturedOutput.toString().trim()
+    val output = application.runAndCaptureOutput(arrayOf("parse", File(resourcePath).absolutePath))
     assert(output == expectedOutput) {
       "Expected: $expectedOutput\nActual: $output"
     }
