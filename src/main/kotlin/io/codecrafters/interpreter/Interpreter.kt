@@ -17,21 +17,22 @@ class Interpreter {
     val operandValue = evaluate(expression.right)
 
     return when (expression.operator.type) {
-      TokenType.MINUS -> when (operandValue) {
-        is Double -> -operandValue
-        is Int    -> -operandValue
-        else      -> throw IllegalArgumentException("Operand must be a number.")
-      }
-      TokenType.BANG  -> !isTruthy(operandValue)
-      else            ->
+      TokenType.MINUS ->
+        when (operandValue) {
+          is Double -> -operandValue
+          is Int -> -operandValue
+          else -> throw IllegalArgumentException("Operand must be a number.")
+        }
+      TokenType.BANG -> !isTruthy(operandValue)
+      else ->
         throw IllegalStateException("Unexpected unary operator ${expression.operator.lexeme}.")
     }
   }
 
   private fun isTruthy(value: Any?): Boolean =
     when (value) {
-      null        -> false
-      is Boolean  -> value
-      else        -> true
+      null -> false
+      is Boolean -> value
+      else -> true
     }
 }
