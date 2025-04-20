@@ -35,6 +35,8 @@ class InterpreterInProcessIT : KoinTest {
         EvaluateTestCase("src/integration-test/resources/literal_string.lox", "hello"),
         EvaluateTestCase("src/integration-test/resources/number_integer_test.lox", "42"),
         EvaluateTestCase("src/integration-test/resources/literal_number.lox", "42.47"),
+        EvaluateTestCase("src/integration-test/resources/unary_negation.lox", "-42"),
+        EvaluateTestCase("src/integration-test/resources/unary_not.lox", "false"),
       )
   }
 
