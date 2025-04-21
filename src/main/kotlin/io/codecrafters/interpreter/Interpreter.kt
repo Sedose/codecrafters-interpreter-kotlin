@@ -50,7 +50,7 @@ class Interpreter {
     return when (unaryExpression.operator.type) {
       TokenType.MINUS ->
         when (operandValue) {
-          is Number -> -operandValue.toDouble()
+          is Number -> (-operandValue.toDouble()).normalized()
           else -> throw IllegalArgumentException("Operand must be a number.")
         }
       TokenType.BANG -> !isTruthy(operandValue)
