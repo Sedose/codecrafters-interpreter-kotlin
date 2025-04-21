@@ -6,6 +6,15 @@ import io.codecrafters.normalized
 import io.codecrafters.parser.Expr
 
 class Interpreter {
+  private val arithmeticOperations:
+    Map<TokenType, (Double, Double) -> Double> =
+    mapOf(
+      TokenType.PLUS to Double::plus,
+      TokenType.MINUS to Double::minus,
+      TokenType.STAR to Double::times,
+      TokenType.SLASH to Double::div,
+    )
+
   fun evaluate(expression: Expr): Any? =
     when (expression) {
       is Expr.Literal -> expression.value.normalized()
@@ -16,33 +25,23 @@ class Interpreter {
 
   private fun evaluateBinary(binaryExpression: Expr.Binary): Any? {
     val (leftExpression, operatorToken, rightExpression) = binaryExpression
+    val leftValue = evaluate(leftExpression)
+    val rightValue = evaluate(rightExpression)
 
-    val leftOperand = evaluate(leftExpression)
-    val rightOperand = evaluate(rightExpression)
-
-    val leftNumber = requireNumber(leftOperand, operatorToken)
-    val rightNumber = requireNumber(rightOperand, operatorToken)
-
-    val rawResult =
-      when (operatorToken.type) {
-        TokenType.STAR -> leftNumber * rightNumber
-        TokenType.SLASH -> leftNumber / rightNumber
-        TokenType.PLUS -> leftNumber + rightNumber
-        TokenType.MINUS -> leftNumber - rightNumber
-        else -> throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
-      }
-
-    return rawResult.normalized()
-  }
-
-  private fun requireNumber(
-    value: Any?,
-    operator: Token,
-  ): Double {
-    if (value !is Number) {
-      throw IllegalArgumentException("Operand for '${operator.lexeme}' must be a number.")
+    if (operatorToken.type == TokenType.PLUS &&
+      leftValue is String &&
+      rightValue is String
+    ) {
+      return leftValue + rightValue
     }
-    return value.toDouble()
+
+    return arithmeticOperations[operatorToken.type]
+      ?.let { operation ->
+        val leftNumber = requireNumber(leftValue, operatorToken)
+        val rightNumber = requireNumber(rightValue, operatorToken)
+        operation(leftNumber, rightNumber).normalized()
+      }
+      ?: throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
   }
 
   private fun evaluateUnary(unaryExpression: Expr.Unary): Any? {
@@ -51,14 +50,21 @@ class Interpreter {
     return when (unaryExpression.operator.type) {
       TokenType.MINUS ->
         when (operandValue) {
-          is Double -> -operandValue
-          is Int -> -operandValue
+          is Number -> -operandValue.toDouble()
           else -> throw IllegalArgumentException("Operand must be a number.")
         }
       TokenType.BANG -> !isTruthy(operandValue)
       else -> throw IllegalStateException("Unexpected unary operator ${unaryExpression.operator.lexeme}.")
     }
   }
+
+  private fun requireNumber(
+    value: Any?,
+    operatorToken: Token,
+  ): Double =
+    (value as? Number)
+      ?.toDouble()
+      ?: throw IllegalArgumentException("Operand for '${operatorToken.lexeme}' must be a number.")
 
   private fun isTruthy(value: Any?): Boolean =
     when (value) {
