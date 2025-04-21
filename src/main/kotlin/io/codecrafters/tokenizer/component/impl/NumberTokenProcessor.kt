@@ -4,15 +4,12 @@ import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
-import org.koin.core.component.KoinComponent
 
-class NumberTokenProcessor :
-  TokenProcessor,
-  KoinComponent {
+class NumberTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean = index in input.indices && input[index].isDigit()
+  ): Boolean = input.getOrNull(index)?.isDigit() ?: false
 
   override fun process(
     input: String,

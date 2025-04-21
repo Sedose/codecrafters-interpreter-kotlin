@@ -2,21 +2,12 @@ package io.codecrafters.tokenizer.component.impl
 
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.tokenizer.component.TokenProcessor
-import org.koin.core.component.KoinComponent
 
-class SingleLineCommentSkipper :
-  TokenProcessor,
-  KoinComponent {
+class SingleLineCommentSkipper : TokenProcessor {
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean {
-    val nextIndex = index + 1
-    return index in input.indices &&
-      nextIndex in input.indices &&
-      input[index] == '/' &&
-      input[nextIndex] == '/'
-  }
+  ): Boolean = input.getOrNull(index) == '/' && input.getOrNull(index + 1) == '/'
 
   override fun process(
     input: String,

@@ -27,6 +27,8 @@ class Interpreter {
       when (operatorToken.type) {
         TokenType.STAR -> leftNumber * rightNumber
         TokenType.SLASH -> leftNumber / rightNumber
+        TokenType.PLUS -> leftNumber + rightNumber
+        TokenType.MINUS -> leftNumber - rightNumber
         else -> throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
       }
 

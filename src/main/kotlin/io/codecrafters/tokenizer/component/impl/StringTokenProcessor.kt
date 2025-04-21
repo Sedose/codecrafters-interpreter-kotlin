@@ -1,20 +1,18 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.isAfter
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
-import org.koin.core.component.KoinComponent
 
 private val STRING_TERMINATORS = charArrayOf('"', '\n')
 
-class StringTokenProcessor :
-  TokenProcessor,
-  KoinComponent {
+class StringTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean = index in input.indices && input[index] == '"'
+  ): Boolean = input.getOrNull(index) == '"'
 
   override fun process(
     input: String,
@@ -26,7 +24,7 @@ class StringTokenProcessor :
         .indexOfAny(STRING_TERMINATORS, startIndex = index + 1)
         .takeUnless { it == -1 }
         ?: input.length
-    if (end !in input.indices || input[end] == '\n') {
+    if (end isAfter input.lastIndex || input[end] == '\n') {
       return ProcessingResult(null, end, "[line $lineNumber] Error: Unterminated string.")
     }
     return ProcessingResult(

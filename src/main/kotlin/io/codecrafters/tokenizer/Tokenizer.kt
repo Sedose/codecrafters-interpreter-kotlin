@@ -1,21 +1,21 @@
 package io.codecrafters.tokenizer
 
+import io.codecrafters.isAfter
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenizationResult
 import io.codecrafters.tokenizer.component.TokenProcessor
-import org.koin.core.component.KoinComponent
 
 class Tokenizer(
   private val processors: List<TokenProcessor>,
-) : KoinComponent {
+) {
   fun tokenize(input: String): TokenizationResult {
-    fun process(
+    tailrec fun process(
       currentIndex: Int,
       currentLine: Int,
       collectedTokens: List<Token>,
       collectedErrors: List<String>,
     ): TokenizationResult {
-      if (currentIndex !in input.indices) {
+      if (currentIndex isAfter input.lastIndex) {
         return TokenizationResult(collectedTokens, collectedErrors)
       }
       val currentChar = input[currentIndex]
@@ -29,8 +29,14 @@ class Tokenizer(
           process(currentIndex + 1, currentLine, collectedTokens, collectedErrors + errorMessage)
         } else {
           val result = processor.process(input, currentIndex, currentLine)
-          val updatedTokens = result.token?.let { collectedTokens + it } ?: collectedTokens
-          val updatedErrors = result.error?.let { collectedErrors + it } ?: collectedErrors
+          val updatedTokens =
+            result.token
+              ?.let { collectedTokens + it }
+              ?: collectedTokens
+          val updatedErrors =
+            result.error
+              ?.let { collectedErrors + it }
+              ?: collectedErrors
           process(result.newIndex, currentLine, updatedTokens, updatedErrors)
         }
       }

@@ -40,6 +40,7 @@ class InterpreterInProcessIT : KoinTest {
         EvaluateTestCase("src/integration-test/resources/multiplication_test.lox", "608"),
         EvaluateTestCase("src/integration-test/resources/division_test.lox", "0.6551724137931034"),
         EvaluateTestCase("src/integration-test/resources/combined_multiplication_division_test.lox", "10.482758620689655"),
+        EvaluateTestCase("src/integration-test/resources/addition_subtraction_operators.lox", "38"),
       )
   }
 

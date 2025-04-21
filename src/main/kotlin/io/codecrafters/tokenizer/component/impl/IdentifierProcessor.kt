@@ -6,15 +6,12 @@ import io.codecrafters.model.RESERVED_WORDS
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
-import org.koin.core.component.KoinComponent
 
-class IdentifierProcessor :
-  TokenProcessor,
-  KoinComponent {
+class IdentifierProcessor : TokenProcessor {
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean = index in input.indices && input[index].isIdentifierChar()
+  ): Boolean = input.getOrNull(index).isIdentifierChar()
 
   override fun process(
     input: String,

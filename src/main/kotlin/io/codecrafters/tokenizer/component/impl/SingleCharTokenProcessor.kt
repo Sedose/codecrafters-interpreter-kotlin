@@ -4,15 +4,12 @@ import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.SINGLE_CHAR_TOKENS
 import io.codecrafters.model.Token
 import io.codecrafters.tokenizer.component.TokenProcessor
-import org.koin.core.component.KoinComponent
 
-class SingleCharTokenProcessor :
-  TokenProcessor,
-  KoinComponent {
+class SingleCharTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean = index in input.indices && SINGLE_CHAR_TOKENS.containsKey(input[index])
+  ): Boolean = input.getOrNull(index) in SINGLE_CHAR_TOKENS
 
   override fun process(
     input: String,

@@ -9,11 +9,7 @@ class MultiCharTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,
     index: Int,
-  ): Boolean {
-    if (index !in input.indices || index + 1 !in input.indices) return false
-    val pair = input[index] to input[index + 1]
-    return MULTI_CHAR_TOKENS.containsKey(pair)
-  }
+  ): Boolean = (input.getOrNull(index) to input.getOrNull(index + 1)) in MULTI_CHAR_TOKENS
 
   override fun process(
     input: String,
