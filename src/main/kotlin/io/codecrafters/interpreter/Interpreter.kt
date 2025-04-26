@@ -15,6 +15,15 @@ class Interpreter {
       TokenType.SLASH to Double::div,
     )
 
+  private val comparisonOperations:
+    Map<TokenType, (Double, Double) -> Boolean> =
+    mapOf(
+      TokenType.GREATER to { a, b -> a > b },
+      TokenType.GREATER_EQUAL to { a, b -> a >= b },
+      TokenType.LESS to { a, b -> a < b },
+      TokenType.LESS_EQUAL to { a, b -> a <= b },
+    )
+
   fun evaluate(expression: Expr): Any? =
     when (expression) {
       is Expr.Literal -> expression.value.normalized()
@@ -35,13 +44,15 @@ class Interpreter {
       return leftValue + rightValue
     }
 
-    return arithmeticOperations[operatorToken.type]
-      ?.let { operation ->
-        val leftNumber = requireNumber(leftValue, operatorToken)
-        val rightNumber = requireNumber(rightValue, operatorToken)
-        operation(leftNumber, rightNumber).normalized()
-      }
-      ?: throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
+    arithmeticOperations[operatorToken.type]?.let { operation ->
+      return applyBinaryOperation(leftValue, rightValue, operatorToken, operation).normalized()
+    }
+
+    comparisonOperations[operatorToken.type]?.let { operation ->
+      return applyBinaryOperation(leftValue, rightValue, operatorToken, operation)
+    }
+
+    throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
   }
 
   private fun evaluateUnary(unaryExpression: Expr.Unary): Any? {
@@ -56,6 +67,17 @@ class Interpreter {
       TokenType.BANG -> !isTruthy(operandValue)
       else -> throw IllegalStateException("Unexpected unary operator ${unaryExpression.operator.lexeme}.")
     }
+  }
+
+  private fun <T> applyBinaryOperation(
+    leftValue: Any?,
+    rightValue: Any?,
+    operatorToken: Token,
+    operation: (Double, Double) -> T,
+  ): T {
+    val leftNumber = requireNumber(leftValue, operatorToken)
+    val rightNumber = requireNumber(rightValue, operatorToken)
+    return operation(leftNumber, rightNumber)
   }
 
   private fun requireNumber(

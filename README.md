@@ -42,35 +42,3 @@ The test coverage report will be available at `target/site/jacoco/index.html`.
 And adding GitHub actions will cause the build to fail cause it would interfere with the CodeCrafters pipeline.
 
 ## Example prompt for agents like VS Code Copilot Agent Mode
-
-```
-Implement support for parsing multiplicative operators (`*` and `/`) in the interpreter. This includes the following tasks:
-
-1. **Code Implementation**:
-   - Update the `Expr` class if necessary to support multiplicative expressions.
-   - Modify the `Parser` class to handle the parsing of multiplication (`*`) and division (`/`) operators as described in Section 6.2: Recursive Descent Parsing.
-
-2. **Unit Tests**:
-   - Add unit tests in `ParserTest.kt` to verify the correct parsing of multiplicative operators (`*` and `/`).
-   - Include test cases for:
-     - Simple multiplication (e.g., `16 * 38`).
-     - Simple division (e.g., `38 / 58`).
-     - Combined multiplication and division (e.g., `16 * 38 / 58`).
-
-3. **Integration Tests**:
-   - Add integration test cases in `ParserInProcessIT.kt` to ensure the program processes multiplicative operators and outputs the correct Abstract Syntax Tree (AST).
-   - Create the following test files in `src/integration-test/resources/`:
-     - `multiplication_test.lox` with the content `16 * 38`.
-     - `division_test.lox` with the content `38 / 58`.
-     - `combined_multiplication_division_test.lox` with the content `16 * 38 / 58`.
-
-4. **Validation**:
-   - Run all unit and integration tests to ensure everything works as expected.
-   - Ensure the output format matches the specification in the book's repository (e.g., `(/ (* 16.0 38.0) 58.0)`).
-
-5. **Git**:
-   - Stage the newly created test files (`multiplication_test.lox`, `division_test.lox`, and `combined_multiplication_division_test.lox`) in git.
-
-Notes:
-- Use ./mvnw, not mvn in terminal
-```

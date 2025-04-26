@@ -42,6 +42,14 @@ class InterpreterInProcessIT : KoinTest {
         EvaluateTestCase("src/integration-test/resources/combined_multiplication_division_test.lox", "10.482758620689655"),
         EvaluateTestCase("src/integration-test/resources/addition_subtraction_operators.lox", "38"),
         EvaluateTestCase("src/integration-test/resources/string_concat.lox", "hello world!"),
+        EvaluateTestCase("src/integration-test/resources/comparison_greater.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/comparison_greater_equal.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/comparison_less.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/comparison_less_equal.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/comparison_greater_false.lox", "false"),
+        EvaluateTestCase("src/integration-test/resources/comparison_greater_equal_edge.lox", "false"),
+        EvaluateTestCase("src/integration-test/resources/comparison_decimal.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/comparison_less_equal_edge.lox", "true"),
       )
   }
 
