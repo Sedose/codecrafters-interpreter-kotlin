@@ -50,6 +50,8 @@ class InterpreterInProcessIT : KoinTest {
         EvaluateTestCase("src/integration-test/resources/comparison_greater_equal_edge.lox", "false"),
         EvaluateTestCase("src/integration-test/resources/comparison_decimal.lox", "true"),
         EvaluateTestCase("src/integration-test/resources/comparison_less_equal_edge.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/equality_equal.lox", "true"),
+        EvaluateTestCase("src/integration-test/resources/equality_not_equal.lox", "true"),
       )
   }
 

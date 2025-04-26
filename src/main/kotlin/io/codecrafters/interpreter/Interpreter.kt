@@ -24,6 +24,13 @@ class Interpreter {
       TokenType.LESS_EQUAL to { a, b -> a <= b },
     )
 
+  private val equalityOperations:
+    Map<TokenType, (Any?, Any?) -> Boolean> =
+    mapOf(
+      TokenType.EQUAL_EQUAL to { a, b -> a == b },
+      TokenType.BANG_EQUAL to { a, b -> a != b },
+    )
+
   fun evaluate(expression: Expr): Any? =
     when (expression) {
       is Expr.Literal -> expression.value.normalized()
@@ -50,6 +57,10 @@ class Interpreter {
 
     comparisonOperations[operatorToken.type]?.let { operation ->
       return applyBinaryOperation(leftValue, rightValue, operatorToken, operation)
+    }
+
+    equalityOperations[operatorToken.type]?.let { operation ->
+      return operation(leftValue, rightValue)
     }
 
     throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
