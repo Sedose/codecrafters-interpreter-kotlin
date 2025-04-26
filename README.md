@@ -24,16 +24,9 @@ For the interactive challenge experience, visit [codecrafters.io](https://codecr
 Useful commands:
 
 ```bash
-# Format code according to ktlint guidelines
-./mvnw ktlint:format
-
-# Clean, verify, and generate a test coverage report
-./mvnw clean verify
-
-# Automatically update versions in pom.xml
-./mvnw versions:use-latest-releases
-
-./mvnw install
+./mvnw versions:use-latest-releases \
+       ktlint:format \
+       install
 ```
 
 The test coverage report will be available at `target/site/jacoco/index.html`.
