@@ -2,6 +2,7 @@ package io.codecrafters.interpreter
 
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.model.TokenType.*
 import io.codecrafters.normalized
 import io.codecrafters.parser.Expr
 
@@ -9,26 +10,26 @@ class Interpreter {
   private val arithmeticOperations:
     Map<TokenType, (Double, Double) -> Double> =
     mapOf(
-      TokenType.PLUS to Double::plus,
-      TokenType.MINUS to Double::minus,
-      TokenType.STAR to Double::times,
-      TokenType.SLASH to Double::div,
+      PLUS to Double::plus,
+      MINUS to Double::minus,
+      STAR to Double::times,
+      SLASH to Double::div,
     )
 
   private val comparisonOperations:
     Map<TokenType, (Double, Double) -> Boolean> =
     mapOf(
-      TokenType.GREATER to { a, b -> a > b },
-      TokenType.GREATER_EQUAL to { a, b -> a >= b },
-      TokenType.LESS to { a, b -> a < b },
-      TokenType.LESS_EQUAL to { a, b -> a <= b },
+      GREATER to { a, b -> a > b },
+      GREATER_EQUAL to { a, b -> a >= b },
+      LESS to { a, b -> a < b },
+      LESS_EQUAL to { a, b -> a <= b },
     )
 
   private val equalityOperations:
     Map<TokenType, (Any?, Any?) -> Boolean> =
     mapOf(
-      TokenType.EQUAL_EQUAL to { a, b -> a == b },
-      TokenType.BANG_EQUAL to { a, b -> a != b },
+      EQUAL_EQUAL to { a, b -> a == b },
+      BANG_EQUAL to { a, b -> a != b },
     )
 
   fun evaluate(expression: Expr): Any? =
@@ -44,7 +45,7 @@ class Interpreter {
     val leftValue = evaluate(leftExpression)
     val rightValue = evaluate(rightExpression)
 
-    if (operatorToken.type == TokenType.PLUS &&
+    if (operatorToken.type == PLUS &&
       leftValue is String &&
       rightValue is String
     ) {
@@ -70,12 +71,13 @@ class Interpreter {
     val operandValue = evaluate(unaryExpression.right)
 
     return when (unaryExpression.operator.type) {
-      TokenType.MINUS ->
+      MINUS ->
         when (operandValue) {
           is Number -> (-operandValue.toDouble()).normalized()
           else -> throw IllegalArgumentException("Operand must be a number.")
         }
-      TokenType.BANG -> !isTruthy(operandValue)
+
+      BANG -> !isTruthy(operandValue)
       else -> throw IllegalStateException("Unexpected unary operator ${unaryExpression.operator.lexeme}.")
     }
   }
