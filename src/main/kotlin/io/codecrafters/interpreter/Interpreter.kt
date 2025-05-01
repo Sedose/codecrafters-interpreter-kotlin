@@ -1,5 +1,7 @@
 package io.codecrafters.interpreter
 
+import arrow.core.raise.Raise
+import io.codecrafters.model.InterpreterError
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.TokenType.*
@@ -32,6 +34,7 @@ class Interpreter {
       BANG_EQUAL to { a, b -> a != b },
     )
 
+  context(_: Raise<InterpreterError>)
   fun evaluate(expression: Expr): Any? =
     when (expression) {
       is Expr.Literal -> expression.value.normalized()
@@ -40,6 +43,7 @@ class Interpreter {
       is Expr.Binary -> evaluateBinary(expression)
     }
 
+  context(_: Raise<InterpreterError>)
   private fun evaluateBinary(binaryExpression: Expr.Binary): Any? {
     val (leftExpression, operatorToken, rightExpression) = binaryExpression
     val leftValue = evaluate(leftExpression)
@@ -67,6 +71,7 @@ class Interpreter {
     throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
   }
 
+  context(raise: Raise<InterpreterError>)
   private fun evaluateUnary(unaryExpression: Expr.Unary): Any? {
     val operandValue = evaluate(unaryExpression.right)
 
@@ -74,7 +79,7 @@ class Interpreter {
       MINUS ->
         when (operandValue) {
           is Number -> (-operandValue.toDouble()).normalized()
-          else -> throw IllegalArgumentException("Operand must be a number.")
+          else -> raise.raise(InterpreterError("Operand must be a number.", unaryExpression.operator.lineNumber))
         }
 
       BANG -> !isTruthy(operandValue)

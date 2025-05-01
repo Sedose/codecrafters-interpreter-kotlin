@@ -36,10 +36,16 @@ class Application(
           .let { println(it) }
       }
       Command.EVALUATE -> {
-        parseTokens(tokens, errors)
-          .let { interpreter.evaluate(it) }
-          .let { it.toLoxString() }
-          .let { println(it) }
+        val expr = parseTokens(tokens, errors)
+        val either = either { interpreter.evaluate(expr) }
+        when (either) {
+          is Either.Left -> {
+            System.err.println(either.value.message)
+            System.err.println("[line ${either.value.lineNumber}]")
+            exitProcess(70)
+          }
+          is Either.Right -> either.value.toLoxString().let { println(it) }
+        }
       }
     }
   }

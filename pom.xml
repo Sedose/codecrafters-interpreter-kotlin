@@ -59,6 +59,11 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
+                        <configuration>
+                            <args>
+                                <arg>-Xcontext-parameters</arg>
+                            </args>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
