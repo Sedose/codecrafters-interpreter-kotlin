@@ -1,7 +1,9 @@
 package io.codecrafters
 
 import arrow.core.Either
+import arrow.core.raise.ExperimentalTraceApi
 import arrow.core.raise.either
+import arrow.core.raise.traced
 import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
@@ -19,6 +21,7 @@ class Application(
   private val astStringifier: AstStringifier,
   private val interpreter: Interpreter,
 ) {
+  @OptIn(ExperimentalTraceApi::class)
   fun run(commandLineArguments: Array<String>) {
     val cliArgs = parseCliArgs(commandLineArguments)
     val (tokens, errors) =
@@ -37,7 +40,18 @@ class Application(
       }
       Command.EVALUATE -> {
         val expr = parseTokens(tokens, errors)
-        val either = either { interpreter.evaluate(expr) }
+        val either =
+          either {
+            traced(
+              block = {
+                interpreter.evaluate(expr)
+              },
+              trace = { trace, error ->
+                println("Error: $error")
+                println("Trace: $trace")
+              },
+            )
+          }
         when (either) {
           is Either.Left -> {
             System.err.println(either.value.message)
