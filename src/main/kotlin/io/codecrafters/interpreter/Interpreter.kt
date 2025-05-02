@@ -87,6 +87,7 @@ class Interpreter {
     }
   }
 
+  context(_: Raise<InterpreterError>)
   private fun <T> applyBinaryOperation(
     leftValue: Any?,
     rightValue: Any?,
@@ -98,13 +99,14 @@ class Interpreter {
     return operation(leftNumber, rightNumber)
   }
 
+  context(raise: Raise<InterpreterError>)
   private fun requireNumber(
     value: Any?,
     operatorToken: Token,
   ): Double =
     (value as? Number)
       ?.toDouble()
-      ?: throw IllegalArgumentException("Operand for '${operatorToken.lexeme}' must be a number.")
+      ?: raise.raise(InterpreterError("Operands must be numbers.", operatorToken.lineNumber))
 
   private fun isTruthy(value: Any?): Boolean =
     when (value) {
