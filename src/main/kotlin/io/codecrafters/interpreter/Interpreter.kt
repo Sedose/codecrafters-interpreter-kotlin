@@ -1,7 +1,7 @@
 package io.codecrafters.interpreter
 
 import arrow.core.raise.Raise
-import io.codecrafters.model.InterpreterError
+import io.codecrafters.model.error.InterpreterError
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.TokenType.*

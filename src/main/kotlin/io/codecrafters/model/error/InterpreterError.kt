@@ -1,4 +1,4 @@
-package io.codecrafters.model
+package io.codecrafters.model.error
 
 data class InterpreterError(
   val message: String,

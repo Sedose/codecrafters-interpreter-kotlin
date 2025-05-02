@@ -3,7 +3,7 @@ package io.codecrafters.parser
 import arrow.core.raise.Raise
 import arrow.core.raise.ensure
 import arrow.core.raise.ensureNotNull
-import io.codecrafters.model.ParseError
+import io.codecrafters.model.error.ParseError
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 
