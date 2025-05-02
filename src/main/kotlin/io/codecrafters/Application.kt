@@ -48,7 +48,7 @@ class Application(
               },
               trace = { trace, error ->
                 println("Error: $error")
-                println("Trace: $trace")
+                println("Trace: ${trace.stackTraceToString()}")
               },
             )
           }
