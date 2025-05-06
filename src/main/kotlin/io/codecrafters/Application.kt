@@ -3,12 +3,12 @@ package io.codecrafters
 import arrow.core.Either
 import arrow.core.raise.ExperimentalTraceApi
 import arrow.core.raise.either
-import arrow.core.raise.traced
 import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.model.error.InterpreterErrorWithTrace
 import io.codecrafters.parser.AstStringifier
 import io.codecrafters.parser.Expr
 import io.codecrafters.parser.Parser
@@ -40,25 +40,30 @@ class Application(
       }
       Command.EVALUATE -> {
         val expr = parseTokens(tokens, errors)
-        val either =
+        val either: Either<InterpreterErrorWithTrace, Any?> =
           either {
-            traced(
-              block = {
-                interpreter.evaluate(expr)
-              },
-              trace = { trace, error ->
-                println("Error: $error")
-                println("Trace: ${trace.stackTraceToString()}")
-              },
-            )
+            withErrorTraced(
+              transform = { trace, interpreterError ->
+                InterpreterErrorWithTrace(
+                  interpreterError = interpreterError,
+                  trace = trace
+                )
+              }
+            ) {
+              interpreter.evaluate(expr)
+            }
           }
+
         when (either) {
           is Either.Left -> {
-            System.err.println(either.value.message)
-            System.err.println("[line ${either.value.lineNumber}]")
+            System.err.println(either.value.interpreterError.message)
+            System.err.println("[line ${either.value.interpreterError.lineNumber}]")
+            System.err.println("Trace: ${either.value.trace.stackTraceToString()}")
             exitProcess(70)
           }
-          is Either.Right -> either.value.toLoxString().let { println(it) }
+          is Either.Right -> {
+            println(either.value.toLoxString())
+          }
         }
       }
     }
