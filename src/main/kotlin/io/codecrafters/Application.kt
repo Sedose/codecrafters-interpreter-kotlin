@@ -1,14 +1,12 @@
 package io.codecrafters
 
-import arrow.core.Either
-import arrow.core.raise.ExperimentalTraceApi
-import arrow.core.raise.either
 import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.model.error.InterpreterErrorWithTrace
+import io.codecrafters.model.error.InterpreterException
+import io.codecrafters.model.error.ParseException
 import io.codecrafters.parser.AstStringifier
 import io.codecrafters.parser.Expr
 import io.codecrafters.parser.Parser
@@ -21,7 +19,6 @@ class Application(
   private val astStringifier: AstStringifier,
   private val interpreter: Interpreter,
 ) {
-  @OptIn(ExperimentalTraceApi::class)
   fun run(commandLineArguments: Array<String>) {
     val cliArgs = parseCliArgs(commandLineArguments)
     val (tokens, errors) =
@@ -40,30 +37,14 @@ class Application(
       }
       Command.EVALUATE -> {
         val expr = parseTokens(tokens, errors)
-        val either: Either<InterpreterErrorWithTrace, Any?> =
-          either {
-            withErrorTraced(
-              transform = { trace, interpreterError ->
-                InterpreterErrorWithTrace(
-                  interpreterError = interpreterError,
-                  trace = trace
-                )
-              }
-            ) {
-              interpreter.evaluate(expr)
-            }
-          }
-
-        when (either) {
-          is Either.Left -> {
-            System.err.println(either.value.interpreterError.message)
-            System.err.println("[line ${either.value.interpreterError.lineNumber}]")
-            System.err.println("Trace: ${either.value.trace.stackTraceToString()}")
-            exitProcess(70)
-          }
-          is Either.Right -> {
-            println(either.value.toLoxString())
-          }
+        try {
+          val result = interpreter.evaluate(expr)
+          result.toLoxString().let(::println)
+        } catch (e: InterpreterException) {
+          System.err.println(e.message)
+          System.err.println("[line ${e.lineNumber}]")
+          System.err.println("Trace: ${e.stackTraceToString()}")
+          exitProcess(70)
         }
       }
     }
@@ -110,13 +91,11 @@ class Application(
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
       }
-    return when (val result = either { Parser(tokenList, this).parse() }) {
-      is Either.Left -> {
-        val error = result.value
-        System.err.println("[line ${error.token.lineNumber}] Error at '${error.token.lexeme}': ${error.message}")
-        exitProcess(65)
-      }
-      is Either.Right -> result.value
+    try {
+      return Parser(tokenList).parse()
+    } catch (e: ParseException) {
+      System.err.println("[line ${e.token.lineNumber}] Error at '${e.token.lexeme}': ${e.message}")
+      exitProcess(65)
     }
   }
 

@@ -1,11 +1,8 @@
 package io.codecrafters.parser
 
-import arrow.core.raise.Raise
-import arrow.core.raise.ensure
-import arrow.core.raise.ensureNotNull
-import io.codecrafters.model.error.ParseError
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.model.error.ParseException
 
 private val UNARY_TOKEN_TYPES = setOf(TokenType.BANG, TokenType.MINUS)
 private val EQUALITY_OPERATORS = setOf(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL)
@@ -16,7 +13,6 @@ private val MULTIPLICATIVE_OPERATORS = setOf(TokenType.STAR, TokenType.SLASH)
 
 class Parser(
   private val tokens: List<Token>,
-  private val raise: Raise<ParseError>,
 ) {
   private var currentIndex = 0
 
@@ -76,7 +72,7 @@ class Parser(
   private fun parsePrimary(): Expr {
     val token =
       tokens.getOrNull(currentIndex)
-        ?: raise.raise(ParseError("Unexpected end of input", tokens.last()))
+        ?: throw ParseException("Unexpected end of input", tokens.last())
     return when (token.type) {
       TokenType.FALSE -> {
         advanceToken()
@@ -95,7 +91,9 @@ class Parser(
 
       TokenType.NUMBER -> {
         val numberValue = token.lexeme.toDoubleOrNull()
-        raise.ensureNotNull(numberValue) { ParseError("Invalid number literal '${token.lexeme}'", token) }
+        if (numberValue == null) {
+          throw ParseException("Invalid number literal '${token.lexeme}'", token)
+        }
         advanceToken()
         Expr.Literal(numberValue)
       }
@@ -110,8 +108,8 @@ class Parser(
         advanceToken()
         val innerExpression = parseExpression()
         val closingToken = tokens.getOrNull(currentIndex)
-        raise.ensure(closingToken?.type == TokenType.RIGHT_PAREN) {
-          ParseError(
+        if (closingToken?.type != TokenType.RIGHT_PAREN) {
+          throw ParseException(
             "Expected ')' after expression",
             closingToken ?: token,
           )
@@ -120,7 +118,7 @@ class Parser(
         Expr.Grouping(innerExpression)
       }
 
-      else -> raise.raise(ParseError("Expected expression, found '${token.lexeme}'", token))
+      else -> throw ParseException("Expected expression, found '${token.lexeme}'", token)
     }
   }
 

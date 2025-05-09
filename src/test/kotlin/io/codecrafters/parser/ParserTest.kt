@@ -1,9 +1,8 @@
 package io.codecrafters.parser
 
-import arrow.core.Either
-import arrow.core.raise.either
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
+import io.codecrafters.model.error.ParseException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,9 +16,11 @@ class ParserTest {
     tokens: List<Token>,
     expectedExpression: Expr,
   ) {
-    when (val result = either { Parser(tokens, this).parse() }) {
-      is Either.Right -> assertEquals(expectedExpression, result.value)
-      is Either.Left -> fail("Expected successful parse, but got error: ${result.value}")
+    try {
+      val result = Parser(tokens).parse()
+      assertEquals(expectedExpression, result)
+    } catch (e: ParseException) {
+      fail("Expected successful parse, but got error: ${e.message}")
     }
   }
 
