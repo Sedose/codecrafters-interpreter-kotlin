@@ -5,14 +5,14 @@ import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.model.error.InterpreterException
-import io.codecrafters.model.error.ParseException
+import io.codecrafters.model.error.NotEnoughCliArgsException
+import io.codecrafters.model.error.TokenizationErrorsDetectedException
+import io.codecrafters.model.error.UnknownCommandException
 import io.codecrafters.parser.AstStringifier
 import io.codecrafters.parser.Expr
 import io.codecrafters.parser.Parser
 import io.codecrafters.tokenizer.Tokenizer
 import java.io.File
-import kotlin.system.exitProcess
 
 class Application(
   private val tokenizer: Tokenizer,
@@ -37,30 +37,21 @@ class Application(
       }
       Command.EVALUATE -> {
         val expr = parseTokens(tokens, errors)
-        try {
-          val result = interpreter.evaluate(expr)
-          result.toLoxString().let(::println)
-        } catch (e: InterpreterException) {
-          System.err.println(e.message)
-          System.err.println("[line ${e.lineNumber}]")
-          System.err.println("Trace: ${e.stackTraceToString()}")
-          exitProcess(70)
-        }
+        val result = interpreter.evaluate(expr)
+        result.toLoxString().let(::println)
       }
     }
   }
 
   private fun parseCliArgs(args: Array<String>): CliArgs {
     if (args.size < 2) {
-      System.err.println("Usage: ./your_program.sh <command> <filename>")
-      exitProcess(1)
+      throw NotEnoughCliArgsException()
     }
     val (commandString, filename) = args
     val command =
       Command.parse(commandString)
         ?: run {
-          System.err.println("Unknown command: $commandString")
-          exitProcess(1)
+          throw UnknownCommandException(commandString)
         }
     return CliArgs(command, filename)
   }
@@ -74,7 +65,7 @@ class Application(
     }
     println("EOF  null")
     if (errors.isNotEmpty()) {
-      exitProcess(65)
+      throw TokenizationErrorsDetectedException()
     }
   }
 
@@ -83,7 +74,7 @@ class Application(
     errors: List<String>,
   ): Expr {
     if (errors.isNotEmpty()) {
-      exitProcess(65)
+      throw TokenizationErrorsDetectedException()
     }
     val tokenList =
       if (tokens.lastOrNull()?.type == TokenType.EOF) {
@@ -91,12 +82,7 @@ class Application(
       } else {
         tokens + Token(type = TokenType.EOF, lexeme = "", literal = null, lineNumber = -1)
       }
-    try {
-      return Parser(tokenList).parse()
-    } catch (e: ParseException) {
-      System.err.println("[line ${e.token.lineNumber}] Error at '${e.token.lexeme}': ${e.message}")
-      exitProcess(65)
-    }
+    return Parser(tokenList).parse()
   }
 
   private fun Any?.toLoxString(): String =
