@@ -4,6 +4,7 @@ enum class Command {
   TOKENIZE,
   PARSE,
   EVALUATE,
+  RUN,
   ;
 
   companion object {

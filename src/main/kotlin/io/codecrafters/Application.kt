@@ -40,6 +40,7 @@ class Application(
         val result = interpreter.evaluate(expr)
         result.toLoxString().let(::println)
       }
+      Command.RUN -> TODO("Run command is not implemented!!!")
     }
   }
 
