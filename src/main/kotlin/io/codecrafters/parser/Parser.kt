@@ -1,5 +1,7 @@
 package io.codecrafters.parser
 
+import io.codecrafters.model.Expr
+import io.codecrafters.model.Stmt
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.error.ParseException
@@ -11,116 +13,142 @@ private val COMPARISON_OPERATORS =
 private val ADDITIVE_OPERATORS = setOf(TokenType.PLUS, TokenType.MINUS)
 private val MULTIPLICATIVE_OPERATORS = setOf(TokenType.STAR, TokenType.SLASH)
 
+/**
+ * Hand-rolled recursive-descent parser.
+ */
 class Parser(
   private val tokens: List<Token>,
 ) {
   private var currentIndex = 0
+
+  fun parseProgram(): List<Stmt> {
+    val statements = mutableListOf<Stmt>()
+    while (!isAtEnd()) statements += parseStatement()
+    return statements
+  }
+
+  private fun parseStatement(): Stmt =
+    if (check(TokenType.PRINT)) {
+      advance()
+      parsePrintStatement()
+    } else {
+      parseExpressionStatement()
+    }
+
+  private fun parsePrintStatement(): Stmt {
+    val value = parseExpression()
+    consume(TokenType.SEMICOLON, "Expect ';' after value.")
+    return Stmt.Print(value)
+  }
+
+  private fun parseExpressionStatement(): Stmt {
+    val value = parseExpression()
+    consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+    return Stmt.Expression(value)
+  }
 
   fun parse(): Expr = parseExpression()
 
   private fun parseExpression(): Expr = parseEquality()
 
   private fun parseEquality(): Expr {
-    var leftExpression = parseComparison()
-    while (tokens.getOrNull(currentIndex)?.type in EQUALITY_OPERATORS) {
-      val operatorToken = advanceToken()
-      val rightExpression = parseComparison()
-      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    var expr = parseComparison()
+    while (check(*EQUALITY_OPERATORS.toTypedArray())) {
+      val operator = advance()
+      val right = parseComparison()
+      expr = Expr.Binary(expr, operator, right)
     }
-    return leftExpression
+    return expr
   }
 
   private fun parseComparison(): Expr {
-    var leftExpression = parseAdditive()
-    while (tokens.getOrNull(currentIndex)?.type in COMPARISON_OPERATORS) {
-      val operatorToken = advanceToken()
-      val rightExpression = parseAdditive()
-      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    var expr = parseAdditive()
+    while (check(*COMPARISON_OPERATORS.toTypedArray())) {
+      val operator = advance()
+      val right = parseAdditive()
+      expr = Expr.Binary(expr, operator, right)
     }
-    return leftExpression
+    return expr
   }
 
   private fun parseAdditive(): Expr {
-    var leftExpression = parseMultiplicative()
-    while (tokens.getOrNull(currentIndex)?.type in ADDITIVE_OPERATORS) {
-      val operatorToken = advanceToken()
-      val rightExpression = parseMultiplicative()
-      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    var expr = parseMultiplicative()
+    while (check(*ADDITIVE_OPERATORS.toTypedArray())) {
+      val operator = advance()
+      val right = parseMultiplicative()
+      expr = Expr.Binary(expr, operator, right)
     }
-    return leftExpression
+    return expr
   }
 
   private fun parseMultiplicative(): Expr {
-    var leftExpression = parseUnary()
-    while (tokens.getOrNull(currentIndex)?.type in MULTIPLICATIVE_OPERATORS) {
-      val operatorToken = advanceToken()
-      val rightExpression = parseUnary()
-      leftExpression = Expr.Binary(leftExpression, operatorToken, rightExpression)
+    var expr = parseUnary()
+    while (check(*MULTIPLICATIVE_OPERATORS.toTypedArray())) {
+      val operator = advance()
+      val right = parseUnary()
+      expr = Expr.Binary(expr, operator, right)
     }
-    return leftExpression
+    return expr
   }
 
-  private fun parseUnary(): Expr {
-    if (tokens.getOrNull(currentIndex)?.type in UNARY_TOKEN_TYPES) {
-      val operatorToken = advanceToken()
-      val rightExpression = parseUnary()
-      return Expr.Unary(operatorToken, rightExpression)
+  private fun parseUnary(): Expr =
+    if (check(*UNARY_TOKEN_TYPES.toTypedArray())) {
+      val operator = advance()
+      val right = parseUnary()
+      Expr.Unary(operator, right)
+    } else {
+      parsePrimary()
     }
-    return parsePrimary()
-  }
 
   private fun parsePrimary(): Expr {
     val token =
-      tokens.getOrNull(currentIndex)
-        ?: throw ParseException("Unexpected end of input", tokens.last())
+      peek()
+        ?: throw ParseException("Unexpected end of input.", tokens.last())
+
     return when (token.type) {
       TokenType.FALSE -> {
-        advanceToken()
+        advance()
         Expr.Literal(false)
       }
-
       TokenType.TRUE -> {
-        advanceToken()
+        advance()
         Expr.Literal(true)
       }
-
       TokenType.NIL -> {
-        advanceToken()
+        advance()
         Expr.Literal(null)
       }
-
       TokenType.NUMBER -> {
-        val numberValue = token.lexeme.toDoubleOrNull()
-        if (numberValue == null) {
-          throw ParseException("Invalid number literal '${token.lexeme}'", token)
-        }
-        advanceToken()
-        Expr.Literal(numberValue)
+        advance()
+        Expr.Literal(token.lexeme.toDouble())
       }
-
       TokenType.STRING -> {
-        val stringValue = token.lexeme.removeSurrounding("\"")
-        advanceToken()
-        Expr.Literal(stringValue)
+        advance()
+        Expr.Literal(token.lexeme.removeSurrounding("\""))
       }
-
       TokenType.LEFT_PAREN -> {
-        advanceToken()
-        val innerExpression = parseExpression()
-        val closingToken = tokens.getOrNull(currentIndex)
-        if (closingToken?.type != TokenType.RIGHT_PAREN) {
-          throw ParseException(
-            "Expected ')' after expression",
-            closingToken ?: token,
-          )
-        }
-        advanceToken()
-        Expr.Grouping(innerExpression)
+        advance()
+        val inner = parseExpression()
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
+        Expr.Grouping(inner)
       }
-
-      else -> throw ParseException("Expected expression, found '${token.lexeme}'", token)
+      else -> throw ParseException("Expected expression, found '${token.lexeme}'.", token)
     }
   }
 
-  private fun advanceToken(): Token = tokens[currentIndex++]
+  private fun consume(
+    type: TokenType,
+    message: String,
+  ): Token {
+    if (check(type)) return advance()
+    throw ParseException(message, peek()!!)
+  }
+
+  private fun check(vararg types: TokenType): Boolean = !isAtEnd() && types.any { peek()!!.type == it }
+
+  private fun advance(): Token = tokens[currentIndex++]
+
+  private fun peek(): Token? = tokens.getOrNull(currentIndex)
+
+  private fun isAtEnd(): Boolean = peek()?.type == TokenType.EOF
 }

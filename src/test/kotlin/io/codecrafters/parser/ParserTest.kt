@@ -1,5 +1,6 @@
 package io.codecrafters.parser
 
+import io.codecrafters.model.Expr
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.error.ParseException

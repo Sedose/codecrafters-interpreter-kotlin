@@ -42,3 +42,14 @@ The test coverage report will be available at `target/site/jacoco/index.html`.
 And adding GitHub actions will cause the build to fail cause it would interfere with the CodeCrafters pipeline.
 
 ## Example prompt for agents like VS Code Copilot Agent Mode
+
+## Standard LLM Dev workflow
+- Run put_kotlin_to_clipboard.py
+- Paste it to LLM window
+- Copy requirements from app.codecrafters.io
+- Paste it to LLM window
+- Copy a relevant https://craftinginterpreters.com/ book section
+- Paste it to LLM window
+- Submit all of that to LLM like OpenAPI o3
+- As a developer, review Proposed changes
+- Incorporate them into the codebase

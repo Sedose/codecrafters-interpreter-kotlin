@@ -1,5 +1,7 @@
 package io.codecrafters.parser
 
+import io.codecrafters.model.Expr
+
 class AstStringifier {
   fun stringify(expr: Expr): String =
     when (expr) {

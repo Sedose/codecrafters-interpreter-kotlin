@@ -1,6 +1,4 @@
-package io.codecrafters.parser
-
-import io.codecrafters.model.Token
+package io.codecrafters.model
 
 sealed class Expr {
   data class Literal(

@@ -1,12 +1,15 @@
 package io.codecrafters.interpreter
 
+import io.codecrafters.model.Expr
+import io.codecrafters.model.Stmt
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.error.InterpreterException
 import io.codecrafters.normalized
-import io.codecrafters.parser.Expr
 
-class Interpreter {
+class Interpreter(
+  private val output: (String) -> Unit = ::println,
+) {
   private val arithmeticOperations:
     Map<TokenType, (Double, Double) -> Double> =
     mapOf(
@@ -40,71 +43,68 @@ class Interpreter {
       is Expr.Binary -> evaluateBinary(expression)
     }
 
-  private fun evaluateBinary(binaryExpression: Expr.Binary): Any? {
-    val (leftExpression, operatorToken, rightExpression) = binaryExpression
-    val leftValue = evaluate(leftExpression)
-    val rightValue = evaluate(rightExpression)
+  private fun evaluateUnary(expr: Expr.Unary): Any? {
+    val right = evaluate(expr.right)
+    return when (expr.operator.type) {
+      TokenType.MINUS -> {
+        val num = requireNumber(right, expr.operator)
+        (-num).normalized()
+      }
+      TokenType.BANG -> !isTruthy(right)
+      else -> throw IllegalStateException("Unexpected unary operator ${expr.operator.lexeme}.")
+    }
+  }
 
-    if (operatorToken.type == TokenType.PLUS &&
-      leftValue is String &&
-      rightValue is String
+  private fun evaluateBinary(expr: Expr.Binary): Any? {
+    val left = evaluate(expr.left)
+    val right = evaluate(expr.right)
+
+    if (expr.operator.type == TokenType.PLUS &&
+      left is String &&
+      right is String
     ) {
-      return leftValue + rightValue
+      return left + right
     }
 
-    arithmeticOperations[operatorToken.type]?.let { operation ->
-      return applyBinaryOperation(leftValue, rightValue, operatorToken, operation).normalized()
+    arithmeticOperations[expr.operator.type]?.let { op ->
+      return op(requireNumber(left, expr.operator), requireNumber(right, expr.operator)).normalized()
     }
-
-    comparisonOperations[operatorToken.type]?.let { operation ->
-      return applyBinaryOperation(leftValue, rightValue, operatorToken, operation)
+    comparisonOperations[expr.operator.type]?.let { op ->
+      return op(requireNumber(left, expr.operator), requireNumber(right, expr.operator))
     }
-
-    equalityOperations[operatorToken.type]?.let { operation ->
-      return operation(leftValue, rightValue)
+    equalityOperations[expr.operator.type]?.let { op ->
+      return op(left, right)
     }
-
-    throw IllegalStateException("Unexpected operator '${operatorToken.lexeme}'.")
-  }
-
-  private fun evaluateUnary(unaryExpression: Expr.Unary): Any? {
-    val operandValue = evaluate(unaryExpression.right)
-
-    return when (unaryExpression.operator.type) {
-      TokenType.MINUS ->
-        when (operandValue) {
-          is Number -> (-operandValue.toDouble()).normalized()
-          else -> throw InterpreterException("Operand must be a number.", unaryExpression.operator.lineNumber)
-        }
-
-      TokenType.BANG -> !isTruthy(operandValue)
-      else -> throw IllegalStateException("Unexpected unary operator ${unaryExpression.operator.lexeme}.")
-    }
-  }
-
-  private fun <T> applyBinaryOperation(
-    leftValue: Any?,
-    rightValue: Any?,
-    operatorToken: Token,
-    operation: (Double, Double) -> T,
-  ): T {
-    val leftNumber = requireNumber(leftValue, operatorToken)
-    val rightNumber = requireNumber(rightValue, operatorToken)
-    return operation(leftNumber, rightNumber)
+    throw IllegalStateException("Unexpected operator '${expr.operator.lexeme}'.")
   }
 
   private fun requireNumber(
     value: Any?,
-    operatorToken: Token,
+    token: Token,
   ): Double =
-    (value as? Number)
-      ?.toDouble()
-      ?: throw InterpreterException("Operands must be numbers.", operatorToken.lineNumber)
+    (value as? Number)?.toDouble()
+      ?: throw InterpreterException("Operand must be a number.", token.lineNumber)
 
   private fun isTruthy(value: Any?): Boolean =
     when (value) {
       null -> false
       is Boolean -> value
       else -> true
+    }
+
+  fun interpret(statements: List<Stmt>) {
+    for (stmt in statements) execute(stmt)
+  }
+
+  private fun execute(statement: Stmt) =
+    when (statement) {
+      is Stmt.Expression -> evaluate(statement.expression)
+      is Stmt.Print -> output(evaluate(statement.expression).toLoxString())
+    }
+
+  private fun Any?.toLoxString(): String =
+    when (this) {
+      null -> "nil"
+      else -> toString()
     }
 }
