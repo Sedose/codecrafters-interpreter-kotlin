@@ -6,8 +6,6 @@ import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
 
-private val STRING_TERMINATORS = charArrayOf('"', '\n')
-
 class StringTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,
@@ -19,23 +17,29 @@ class StringTokenProcessor : TokenProcessor {
     index: Int,
     lineNumber: Int,
   ): ProcessingResult {
-    val end =
-      input
-        .indexOfAny(STRING_TERMINATORS, startIndex = index + 1)
-        .takeUnless { it == -1 }
-        ?: input.length
-    if (end isAfter input.lastIndex || input[end] == '\n') {
-      return ProcessingResult(null, end, "[line $lineNumber] Error: Unterminated string.")
+    var current = index + 1
+    while (current <= input.lastIndex && input[current] != '"') {
+      current += 1
     }
+
+    if (current isAfter input.lastIndex) {
+      return ProcessingResult(
+        token = null,
+        newIndex = current,
+        error = "[line $lineNumber] Error: Unterminated string.",
+      )
+    }
+
+    val lexeme = input.substring(index, current + 1)
     return ProcessingResult(
       token =
         Token(
-          TokenType.STRING,
-          input.substring(index, end + 1),
-          input.substring(index + 1, end),
-          lineNumber,
+          type = TokenType.STRING,
+          lexeme = lexeme,
+          literal = lexeme.substring(1, lexeme.lastIndex),
+          lineNumber = lineNumber,
         ),
-      newIndex = end + 1,
+      newIndex = current + 1,
       error = null,
     )
   }

@@ -132,16 +132,5 @@ class StringTokenProcessorTest {
           ),
         ),
       ),
-      Arguments.of(
-        Named.of(
-          "Unterminated before newline",
-          ErrorProcessCase(
-            input = "\"line1\nline2\"",
-            startIndex = 0,
-            expectedNewIndex = 6,
-            expectedError = "[line 1] Error: Unterminated string.",
-          ),
-        ),
-      ),
     )
 }
