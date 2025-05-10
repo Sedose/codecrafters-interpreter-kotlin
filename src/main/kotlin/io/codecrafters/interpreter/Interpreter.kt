@@ -1,6 +1,7 @@
 package io.codecrafters.interpreter
 
 import io.codecrafters.model.Expr
+import io.codecrafters.model.StdoutSink
 import io.codecrafters.model.Stmt
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
@@ -8,7 +9,7 @@ import io.codecrafters.model.error.InterpreterException
 import io.codecrafters.normalized
 
 class Interpreter(
-  private val output: (String) -> Unit = ::println,
+  private val stdout: StdoutSink,
 ) {
   private val arithmeticOperations:
     Map<TokenType, (Double, Double) -> Double> =
@@ -99,7 +100,7 @@ class Interpreter(
   private fun execute(statement: Stmt) =
     when (statement) {
       is Stmt.Expression -> evaluate(statement.expression)
-      is Stmt.Print -> output(evaluate(statement.expression).toLoxString())
+      is Stmt.Print -> stdout.write(evaluate(statement.expression).toLoxString())
     }
 
   private fun Any?.toLoxString(): String =
