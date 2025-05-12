@@ -11,6 +11,8 @@ import io.codecrafters.normalized
 class Interpreter(
   private val stdout: StdoutSink,
 ) {
+  private val globals = mutableMapOf<String, Any?>()
+
   private val arithmeticOperations:
     Map<TokenType, (Double, Double) -> Double> =
     mapOf(
@@ -42,7 +44,14 @@ class Interpreter(
       is Expr.Grouping -> evaluate(expression.expression)
       is Expr.Unary -> evaluateUnary(expression)
       is Expr.Binary -> evaluateBinary(expression)
+      is Expr.Variable -> getVariable(expression.name)
     }
+
+  private fun getVariable(name: Token): Any? =
+    globals[name.lexeme] ?: throw InterpreterException(
+      "Undefined variable '${name.lexeme}'.",
+      name.lineNumber,
+    )
 
   private fun evaluateUnary(expr: Expr.Unary): Any? {
     val right = evaluate(expr.right)
@@ -101,6 +110,10 @@ class Interpreter(
     when (statement) {
       is Stmt.Expression -> evaluate(statement.expression)
       is Stmt.Print -> stdout.write(evaluate(statement.expression).toLoxString())
+      is Stmt.Var -> {
+        val value = statement.initializer?.let(this::evaluate)
+        globals[statement.name.lexeme] = value
+      }
     }
 
   private fun Any?.toLoxString(): String =

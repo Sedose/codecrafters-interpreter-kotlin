@@ -1,5 +1,6 @@
 package io.codecrafters
 
+import io.codecrafters.application.Application
 import io.codecrafters.model.error.InterpreterException
 import io.codecrafters.model.error.NotEnoughCliArgsException
 import io.codecrafters.model.error.ParseException

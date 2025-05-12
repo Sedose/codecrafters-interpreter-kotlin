@@ -1,10 +1,11 @@
 package io.codecrafters
 
-import io.codecrafters.command.CommandHandler
-import io.codecrafters.command.EvaluateCommandHandler
-import io.codecrafters.command.ParseCommandHandler
-import io.codecrafters.command.RunCommandHandler
-import io.codecrafters.command.TokenizeCommandHandler
+import io.codecrafters.application.Application
+import io.codecrafters.application.command.CommandHandler
+import io.codecrafters.application.command.EvaluateCommandHandler
+import io.codecrafters.application.command.ParseCommandHandler
+import io.codecrafters.application.command.RunCommandHandler
+import io.codecrafters.application.command.TokenizeCommandHandler
 import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.model.Command
 import io.codecrafters.model.StderrSink

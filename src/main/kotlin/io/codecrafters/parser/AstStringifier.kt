@@ -14,5 +14,6 @@ class AstStringifier {
       is Expr.Grouping -> "(group ${stringify(expr.expression)})"
       is Expr.Unary -> "(${expr.operator.lexeme} ${stringify(expr.right)})"
       is Expr.Binary -> "(${expr.operator.lexeme} ${stringify(expr.left)} ${stringify(expr.right)})"
+      is Expr.Variable -> expr.name.lexeme
     }
 }

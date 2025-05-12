@@ -21,19 +21,38 @@ class Parser(
 ) {
   private var currentIndex = 0
 
-  fun parseProgram(): List<Stmt> {
-    val statements = mutableListOf<Stmt>()
-    while (!isAtEnd()) statements += parseStatement()
-    return statements
-  }
+  fun parseProgram(): List<Stmt> =
+    buildList {
+      while (!isAtEnd()) {
+        add(parseStatement())
+      }
+    }
 
   private fun parseStatement(): Stmt =
-    if (check(TokenType.PRINT)) {
-      advance()
-      parsePrintStatement()
-    } else {
-      parseExpressionStatement()
+    when {
+      check(TokenType.VAR) -> {
+        advance()
+        parseVarDeclaration()
+      }
+      check(TokenType.PRINT) -> {
+        advance()
+        parsePrintStatement()
+      }
+      else -> parseExpressionStatement()
     }
+
+  private fun parseVarDeclaration(): Stmt {
+    val name = consume(TokenType.IDENTIFIER, "Expect variable name.")
+    val initializer =
+      if (check(TokenType.EQUAL)) {
+        advance()
+        parseExpression()
+      } else {
+        null
+      }
+    consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+    return Stmt.Var(name, initializer)
+  }
 
   private fun parsePrintStatement(): Stmt {
     val value = parseExpression()
@@ -110,28 +129,39 @@ class Parser(
         advance()
         Expr.Literal(false)
       }
+
       TokenType.TRUE -> {
         advance()
         Expr.Literal(true)
       }
+
       TokenType.NIL -> {
         advance()
         Expr.Literal(null)
       }
+
       TokenType.NUMBER -> {
         advance()
         Expr.Literal(token.lexeme.toDouble())
       }
+
       TokenType.STRING -> {
         advance()
         Expr.Literal(token.lexeme.removeSurrounding("\""))
       }
+
       TokenType.LEFT_PAREN -> {
         advance()
         val inner = parseExpression()
         consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.")
         Expr.Grouping(inner)
       }
+
+      TokenType.IDENTIFIER -> {
+        advance()
+        Expr.Variable(token)
+      }
+
       else -> throw ParseException("Expected expression, found '${token.lexeme}'.", token)
     }
   }

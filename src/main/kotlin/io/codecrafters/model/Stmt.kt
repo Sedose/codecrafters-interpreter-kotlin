@@ -8,4 +8,9 @@ sealed class Stmt {
   data class Print(
     val expression: Expr,
   ) : Stmt()
+
+  data class Var(
+    val name: Token,
+    val initializer: Expr?,
+  ) : Stmt()
 }

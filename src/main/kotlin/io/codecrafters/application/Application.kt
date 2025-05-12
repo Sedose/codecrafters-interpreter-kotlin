@@ -1,6 +1,6 @@
-package io.codecrafters
+package io.codecrafters.application
 
-import io.codecrafters.command.CommandHandler
+import io.codecrafters.application.command.CommandHandler
 import io.codecrafters.model.CliArgs
 import io.codecrafters.model.Command
 import io.codecrafters.model.StderrSink
@@ -36,7 +36,7 @@ class Application(
     }
     val (commandString, filename) = args
     val command =
-      Command.parse(commandString)
+      Command.Companion.parse(commandString)
         ?: throw UnknownCommandException(commandString)
     return CliArgs(command, filename)
   }

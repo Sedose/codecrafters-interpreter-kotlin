@@ -1,5 +1,6 @@
 package io.codecrafters
 
+import io.codecrafters.application.Application
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.io.PrintStream

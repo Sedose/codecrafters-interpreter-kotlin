@@ -1,4 +1,4 @@
-package io.codecrafters.command
+package io.codecrafters.application.command
 
 import io.codecrafters.interpreter.Interpreter
 import io.codecrafters.model.Stmt
