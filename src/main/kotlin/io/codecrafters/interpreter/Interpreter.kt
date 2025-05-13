@@ -47,6 +47,10 @@ class Interpreter(
       is Expr.Variable -> getVariable(expression.name)
     }
 
+  fun interpret(statements: List<Stmt>) {
+    for (stmt in statements) execute(stmt)
+  }
+
   private fun getVariable(name: Token): Any? =
     globals[name.lexeme] ?: throw InterpreterException(
       "Undefined variable '${name.lexeme}'.",
@@ -101,10 +105,6 @@ class Interpreter(
       is Boolean -> value
       else -> true
     }
-
-  fun interpret(statements: List<Stmt>) {
-    for (stmt in statements) execute(stmt)
-  }
 
   private fun execute(statement: Stmt) =
     when (statement) {
