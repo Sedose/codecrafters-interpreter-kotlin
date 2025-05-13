@@ -111,7 +111,7 @@ class Interpreter(
       is Stmt.Expression -> evaluate(statement.expression)
       is Stmt.Print -> stdout.write(evaluate(statement.expression).toLoxString())
       is Stmt.Var -> {
-        val value = statement.initializer?.let(this::evaluate)
+        val value = statement.initializer?.let(this::evaluate) ?: "nil"
         globals[statement.name.lexeme] = value
       }
     }
