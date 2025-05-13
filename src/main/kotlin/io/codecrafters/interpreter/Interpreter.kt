@@ -44,12 +44,18 @@ class Interpreter(
       is Expr.Grouping -> evaluate(expression.expression)
       is Expr.Unary -> evaluateUnary(expression)
       is Expr.Binary -> evaluateBinary(expression)
-      is Expr.Variable -> globals[expression.name.lexeme] ?: "nil"
+      is Expr.Variable -> getVariable(expression.name)
     }
 
   fun interpret(statements: List<Stmt>) {
     for (stmt in statements) execute(stmt)
   }
+
+  private fun getVariable(name: Token): Any? =
+    globals[name.lexeme] ?: throw InterpreterException(
+      "Undefined variable '${name.lexeme}'.",
+      name.lineNumber,
+    )
 
   private fun evaluateUnary(expr: Expr.Unary): Any? {
     val right = evaluate(expr.right)
