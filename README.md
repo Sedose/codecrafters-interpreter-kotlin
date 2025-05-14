@@ -22,7 +22,12 @@ For the interactive challenge experience, visit [codecrafters.io](https://codecr
 ## Getting Started
 
 Useful commands:
-
+- Configure git to use a pre-commit hook
+```bash
+chmod +x .git/hooks/pre-commit
+git config core.hooksPath .githooks
+```
+- All at once command for build
 ```bash
 ./mvnw versions:use-latest-releases \
        ktlint:format \
