@@ -6,7 +6,10 @@ import io.codecrafters.application.command.EvaluateCommandHandler
 import io.codecrafters.application.command.ParseCommandHandler
 import io.codecrafters.application.command.RunCommandHandler
 import io.codecrafters.application.command.TokenizeCommandHandler
+import io.codecrafters.interpreter.Environment
+import io.codecrafters.interpreter.ExpressionEvaluator
 import io.codecrafters.interpreter.Interpreter
+import io.codecrafters.interpreter.StatementExecutor
 import io.codecrafters.model.Command
 import io.codecrafters.model.StderrSink
 import io.codecrafters.model.StdoutSink
@@ -45,7 +48,10 @@ val appModule =
 
     single { Tokenizer(get()) }
     single { AstStringifier() }
-    single { Interpreter(get()) }
+    single { Environment() }
+    single { ExpressionEvaluator(get()) }
+    single { StatementExecutor(get(), get(), get()) }
+    single { Interpreter(get(), get()) }
 
     single { TokenizeCommandHandler(get()) }
     single { ParseCommandHandler(get<AstStringifier>(), get()) }

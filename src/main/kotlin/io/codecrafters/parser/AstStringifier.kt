@@ -15,5 +15,6 @@ class AstStringifier {
       is Expr.Unary -> "(${expr.operator.lexeme} ${stringify(expr.right)})"
       is Expr.Binary -> "(${expr.operator.lexeme} ${stringify(expr.left)} ${stringify(expr.right)})"
       is Expr.Variable -> expr.name.lexeme
+      is Expr.Assign -> "(= ${expr.name.lexeme} ${stringify(expr.value)})"
     }
 }
