@@ -22,7 +22,9 @@ import org.koin.dsl.module
 
 val appModule =
   module {
-    single { SingleLineCommentSkipper() }
+    single {
+      SingleLineCommentSkipper()
+    }
     single { StringTokenProcessor() }
     single { NumberTokenProcessor() }
     single { IdentifierProcessor() }
