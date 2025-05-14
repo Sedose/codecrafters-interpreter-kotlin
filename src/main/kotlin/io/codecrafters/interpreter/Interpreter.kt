@@ -45,10 +45,20 @@ class Interpreter(
       is Expr.Unary -> evaluateUnary(expression)
       is Expr.Binary -> evaluateBinary(expression)
       is Expr.Variable -> getVariable(expression.name)
+      is Expr.Assign -> evaluateAssign(expression)
     }
 
   fun interpret(statements: List<Stmt>) {
     for (stmt in statements) execute(stmt)
+  }
+
+  private fun evaluateAssign(expr: Expr.Assign): Any? {
+    val assignedValue = evaluate(expr.value)
+    if (!globals.containsKey(expr.name.lexeme)) {
+      throw InterpreterException("Undefined variable '${expr.name.lexeme}'.", expr.name.lineNumber)
+    }
+    globals[expr.name.lexeme] = assignedValue
+    return assignedValue
   }
 
   private fun getVariable(name: Token): Any? =

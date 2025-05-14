@@ -7,7 +7,7 @@ echo "Running ktlint formatter..."
 # Check for any unstaged changes (i.e., formatting changes)
 if ! git diff --quiet
 then
-  echo "Ktlint made formatting changes. Please review and stage them."
+  echo "Ktlint made formatting changes. Please review, stage them and commit again if you are OK with the changes"
   git diff
   exit 1
 fi
