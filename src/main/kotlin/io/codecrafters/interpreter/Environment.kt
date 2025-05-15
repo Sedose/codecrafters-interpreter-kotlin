@@ -3,28 +3,33 @@ package io.codecrafters.interpreter
 import io.codecrafters.model.Token
 import io.codecrafters.model.error.InterpreterException
 
-class Environment {
-  private val variables = mutableMapOf<String, Any?>()
+class Environment(
+  private val enclosingEnvironment: Environment? = null,
+) {
+  private val bindings = mutableMapOf<String, Any?>()
 
   fun define(
     name: String,
     value: Any?,
   ) {
-    variables[name] = value
+    bindings[name] = value
   }
 
   fun assign(
     name: Token,
     value: Any?,
-  ): Any? {
-    if (!variables.containsKey(name.lexeme)) {
-      throw InterpreterException("Undefined variable '${name.lexeme}'.", name.lineNumber)
+  ): Any? =
+    when {
+      bindings.containsKey(name.lexeme) -> {
+        bindings[name.lexeme] = value
+        value
+      }
+      enclosingEnvironment != null -> enclosingEnvironment.assign(name, value)
+      else -> throw InterpreterException("Undefined variable '${name.lexeme}'.", name.lineNumber)
     }
-    variables[name.lexeme] = value
-    return value
-  }
 
   fun get(name: Token): Any? =
-    variables[name.lexeme]
+    bindings[name.lexeme]
+      ?: enclosingEnvironment?.get(name)
       ?: throw InterpreterException("Undefined variable '${name.lexeme}'.", name.lineNumber)
 }

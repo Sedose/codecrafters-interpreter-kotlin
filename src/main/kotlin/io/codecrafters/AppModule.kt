@@ -49,8 +49,8 @@ val appModule =
     single { Tokenizer(get()) }
     single { AstStringifier() }
     single { Environment() }
-    single { ExpressionEvaluator(get()) }
-    single { StatementExecutor(get(), get(), get()) }
+    single { ExpressionEvaluator() }
+    single { StatementExecutor(get(), get()) }
     single { Interpreter(get(), get()) }
 
     single { TokenizeCommandHandler(get()) }

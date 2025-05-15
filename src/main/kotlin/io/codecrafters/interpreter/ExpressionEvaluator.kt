@@ -6,9 +6,9 @@ import io.codecrafters.model.TokenType
 import io.codecrafters.model.error.InterpreterException
 import io.codecrafters.normalized
 
-class ExpressionEvaluator(
-  private val environment: Environment,
-) {
+class ExpressionEvaluator {
+
+  context(environment: Environment)
   fun evaluate(expression: Expr): Any? =
     when (expression) {
       is Expr.Literal -> expression.value.normalized()
@@ -19,6 +19,7 @@ class ExpressionEvaluator(
       is Expr.Assign -> environment.assign(expression.name, evaluate(expression.value))
     }
 
+  context(_: Environment)
   private fun evaluateUnary(expr: Expr.Unary): Any? {
     val right = evaluate(expr.right)
     return when (expr.operator.type) {
@@ -29,6 +30,7 @@ class ExpressionEvaluator(
   }
 
   @Suppress("ReturnCount")
+  context(_: Environment)
   private fun evaluateBinary(expr: Expr.Binary): Any? {
     val left = evaluate(expr.left)
     val right = evaluate(expr.right)
@@ -49,10 +51,7 @@ class ExpressionEvaluator(
     error("Unexpected operator '${expr.operator.lexeme}'.")
   }
 
-  private fun requireNumber(
-    value: Any?,
-    token: Token,
-  ): Double =
+  private fun requireNumber(value: Any?, token: Token): Double =
     (value as? Number)?.toDouble()
       ?: throw InterpreterException("Operand must be a number.", token.lineNumber)
 
