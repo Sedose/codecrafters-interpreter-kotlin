@@ -24,10 +24,11 @@ class ExpressionEvaluator(
     return when (expr.operator.type) {
       TokenType.MINUS -> (-requireNumber(right, expr.operator)).normalized()
       TokenType.BANG -> !isTruthy(right)
-      else -> throw IllegalStateException("Unexpected unary operator ${expr.operator.lexeme}.")
+      else -> error("Unexpected unary operator ${expr.operator.lexeme}.")
     }
   }
 
+  @Suppress("ReturnCount")
   private fun evaluateBinary(expr: Expr.Binary): Any? {
     val left = evaluate(expr.left)
     val right = evaluate(expr.right)
@@ -45,7 +46,7 @@ class ExpressionEvaluator(
     OperationRegistry.equality[expr.operator.type]?.let { op ->
       return op(left, right)
     }
-    throw IllegalStateException("Unexpected operator '${expr.operator.lexeme}'.")
+    error("Unexpected operator '${expr.operator.lexeme}'.")
   }
 
   private fun requireNumber(

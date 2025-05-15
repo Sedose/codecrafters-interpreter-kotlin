@@ -30,15 +30,30 @@ class Parser(
 
   private fun parseStatement(): Stmt =
     when {
+      check(TokenType.LEFT_BRACE) -> {
+        advance()
+        Stmt.Block(parseBlock())
+      }
+
       check(TokenType.VAR) -> {
         advance()
         parseVarDeclaration()
       }
+
       check(TokenType.PRINT) -> {
         advance()
         parsePrintStatement()
       }
+
       else -> parseExpressionStatement()
+    }
+
+  private fun parseBlock(): List<Stmt> =
+    buildList {
+      while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+        add(parseStatement())
+      }
+      consume(TokenType.RIGHT_BRACE, "Expect '}' .")
     }
 
   private fun parseVarDeclaration(): Stmt {

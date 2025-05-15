@@ -13,4 +13,8 @@ sealed class Stmt {
     val name: Token,
     val initializer: Expr?,
   ) : Stmt()
+
+  data class Block(
+    val statements: List<Stmt>,
+  ) : Stmt()
 }

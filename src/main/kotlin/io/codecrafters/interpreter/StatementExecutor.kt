@@ -23,6 +23,11 @@ class StatementExecutor(
         val value = statement.initializer?.let(evaluator::evaluate) ?: "nil"
         environment.define(statement.name.lexeme, value)
       }
+      is Stmt.Block -> {
+        for (nested in statement.statements) {
+          execute(nested)
+        }
+      }
     }
   }
 }
