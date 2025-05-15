@@ -12,7 +12,7 @@ class Environment(
     name: String,
     value: Any?,
   ) {
-    bindings[name] = value
+    bindings[name] = value ?: "nil"
   }
 
   fun assign(
