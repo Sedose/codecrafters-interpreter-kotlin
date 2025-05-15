@@ -29,7 +29,7 @@ class ExpressionEvaluator {
     }
   }
 
-  @Suppress("ReturnCount")
+//  @Suppress("ReturnCount")
   context(_: Environment)
   private fun evaluateBinary(expr: Expr.Binary): Any? {
     val left = evaluate(expr.left)
