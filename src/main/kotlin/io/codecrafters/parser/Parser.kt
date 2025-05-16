@@ -30,6 +30,11 @@ class Parser(
 
   private fun parseStatement(): Stmt =
     when {
+      check(TokenType.WHILE) -> {
+        advance()
+        parseWhileStatement()
+      }
+
       check(TokenType.IF) -> {
         advance()
         parseIfStatement()
@@ -52,6 +57,14 @@ class Parser(
 
       else -> parseExpressionStatement()
     }
+
+  private fun parseWhileStatement(): Stmt {
+    consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+    val condition = parseExpression()
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+    val body = parseStatement()
+    return Stmt.While(condition, body)
+  }
 
   private fun parseIfStatement(): Stmt {
     consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")

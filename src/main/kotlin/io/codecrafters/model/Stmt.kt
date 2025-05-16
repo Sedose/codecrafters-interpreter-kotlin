@@ -23,4 +23,9 @@ sealed class Stmt {
     val thenBranch: Stmt,
     val elseBranch: Stmt?,
   ) : Stmt()
+
+  data class While(
+    val condition: Expr,
+    val body: Stmt,
+  ) : Stmt()
 }

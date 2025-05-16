@@ -16,7 +16,7 @@ class StatementExecutor(
     statements.forEach { execute(it, environment) }
   }
 
-  private tailrec fun execute(
+  private fun execute(
     statement: Stmt,
     environment: Environment,
   ) {
@@ -53,6 +53,14 @@ class StatementExecutor(
           execute(statement.thenBranch, environment)
         } else if (statement.elseBranch != null) {
           execute(statement.elseBranch, environment)
+        }
+      }
+
+      is Stmt.While -> {
+        while (
+          with(environment) { evaluator.evaluate(statement.condition) }.isTruthy()
+        ) {
+          execute(statement.body, environment)
         }
       }
     }
