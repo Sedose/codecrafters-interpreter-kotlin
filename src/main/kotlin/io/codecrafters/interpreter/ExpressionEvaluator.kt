@@ -49,6 +49,9 @@ class ExpressionEvaluator {
     OperationRegistry.equality[expr.operator.type]?.let { op ->
       return op(left, right)
     }
+    OperationRegistry.logical[expr.operator.type]?.let { op ->
+      return op(left.isTruthy(), right.isTruthy())
+    }
     error("Unexpected operator '${expr.operator.lexeme}'.")
   }
 
