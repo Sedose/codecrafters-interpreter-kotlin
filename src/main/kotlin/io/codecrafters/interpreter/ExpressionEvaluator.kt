@@ -12,6 +12,7 @@ class ExpressionEvaluator {
   context(environment: Environment)
   fun evaluate(expression: Expr): Any? =
     when (expression) {
+      is Expr.Logical -> evaluateLogical(expression)
       is Expr.Literal -> expression.value.normalized()
       is Expr.Grouping -> evaluate(expression.expression)
       is Expr.Unary -> evaluateUnary(expression)
@@ -19,6 +20,16 @@ class ExpressionEvaluator {
       is Expr.Variable -> environment.get(expression.name)
       is Expr.Assign -> environment.assign(expression.name, evaluate(expression.value))
     }
+
+  context(_: Environment)
+  private fun evaluateLogical(expr: Expr.Logical): Any? {
+    val left = evaluate(expr.left)
+    return when (expr.operator.type) {
+      TokenType.OR  -> if (left.isTruthy())  left else evaluate(expr.right)
+      TokenType.AND -> if (!left.isTruthy()) left else evaluate(expr.right)
+      else -> error("Unexpected logical operator ${expr.operator.lexeme}")
+    }
+  }
 
   context(_: Environment)
   private fun evaluateUnary(expr: Expr.Unary): Any? {
@@ -48,9 +59,6 @@ class ExpressionEvaluator {
     }
     OperationRegistry.equality[expr.operator.type]?.let { op ->
       return op(left, right)
-    }
-    OperationRegistry.logical[expr.operator.type]?.let { op ->
-      return op(left.isTruthy(), right.isTruthy())
     }
     error("Unexpected operator '${expr.operator.lexeme}'.")
   }

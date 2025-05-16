@@ -8,7 +8,6 @@ import io.codecrafters.model.error.ParseException
 
 private val UNARY_TOKEN_TYPES = setOf(TokenType.BANG, TokenType.MINUS)
 private val EQUALITY_OPERATORS = setOf(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL)
-private val LOGICAL_OPERATORS = setOf(TokenType.OR, TokenType.AND)
 private val COMPARISON_OPERATORS =
   setOf(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)
 private val ADDITIVE_OPERATORS = setOf(TokenType.PLUS, TokenType.MINUS)
@@ -107,7 +106,7 @@ class Parser(
   private fun parseExpression(): Expr = parseAssignment()
 
   private fun parseAssignment(): Expr {
-    val expression = parseLogical()
+    val expression = parseOr()
     if (check(TokenType.EQUAL)) {
       val equalsToken = advance()
       val value = parseAssignment()
@@ -119,12 +118,22 @@ class Parser(
     return expression
   }
 
-  private fun parseLogical(): Expr {
+  private fun parseOr(): Expr {
+    var expr = parseAnd()
+    while (check(TokenType.OR)) {
+      val operator = advance()
+      val right = parseAnd()
+      expr = Expr.Logical(expr, operator, right)
+    }
+    return expr
+  }
+
+  private fun parseAnd(): Expr {
     var expr = parseEquality()
-    while (check(*LOGICAL_OPERATORS.toTypedArray())) {
+    while (check(TokenType.AND)) {
       val operator = advance()
       val right = parseEquality()
-      expr = Expr.Binary(expr, operator, right)
+      expr = Expr.Logical(expr, operator, right)
     }
     return expr
   }

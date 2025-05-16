@@ -24,10 +24,4 @@ object OperationRegistry {
       TokenType.EQUAL_EQUAL to { a, b -> a == b },
       TokenType.BANG_EQUAL to { a, b -> a != b },
     )
-
-  val logical: Map<TokenType, (Boolean, Boolean) -> Boolean> =
-    mapOf(
-      TokenType.OR to { left, right -> left || right },
-      TokenType.AND to { left, right -> left && right },
-    )
 }

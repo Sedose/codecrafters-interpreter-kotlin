@@ -28,4 +28,10 @@ sealed class Expr {
     val name: Token,
     val value: Expr,
   ) : Expr()
+
+  data class Logical(
+    val left: Expr,
+    val operator: Token,
+    val right: Expr,
+  ) : Expr()
 }
