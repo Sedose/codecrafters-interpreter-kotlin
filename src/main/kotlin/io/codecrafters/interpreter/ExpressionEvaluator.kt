@@ -1,5 +1,6 @@
 package io.codecrafters.interpreter
 
+import io.codecrafters.isTruthy
 import io.codecrafters.model.Expr
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
@@ -24,7 +25,7 @@ class ExpressionEvaluator {
     val right = evaluate(expr.right)
     return when (expr.operator.type) {
       TokenType.MINUS -> (-requireNumber(right, expr.operator)).normalized()
-      TokenType.BANG -> !isTruthy(right)
+      TokenType.BANG -> !right.isTruthy()
       else -> error("Unexpected unary operator ${expr.operator.lexeme}.")
     }
   }
@@ -54,11 +55,4 @@ class ExpressionEvaluator {
   private fun requireNumber(value: Any?, token: Token): Double =
     (value as? Number)?.toDouble()
       ?: throw InterpreterException("Operand must be a number.", token.lineNumber)
-
-  private fun isTruthy(value: Any?): Boolean =
-    when (value) {
-      null -> false
-      is Boolean -> value
-      else -> true
-    }
 }

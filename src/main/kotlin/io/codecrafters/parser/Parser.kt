@@ -30,6 +30,11 @@ class Parser(
 
   private fun parseStatement(): Stmt =
     when {
+      check(TokenType.IF) -> {
+        advance()
+        parseIfStatement()
+      }
+
       check(TokenType.LEFT_BRACE) -> {
         advance()
         Stmt.Block(parseBlock())
@@ -47,6 +52,21 @@ class Parser(
 
       else -> parseExpressionStatement()
     }
+
+  private fun parseIfStatement(): Stmt {
+    consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+    val condition = parseExpression()
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+    val thenBranch = parseStatement()
+    val elseBranch =
+      if (check(TokenType.ELSE)) {
+        advance()
+        parseStatement()
+      } else {
+        null
+      }
+    return Stmt.If(condition, thenBranch, elseBranch)
+  }
 
   private fun parseBlock(): List<Stmt> =
     buildList {

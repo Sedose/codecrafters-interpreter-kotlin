@@ -5,3 +5,10 @@ fun Any?.normalized(): Any? =
     is Double -> if (this % 1 == 0.0) this.toInt() else this
     else -> this
   }
+
+fun Any?.isTruthy(): Boolean =
+  when (this) {
+    null -> false
+    is Boolean -> this
+    else -> true
+  }

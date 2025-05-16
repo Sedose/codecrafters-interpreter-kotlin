@@ -1,5 +1,6 @@
 package io.codecrafters.interpreter
 
+import io.codecrafters.isTruthy
 import io.codecrafters.model.StdoutSink
 import io.codecrafters.model.Stmt
 import io.codecrafters.toLoxString
@@ -15,20 +16,44 @@ class StatementExecutor(
     statements.forEach { execute(it, environment) }
   }
 
-  private fun execute(
+  private tailrec fun execute(
     statement: Stmt,
     environment: Environment,
   ) {
     when (statement) {
-      is Stmt.Expression -> with(environment) { evaluator.evaluate(statement.expression) }
-      is Stmt.Print -> with(environment) { output.write(evaluator.evaluate(statement.expression).toLoxString()) }
+      is Stmt.Expression ->
+        with(environment) {
+          evaluator.evaluate(statement.expression)
+        }
+
+      is Stmt.Print ->
+        with(environment) {
+          output.write(evaluator.evaluate(statement.expression).toLoxString())
+        }
+
       is Stmt.Var -> {
-        val value = statement.initializer?.let { with(environment) { evaluator.evaluate(it) } }
+        val value =
+          statement.initializer?.let {
+            with(environment) { evaluator.evaluate(it) }
+          }
         environment.define(statement.name.lexeme, value)
       }
+
       is Stmt.Block -> {
         val innerEnvironment = Environment(environment)
         interpret(statement.statements, innerEnvironment)
+      }
+
+      is Stmt.If -> {
+        val conditionValue =
+          with(environment) {
+            evaluator.evaluate(statement.condition)
+          }
+        if (conditionValue.isTruthy()) {
+          execute(statement.thenBranch, environment)
+        } else if (statement.elseBranch != null) {
+          execute(statement.elseBranch, environment)
+        }
       }
     }
   }
