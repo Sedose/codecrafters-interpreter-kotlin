@@ -24,8 +24,17 @@ class Parser(
   fun parseProgram(): List<Stmt> =
     buildList {
       while (!isAtEnd()) {
-        add(parseStatement())
+        add(parseDeclaration())
       }
+    }
+
+  private fun parseDeclaration(): Stmt =
+    when {
+      check(TokenType.VAR) -> {
+        advance()
+        parseVarDeclaration()
+      }
+      else -> parseStatement()
     }
 
   private fun parseStatement(): Stmt =
@@ -34,32 +43,22 @@ class Parser(
         advance()
         parseForStatement()
       }
-
       check(TokenType.WHILE) -> {
         advance()
         parseWhileStatement()
       }
-
       check(TokenType.IF) -> {
         advance()
         parseIfStatement()
       }
-
       check(TokenType.LEFT_BRACE) -> {
         advance()
         Stmt.Block(parseBlock())
       }
-
-      check(TokenType.VAR) -> {
-        advance()
-        parseVarDeclaration()
-      }
-
       check(TokenType.PRINT) -> {
         advance()
         parsePrintStatement()
       }
-
       else -> parseExpressionStatement()
     }
 
@@ -135,7 +134,7 @@ class Parser(
   private fun parseBlock(): List<Stmt> =
     buildList {
       while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-        add(parseStatement())
+        add(parseDeclaration())
       }
       consume(TokenType.RIGHT_BRACE, "Expect '}' .")
     }
