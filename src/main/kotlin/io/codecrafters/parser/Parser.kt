@@ -30,6 +30,11 @@ class Parser(
 
   private fun parseStatement(): Stmt =
     when {
+      check(TokenType.FOR) -> {
+        advance()
+        parseForStatement()
+      }
+
       check(TokenType.WHILE) -> {
         advance()
         parseWhileStatement()
@@ -57,6 +62,52 @@ class Parser(
 
       else -> parseExpressionStatement()
     }
+
+  private fun parseForStatement(): Stmt {
+    consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+    val initializer: Stmt? =
+      when {
+        check(TokenType.SEMICOLON) -> {
+          advance()
+          null
+        }
+        check(TokenType.VAR) -> {
+          advance()
+          parseVarDeclaration()
+        }
+        else -> parseExpressionStatement()
+      }
+
+    val condition: Expr? =
+      if (!check(TokenType.SEMICOLON)) parseExpression() else null
+    consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+    val increment: Expr? =
+      if (!check(TokenType.RIGHT_PAREN)) parseExpression() else null
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+    var body: Stmt = parseStatement()
+
+    if (increment != null) {
+      body =
+        Stmt.Block(
+          listOf(
+            body,
+            Stmt.Expression(increment),
+          ),
+        )
+    }
+
+    val loopCondition = condition ?: Expr.Literal(true)
+    body = Stmt.While(loopCondition, body)
+
+    return if (initializer != null) {
+      Stmt.Block(listOf(initializer, body))
+    } else {
+      body
+    }
+  }
 
   private fun parseWhileStatement(): Stmt {
     consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
