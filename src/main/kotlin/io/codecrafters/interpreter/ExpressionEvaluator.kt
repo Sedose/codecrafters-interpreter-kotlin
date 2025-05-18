@@ -2,6 +2,7 @@ package io.codecrafters.interpreter
 
 import io.codecrafters.isTruthy
 import io.codecrafters.model.Expr
+import io.codecrafters.model.LoxCallable
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.error.InterpreterException
@@ -19,7 +20,17 @@ class ExpressionEvaluator {
       is Expr.Binary -> evaluateBinary(expression)
       is Expr.Variable -> environment.get(expression.name)
       is Expr.Assign -> environment.assign(expression.name, evaluate(expression.value))
+      is Expr.Call    -> evaluateCall(expression)
     }
+
+  context(_: Environment)
+  private fun evaluateCall(expr: Expr.Call): Any? {
+    val calleeValue = evaluate(expr.callee)
+    if (calleeValue !is LoxCallable)
+      throw InterpreterException("Can only call functions.", expr.paren.lineNumber)
+    val evaluatedArguments = expr.arguments.map { evaluate(it) }
+    return calleeValue.call(evaluatedArguments)
+  }
 
   context(_: Environment)
   private fun evaluateLogical(expr: Expr.Logical): Any? {

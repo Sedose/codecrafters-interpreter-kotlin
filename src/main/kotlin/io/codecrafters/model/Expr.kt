@@ -34,4 +34,10 @@ sealed class Expr {
     val operator: Token,
     val right: Expr,
   ) : Expr()
+
+  data class Call(
+    val callee: Expr,
+    val paren: Token,
+    val arguments: List<Expr>,
+  ) : Expr()
 }

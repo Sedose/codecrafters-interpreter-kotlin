@@ -17,5 +17,9 @@ class AstStringifier {
       is Expr.Variable -> expr.name.lexeme
       is Expr.Assign -> "(= ${expr.name.lexeme} ${stringify(expr.value)})"
       is Expr.Logical -> "(${expr.operator.lexeme} ${stringify(expr.left)} ${stringify(expr.right)})"
+      is Expr.Call -> {
+        val args = expr.arguments.joinToString(" ") { stringify(it) }
+        "(call ${stringify(expr.callee)} $args)"
+      }
     }
 }

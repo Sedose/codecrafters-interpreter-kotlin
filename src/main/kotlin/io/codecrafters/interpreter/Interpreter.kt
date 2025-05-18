@@ -1,12 +1,16 @@
 package io.codecrafters.interpreter
 
+import io.codecrafters.interpreter.natives.ClockNativeFunction
 import io.codecrafters.model.Stmt
 
 class Interpreter(
   private val evaluator: ExpressionEvaluator,
   private val executor: StatementExecutor,
 ) {
-  private val globalEnvironment = Environment()
+  private val globalEnvironment =
+    Environment().apply {
+      define("clock", ClockNativeFunction)
+    }
 
   fun evaluate(expression: io.codecrafters.model.Expr): Any? =
     with(globalEnvironment) {

@@ -247,8 +247,28 @@ class Parser(
       val right = parseUnary()
       Expr.Unary(operator, right)
     } else {
-      parsePrimary()
+      parseCall()
     }
+
+  private fun parseCall(): Expr {
+    var expression = parsePrimary()
+    while (check(TokenType.LEFT_PAREN)) {
+      val paren = advance()
+      val arguments =
+        buildList {
+          if (!check(TokenType.RIGHT_PAREN)) {
+            add(parseExpression())
+            while (check(TokenType.COMMA)) {
+              advance()
+              add(parseExpression())
+            }
+          }
+        }
+      consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+      expression = Expr.Call(expression, paren, arguments)
+    }
+    return expression
+  }
 
   private fun parsePrimary(): Expr {
     val token =

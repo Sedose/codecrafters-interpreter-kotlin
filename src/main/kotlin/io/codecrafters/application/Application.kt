@@ -36,7 +36,7 @@ class Application(
     }
     val (commandString, filename) = args
     val command =
-      Command.Companion.parse(commandString)
+      Command.parse(commandString)
         ?: throw UnknownCommandException(commandString)
     return CliArgs(command, filename)
   }
