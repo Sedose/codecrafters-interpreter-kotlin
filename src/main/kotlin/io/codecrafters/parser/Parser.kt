@@ -30,12 +30,25 @@ class Parser(
 
   private fun parseDeclaration(): Stmt =
     when {
+      check(TokenType.FUN) -> {
+        advance()
+        parseFunction()
+      }
       check(TokenType.VAR) -> {
         advance()
         parseVarDeclaration()
       }
       else -> parseStatement()
     }
+
+  private fun parseFunction(): Stmt.Function {
+    val name = consume(TokenType.IDENTIFIER, "Expect function name.")
+    consume(TokenType.LEFT_PAREN, "Expect '(' after function name.")
+    consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+    consume(TokenType.LEFT_BRACE, "Expect '{' before function body.")
+    val body = parseBlock()
+    return Stmt.Function(name, emptyList(), body)
+  }
 
   private fun parseStatement(): Stmt =
     when {

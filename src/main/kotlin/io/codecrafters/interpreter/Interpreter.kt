@@ -1,6 +1,6 @@
 package io.codecrafters.interpreter
 
-import io.codecrafters.interpreter.natives.ClockNativeFunction
+import io.codecrafters.interpreter.func.ClockNativeFunction
 import io.codecrafters.model.Stmt
 
 class Interpreter(

@@ -1,5 +1,6 @@
 package io.codecrafters.interpreter
 
+import io.codecrafters.interpreter.func.LoxFunction
 import io.codecrafters.isTruthy
 import io.codecrafters.model.StdoutSink
 import io.codecrafters.model.Stmt
@@ -62,6 +63,11 @@ class StatementExecutor(
         ) {
           execute(statement.body, environment)
         }
+      }
+
+      is Stmt.Function -> {
+        val functionObject = LoxFunction(statement, environment, this)
+        environment.define(statement.name.lexeme, functionObject)
       }
     }
   }

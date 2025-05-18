@@ -28,4 +28,10 @@ sealed class Stmt {
     val condition: Expr,
     val body: Stmt,
   ) : Stmt()
+
+  data class Function(
+    val name: Token,
+    val parameters: List<Token>,
+    val body: List<Stmt>,
+  ) : Stmt()
 }
