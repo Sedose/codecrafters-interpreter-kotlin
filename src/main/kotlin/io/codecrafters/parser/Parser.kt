@@ -34,20 +34,32 @@ class Parser(
         advance()
         parseFunction()
       }
+
       check(TokenType.VAR) -> {
         advance()
         parseVarDeclaration()
       }
+
       else -> parseStatement()
     }
 
   private fun parseFunction(): Stmt.Function {
     val name = consume(TokenType.IDENTIFIER, "Expect function name.")
     consume(TokenType.LEFT_PAREN, "Expect '(' after function name.")
+    val parameters =
+      buildList {
+        if (!check(TokenType.RIGHT_PAREN)) {
+          add(consume(TokenType.IDENTIFIER, "Expect parameter name."))
+          while (check(TokenType.COMMA)) {
+            advance()
+            add(consume(TokenType.IDENTIFIER, "Expect parameter name."))
+          }
+        }
+      }
     consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
     consume(TokenType.LEFT_BRACE, "Expect '{' before function body.")
     val body = parseBlock()
-    return Stmt.Function(name, emptyList(), body)
+    return Stmt.Function(name, parameters, body)
   }
 
   private fun parseStatement(): Stmt =
@@ -56,22 +68,27 @@ class Parser(
         advance()
         parseForStatement()
       }
+
       check(TokenType.WHILE) -> {
         advance()
         parseWhileStatement()
       }
+
       check(TokenType.IF) -> {
         advance()
         parseIfStatement()
       }
+
       check(TokenType.LEFT_BRACE) -> {
         advance()
         Stmt.Block(parseBlock())
       }
+
       check(TokenType.PRINT) -> {
         advance()
         parsePrintStatement()
       }
+
       else -> parseExpressionStatement()
     }
 
@@ -84,10 +101,12 @@ class Parser(
           advance()
           null
         }
+
         check(TokenType.VAR) -> {
           advance()
           parseVarDeclaration()
         }
+
         else -> parseExpressionStatement()
       }
 
