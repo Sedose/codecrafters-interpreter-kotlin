@@ -69,6 +69,13 @@ class StatementExecutor(
         val functionObject = LoxFunction(statement, environment, this)
         environment.define(statement.name.lexeme, functionObject)
       }
+
+      is Stmt.Return -> {
+        val result =
+          statement.value
+            ?.let { with(environment) { evaluator.evaluate(it) } }
+        throw ReturnSignal(result)
+      }
     }
   }
 }

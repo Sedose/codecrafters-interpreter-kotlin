@@ -34,4 +34,9 @@ sealed class Stmt {
     val parameters: List<Token>,
     val body: List<Stmt>,
   ) : Stmt()
+
+  data class Return(
+    val keyword: Token,
+    val value: Expr?,
+  ) : Stmt()
 }

@@ -68,29 +68,40 @@ class Parser(
         advance()
         parseForStatement()
       }
-
       check(TokenType.WHILE) -> {
         advance()
         parseWhileStatement()
       }
-
       check(TokenType.IF) -> {
         advance()
         parseIfStatement()
       }
-
       check(TokenType.LEFT_BRACE) -> {
         advance()
         Stmt.Block(parseBlock())
       }
-
       check(TokenType.PRINT) -> {
         advance()
         parsePrintStatement()
       }
-
+      check(TokenType.RETURN) -> {
+        advance()
+        parseReturnStatement()
+      }
       else -> parseExpressionStatement()
     }
+
+  private fun parseReturnStatement(): Stmt {
+    val keyword = previous()
+    val value =
+      if (!check(TokenType.SEMICOLON)) {
+        parseExpression()
+      } else {
+        null
+      }
+    consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+    return Stmt.Return(keyword, value)
+  }
 
   private fun parseForStatement(): Stmt {
     consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
@@ -360,6 +371,8 @@ class Parser(
   private fun check(vararg types: TokenType): Boolean = !isAtEnd() && types.any { peek()!!.type == it }
 
   private fun advance(): Token = tokens[currentIndex++]
+
+  private fun previous(): Token = tokens[currentIndex - 1]
 
   private fun peek(): Token? = tokens.getOrNull(currentIndex)
 

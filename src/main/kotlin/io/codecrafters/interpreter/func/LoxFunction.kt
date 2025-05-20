@@ -1,6 +1,7 @@
 package io.codecrafters.interpreter.func
 
 import io.codecrafters.interpreter.Environment
+import io.codecrafters.interpreter.ReturnSignal
 import io.codecrafters.interpreter.StatementExecutor
 import io.codecrafters.model.Stmt
 import io.codecrafters.model.error.InterpreterException
@@ -17,12 +18,18 @@ class LoxFunction(
         declaration.name.lineNumber,
       )
     }
+
     val invocationEnvironment = Environment(closure)
     for ((parameterToken, argumentValue) in declaration.parameters.zip(passedArguments)) {
       invocationEnvironment.define(parameterToken.lexeme, argumentValue)
     }
-    statementExecutor.interpret(declaration.body, invocationEnvironment)
-    return null
+
+    return try {
+      statementExecutor.interpret(declaration.body, invocationEnvironment)
+      null
+    } catch (signal: ReturnSignal) {
+      signal.value
+    }
   }
 
   override fun toString(): String = "<fn ${declaration.name.lexeme}>"
