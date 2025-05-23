@@ -1,6 +1,7 @@
 package io.codecrafters
 
 import io.codecrafters.application.Application
+import io.codecrafters.application.CliArgumentsParser
 import io.codecrafters.application.command.CommandHandler
 import io.codecrafters.application.command.EvaluateCommandHandler
 import io.codecrafters.application.command.ParseCommandHandler
@@ -57,6 +58,7 @@ val appModule =
     single { ParseCommandHandler(get<AstStringifier>(), get()) }
     single { EvaluateCommandHandler(get<Interpreter>(), get()) }
     single { RunCommandHandler(get()) }
+    single { CliArgumentsParser() }
 
     single<Map<Command, CommandHandler>> {
       mapOf(
@@ -67,5 +69,5 @@ val appModule =
       )
     }
 
-    single { Application(get<Tokenizer>(), get<Map<Command, CommandHandler>>(), get()) }
+    single { Application(get<Tokenizer>(), get<Map<Command, CommandHandler>>(), get(), get()) }
   }
