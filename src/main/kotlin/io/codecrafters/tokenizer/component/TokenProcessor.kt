@@ -1,16 +1,11 @@
 package io.codecrafters.tokenizer.component
 
-import io.codecrafters.model.ProcessingResult
+import io.codecrafters.tokenizer.TokenProcessorResult
 
-interface TokenProcessor {
-  fun canProcess(
-    input: String,
-    index: Int,
-  ): Boolean
-
+fun interface TokenProcessor {
   fun process(
     input: String,
     index: Int,
-    lineNumber: Int = -1,
-  ): ProcessingResult
+    lineNumber: Int,
+  ): TokenProcessorResult
 }
