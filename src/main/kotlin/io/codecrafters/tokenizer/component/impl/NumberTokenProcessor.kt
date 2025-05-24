@@ -1,39 +1,35 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.tokenizer.LexError
-import io.codecrafters.tokenizer.TokenProcessorResult
 import io.codecrafters.tokenizer.component.TokenProcessor
 
 class NumberTokenProcessor : TokenProcessor {
+  override fun canProcess(
+    input: String,
+    index: Int,
+  ): Boolean = input.getOrNull(index)?.isDigit() ?: false
+
   override fun process(
     input: String,
     index: Int,
     lineNumber: Int,
-  ): TokenProcessorResult {
-    val first = input.getOrNull(index) ?: return TokenProcessorResult.Skipped(index)
-    if (!first.isDigit()) return TokenProcessorResult.Skipped(index)
-    var current = index
-    var dotCount = 0
-    while (current <= input.lastIndex) {
-      val currentChar = input[current]
-      if (currentChar.isDigit()) {
-        current += 1
-        continue
-      }
-      if (currentChar == '.') {
-        dotCount += 1
-        if (dotCount > 1) return TokenProcessorResult.Error(LexError(lineNumber, "Error: Unexpected character: ."), current)
-        current += 1
-        continue
-      }
-      break
+  ): ProcessingResult {
+    val lexemeCandidate =
+      extractLexeme(input.substring(index)) ?: return ProcessingResult(null, index, "[line $lineNumber] Error: Invalid number format.")
+    val dotCount = lexemeCandidate.count { it == '.' }
+    return if (dotCount > 1) {
+      val errorIndex = index + lexemeCandidate.indexOf('.', lexemeCandidate.indexOf('.') + 1)
+      ProcessingResult(null, errorIndex, "[line $lineNumber] Error: Unexpected character: .")
+    } else {
+      ProcessingResult(
+        Token(TokenType.NUMBER, lexemeCandidate, lexemeCandidate.toDoubleOrNull(), lineNumber),
+        index + lexemeCandidate.length,
+        null,
+      )
     }
-    val lexeme = input.substring(index, current)
-    val numberValue =
-      lexeme.toDoubleOrNull() ?: return TokenProcessorResult.Error(LexError(lineNumber, "Error: Invalid number format."), current)
-    val token = Token(TokenType.NUMBER, lexeme, numberValue, lineNumber)
-    return TokenProcessorResult.Produced(token, current)
   }
+
+  private fun extractLexeme(input: String): String? = Regex("^\\d[.\\d]*").find(input)?.value
 }

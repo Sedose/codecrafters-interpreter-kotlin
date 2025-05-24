@@ -3,8 +3,8 @@ package io.codecrafters.application
 import io.codecrafters.application.command.CommandHandler
 import io.codecrafters.model.Command
 import io.codecrafters.model.StderrSink
-import io.codecrafters.tokenizer.LexError
 import io.codecrafters.tokenizer.Tokenizer
+import java.io.File
 
 class Application(
   private val tokenizer: Tokenizer,
@@ -15,13 +15,16 @@ class Application(
   fun run(commandLineArguments: Array<String>) {
     val cliArgs = cliArgumentsParser.parse(commandLineArguments)
     val (tokens, errors) =
-      java.io
-        .File(cliArgs.filename)
+      File(cliArgs.filename)
         .readText()
         .let(tokenizer::tokenize)
-    for (lexError in errors) {
-      stderr.write(lexError.toString())
+
+    for (error in errors) {
+      stderr.write(error)
     }
-    commandHandlers.getValue(cliArgs.command).handle(tokens, errors.map(LexError::toString))
+
+    commandHandlers
+      .getValue(cliArgs.command)
+      .handle(tokens, errors)
   }
 }

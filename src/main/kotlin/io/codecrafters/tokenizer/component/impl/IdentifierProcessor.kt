@@ -1,26 +1,29 @@
 package io.codecrafters.tokenizer.component.impl
 
+import io.codecrafters.isIdentifierChar
+import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.RESERVED_WORDS
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
-import io.codecrafters.tokenizer.TokenProcessorResult
 import io.codecrafters.tokenizer.component.TokenProcessor
 
 class IdentifierProcessor : TokenProcessor {
+  override fun canProcess(
+    input: String,
+    index: Int,
+  ): Boolean = input.getOrNull(index).isIdentifierChar()
+
   override fun process(
     input: String,
     index: Int,
     lineNumber: Int,
-  ): TokenProcessorResult {
-    val first = input.getOrNull(index) ?: return TokenProcessorResult.Skipped(index)
-    if (!first.isLetterOrDigit() && first != '_') return TokenProcessorResult.Skipped(index)
-    var current = index
-    while (current <= input.lastIndex && (input[current].isLetterOrDigit() || input[current] == '_')) {
-      current += 1
-    }
-    val lexeme = input.substring(index, current)
-    val tokenType = RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER
-    val token = Token(tokenType, lexeme, null, lineNumber)
-    return TokenProcessorResult.Produced(token, current)
+  ): ProcessingResult {
+    val lexeme = extractLexeme(input, index)
+    return ProcessingResult(Token(RESERVED_WORDS[lexeme] ?: TokenType.IDENTIFIER, lexeme, null, lineNumber), index + lexeme.length, null)
   }
+
+  private fun extractLexeme(
+    input: String,
+    start: Int,
+  ): String = input.substring(start, start + input.drop(start).takeWhile { it.isIdentifierChar() }.length)
 }
