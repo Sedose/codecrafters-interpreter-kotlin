@@ -1,6 +1,10 @@
 package io.codecrafters
 
-import io.codecrafters.application.command.*
+import io.codecrafters.application.command.CommandHandler
+import io.codecrafters.application.command.EvaluateCommandHandler
+import io.codecrafters.application.command.ParseCommandHandler
+import io.codecrafters.application.command.RunCommandHandler
+import io.codecrafters.application.command.TokenizeCommandHandler
 import io.codecrafters.model.Command
 import io.codecrafters.tokenizer.Tokenizer
 import io.codecrafters.tokenizer.component.impl.IdentifierProcessor
