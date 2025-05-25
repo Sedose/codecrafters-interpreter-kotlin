@@ -12,10 +12,9 @@ set -e # Exit early if any commands fail
 (
   cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
 
-  mvn -B package -DskipTests -Ddir=/tmp/codecrafters-build-dir \
-       -Dspring-boot.repackage.skip=false
+  mvn -B clean install
 )
 
 # Run the Spring Boot application
 # The spring-boot-maven-plugin creates an executable jar with a different name pattern
-exec java -jar /tmp/codecrafters-build-dir/build-your-own-interpreter-1.0.jar "$@"
+exec java -jar target/build-your-own-interpreter-1.0.jar "$@"
