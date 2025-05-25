@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Use this script to run your program LOCALLY.
+# Use this script to run your Spring Boot application LOCALLY.
 #
 # Note: Changing this script WILL NOT affect how CodeCrafters runs your program.
 #
@@ -9,16 +9,13 @@
 set -e # Exit early if any commands fail
 
 # Copied from .codecrafters/compile.sh
-#
-# - Edit this to change how your program compiles locally
-# - Edit .codecrafters/compile.sh to change how your program compiles remotely
 (
   cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
-  mvn -B package -Ddir=/tmp/codecrafters-build-dir
+
+  mvn -B package -DskipTests -Ddir=/tmp/codecrafters-build-dir \
+       -Dspring-boot.repackage.skip=false
 )
 
-# Copied from .codecrafters/run.sh
-#
-# - Edit this to change how your program runs locally
-# - Edit .codecrafters/run.sh to change how your program runs remotely
+# Run the Spring Boot application
+# The spring-boot-maven-plugin creates an executable jar with a different name pattern
 exec java -jar /tmp/codecrafters-build-dir/build-your-own-interpreter-1.0.jar "$@"
