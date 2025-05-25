@@ -13,9 +13,6 @@ private val COMPARISON_OPERATORS =
 private val ADDITIVE_OPERATORS = setOf(TokenType.PLUS, TokenType.MINUS)
 private val MULTIPLICATIVE_OPERATORS = setOf(TokenType.STAR, TokenType.SLASH)
 
-/**
- * Hand-rolled recursive-descent parser.
- */
 class Parser(
   private val tokens: List<Token>,
 ) {

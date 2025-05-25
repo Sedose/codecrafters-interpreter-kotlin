@@ -1,14 +1,11 @@
 package io.codecrafters
 
 import io.codecrafters.application.Application
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.core.context.GlobalContext.stopKoin
-import org.koin.test.KoinTest
-import org.koin.test.inject
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.io.File
 
 data class EvaluateTestCase(
@@ -16,15 +13,11 @@ data class EvaluateTestCase(
   val expectedOutput: String,
 )
 
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InterpreterInProcessIT : KoinTest {
-  private val application: Application by inject()
-
-  @BeforeEach
-  fun setup() {
-    stopKoin()
-    startKoin { modules(appModule) }
-  }
+class InterpreterInProcessIT {
+  @Autowired
+  private lateinit var application: Application
 
   companion object {
     @JvmStatic

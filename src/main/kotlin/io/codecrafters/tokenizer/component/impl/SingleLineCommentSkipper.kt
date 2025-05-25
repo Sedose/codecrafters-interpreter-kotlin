@@ -2,7 +2,9 @@ package io.codecrafters.tokenizer.component.impl
 
 import io.codecrafters.model.ProcessingResult
 import io.codecrafters.tokenizer.component.TokenProcessor
+import org.springframework.stereotype.Component
 
+@Component
 class SingleLineCommentSkipper : TokenProcessor {
   override fun canProcess(
     input: String,

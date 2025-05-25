@@ -1,7 +1,9 @@
 package io.codecrafters.parser
 
 import io.codecrafters.model.Expr
+import org.springframework.stereotype.Component
 
+@Component
 class AstStringifier {
   fun stringify(expr: Expr): String =
     when (expr) {

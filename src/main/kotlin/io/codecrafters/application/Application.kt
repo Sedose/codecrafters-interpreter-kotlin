@@ -4,8 +4,10 @@ import io.codecrafters.application.command.CommandHandler
 import io.codecrafters.model.Command
 import io.codecrafters.model.StderrSink
 import io.codecrafters.tokenizer.Tokenizer
+import org.springframework.stereotype.Component
 import java.io.File
 
+@Component
 class Application(
   private val tokenizer: Tokenizer,
   private val commandHandlers: Map<Command, CommandHandler>,

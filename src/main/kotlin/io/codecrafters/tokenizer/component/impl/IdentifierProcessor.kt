@@ -6,7 +6,9 @@ import io.codecrafters.model.RESERVED_WORDS
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
+import org.springframework.stereotype.Component
 
+@Component
 class IdentifierProcessor : TokenProcessor {
   override fun canProcess(
     input: String,

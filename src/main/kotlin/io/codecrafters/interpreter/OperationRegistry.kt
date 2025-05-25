@@ -1,8 +1,10 @@
 package io.codecrafters.interpreter
 
 import io.codecrafters.model.TokenType
+import org.springframework.stereotype.Component
 
-object OperationRegistry {
+@Component
+class OperationRegistry {
   val arithmetic: Map<TokenType, (Double, Double) -> Double> =
     mapOf(
       TokenType.PLUS to Double::plus,

@@ -7,7 +7,9 @@ import io.codecrafters.model.error.TokenizationErrorsDetectedException
 import io.codecrafters.parser.Parser
 import io.codecrafters.toLoxString
 import io.codecrafters.withEofGuaranteed
+import org.springframework.stereotype.Component
 
+@Component
 class EvaluateCommandHandler(
   private val interpreter: Interpreter,
   private val stdout: StdoutSink,

@@ -4,7 +4,9 @@ import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.SINGLE_CHAR_TOKENS
 import io.codecrafters.model.Token
 import io.codecrafters.tokenizer.component.TokenProcessor
+import org.springframework.stereotype.Component
 
+@Component
 class SingleCharTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,

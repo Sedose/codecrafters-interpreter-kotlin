@@ -1,14 +1,18 @@
 package io.codecrafters.interpreter
 
+import io.codecrafters.interpreter.func.LoxCallable
 import io.codecrafters.isTruthy
 import io.codecrafters.model.Expr
-import io.codecrafters.interpreter.func.LoxCallable
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.model.error.InterpreterException
 import io.codecrafters.normalized
+import org.springframework.stereotype.Component
 
-class ExpressionEvaluator {
+@Component
+class ExpressionEvaluator(
+  private val operationRegistry: OperationRegistry,
+) {
 
   context(environment: Environment)
   fun evaluate(expression: Expr): Any? =
@@ -20,7 +24,7 @@ class ExpressionEvaluator {
       is Expr.Binary -> evaluateBinary(expression)
       is Expr.Variable -> environment.get(expression.name)
       is Expr.Assign -> environment.assign(expression.name, evaluate(expression.value))
-      is Expr.Call    -> evaluateCall(expression)
+      is Expr.Call -> evaluateCall(expression)
     }
 
   context(_: Environment)
@@ -36,7 +40,7 @@ class ExpressionEvaluator {
   private fun evaluateLogical(expr: Expr.Logical): Any? {
     val left = evaluate(expr.left)
     return when (expr.operator.type) {
-      TokenType.OR  -> if (left.isTruthy())  left else evaluate(expr.right)
+      TokenType.OR -> if (left.isTruthy()) left else evaluate(expr.right)
       TokenType.AND -> if (!left.isTruthy()) left else evaluate(expr.right)
       else -> error("Unexpected logical operator ${expr.operator.lexeme}")
     }
@@ -52,7 +56,7 @@ class ExpressionEvaluator {
     }
   }
 
-//  @Suppress("ReturnCount")
+  //  @Suppress("ReturnCount")
   context(_: Environment)
   private fun evaluateBinary(expr: Expr.Binary): Any? {
     val left = evaluate(expr.left)
@@ -62,13 +66,13 @@ class ExpressionEvaluator {
       return left + right
     }
 
-    OperationRegistry.arithmetic[expr.operator.type]?.let { op ->
+    operationRegistry.arithmetic[expr.operator.type]?.let { op ->
       return op(requireNumber(left, expr.operator), requireNumber(right, expr.operator)).normalized()
     }
-    OperationRegistry.comparison[expr.operator.type]?.let { op ->
+    operationRegistry.comparison[expr.operator.type]?.let { op ->
       return op(requireNumber(left, expr.operator), requireNumber(right, expr.operator))
     }
-    OperationRegistry.equality[expr.operator.type]?.let { op ->
+    operationRegistry.equality[expr.operator.type]?.let { op ->
       return op(left, right)
     }
     error("Unexpected operator '${expr.operator.lexeme}'.")

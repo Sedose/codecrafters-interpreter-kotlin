@@ -1,8 +1,8 @@
 package io.codecrafters.interpreter.func
 
 import io.codecrafters.interpreter.Environment
-import io.codecrafters.interpreter.ReturnSignal
 import io.codecrafters.interpreter.StatementExecutor
+import io.codecrafters.model.ReturnSignal
 import io.codecrafters.model.Stmt
 import io.codecrafters.model.error.InterpreterException
 

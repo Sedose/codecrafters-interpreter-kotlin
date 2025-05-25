@@ -6,7 +6,9 @@ import io.codecrafters.model.Token
 import io.codecrafters.model.error.TokenizationErrorsDetectedException
 import io.codecrafters.parser.Parser
 import io.codecrafters.withEofGuaranteed
+import org.springframework.stereotype.Component
 
+@Component
 class RunCommandHandler(
   private val interpreter: Interpreter,
 ) : CommandHandler {

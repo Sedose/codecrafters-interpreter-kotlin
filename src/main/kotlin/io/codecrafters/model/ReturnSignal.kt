@@ -1,4 +1,4 @@
-package io.codecrafters.interpreter
+package io.codecrafters.model
 
 class ReturnSignal(
   val value: Any?,

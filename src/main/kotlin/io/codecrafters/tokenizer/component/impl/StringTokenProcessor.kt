@@ -5,7 +5,9 @@ import io.codecrafters.model.ProcessingResult
 import io.codecrafters.model.Token
 import io.codecrafters.model.TokenType
 import io.codecrafters.tokenizer.component.TokenProcessor
+import org.springframework.stereotype.Component
 
+@Component
 class StringTokenProcessor : TokenProcessor {
   override fun canProcess(
     input: String,

@@ -2,10 +2,13 @@ package io.codecrafters.interpreter
 
 import io.codecrafters.interpreter.func.LoxFunction
 import io.codecrafters.isTruthy
+import io.codecrafters.model.ReturnSignal
 import io.codecrafters.model.StdoutSink
 import io.codecrafters.model.Stmt
 import io.codecrafters.toLoxString
+import org.springframework.stereotype.Component
 
+@Component
 class StatementExecutor(
   private val evaluator: ExpressionEvaluator,
   private val output: StdoutSink,
